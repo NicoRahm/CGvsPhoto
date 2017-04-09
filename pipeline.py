@@ -64,7 +64,7 @@ image_size = 200
 # load data
 print('   import data ...')
 #data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-data = il.Database_loader('/home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
+data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
 
 
 
@@ -83,8 +83,27 @@ x_image = tf.reshape(x, [-1,image_size, image_size, 1])
 laplacian = tf.constant([[0, -1, 0], [-1, 4, -1], [0, -1, 0]], tf.float32)
 laplacian_filter = tf.reshape(laplacian, [3, 3, 1, 1])
 
-x_image_filtered = conv2d(x_image, laplacian_filter)
+horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
+horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
 
+vertical = tf.constant([[1,0],[-1,0]], tf.float32)
+vertical_filter = tf.reshape(vertical, [2, 2, 1, 1])
+
+diagonal = tf.constant([[1,0], [0,-1]], tf.float32)
+diagonal_filter = tf.reshape(diagonal, [2, 2, 1, 1])
+
+antidiag = tf.constant([[0,1],[-1,0]], tf.float32)
+antidiag_filter = tf.reshape(antidiag, [2, 2, 1, 1])
+
+#x_image_filtered = conv2d(x_image, laplacian_filter)
+#x_image_filtered = x_image
+
+#x_image_h = conv2d(x_image, horizontal_filter)
+#x_image_v = conv2d(x_image, vertical_filter)
+#x_image_d = conv2d(x_image, diagonal_filter)
+#x_image_a = conv2d(x_image, antidiag_filter)
+
+#hist = tf.histogram_fixed_width(x_image, [-1.0,1.0], nbins = 100, dtype=tf.float32)
 
 # first conv net layer
 # conv_matrix_width : 5
@@ -98,14 +117,14 @@ W_conv1 = weight_variable([5, 5, 1, 32], seed = random_seed)
 b_conv1 = bias_variable([32])
 
 # relu on the conv layer
-h_conv1 = tf.nn.relu(conv2d(x_image_filtered, W_conv1) + b_conv1)
+h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
 
-m_pool = max_pool_2x2(h_conv1)
-
+#m_pool = max_pool_2x2(h_conv1)
+#
 # second conv 
-W_conv2 = weight_variable([5, 5, 32, 32])
-b_conv2 = bias_variable([32])
-h_conv2 = tf.nn.relu(conv2d(m_pool, W_conv2) + b_conv2)
+W_conv2 = weight_variable([5, 5, 32, 64])
+b_conv2 = bias_variable([64])
+h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
 
 
 
@@ -114,12 +133,12 @@ h_conv2 = tf.nn.relu(conv2d(m_pool, W_conv2) + b_conv2)
 m_pool3 = max_pool_2x2(h_conv2)
 
 # average pool
-#a_pool3 = avg_pool_10x10(h_conv1)
-#a_pool3 = avg_pool_2x2(h_conv2)
+a_pool3 = avg_pool_2x2(h_conv2)
+#m_pool4 = max_pool_2x2(h_conv2)
 
 # difference between max and average
-#diff_1 = tf.subtract(m_pool3, a_pool3)
-diff_1 = m_pool3
+diff_1 = tf.subtract(m_pool3, a_pool3)
+# diff_1 = m_pool3
 
 # flattern 
 # with the 2 pooling, the image size is 7x7
@@ -197,7 +216,7 @@ for i in range(81): # in the test 20000
         validation_batch_size = 10       # size of the batches
         validation_accuracy = 0
         data.validation_iterator = 0
-        nb_iterations = 100
+        nb_iterations = 50
         for _ in range( nb_iterations ) :
             batch_validation = data.get_batch_validation(batch_size=validation_batch_size, random_flip_flop = True, random_rotate = True)
             feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
