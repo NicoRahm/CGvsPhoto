@@ -1,7 +1,7 @@
 
 print("   reset python interpreter ...")
 import os
-clear = lambda: os.system('cls')
+clear = lambda: os.system('clear')
 clear()
 import time
 import random
@@ -53,11 +53,15 @@ def avg_pool_10x10(x):
   return tf.nn.avg_pool(x, ksize=[1, 10, 10, 1],
                            strides=[1, 10, 10, 1], padding='SAME')
 
+def histogram(x, nbins):
+  return(tf.histogram_fixed_width(x, 
+                                  value_range = [-1.0,1.0], 
+                                  nbins = nbins, dtype = tf.float32))
 
   
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 200
+image_size = 100
 
 
 
@@ -80,20 +84,20 @@ x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
 x_image = tf.reshape(x, [-1,image_size, image_size, 1])
 
 # Filtering with laplacian filter
-laplacian = tf.constant([[0, -1, 0], [-1, 4, -1], [0, -1, 0]], tf.float32)
-laplacian_filter = tf.reshape(laplacian, [3, 3, 1, 1])
+# laplacian = tf.constant([[0, -1, 0], [-1, 4, -1], [0, -1, 0]], tf.float32)
+# laplacian_filter = tf.reshape(laplacian, [3, 3, 1, 1])
 
-horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
-horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
+# horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
+# horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
 
-vertical = tf.constant([[1,0],[-1,0]], tf.float32)
-vertical_filter = tf.reshape(vertical, [2, 2, 1, 1])
+# vertical = tf.constant([[1,0],[-1,0]], tf.float32)
+# vertical_filter = tf.reshape(vertical, [2, 2, 1, 1])
 
-diagonal = tf.constant([[1,0], [0,-1]], tf.float32)
-diagonal_filter = tf.reshape(diagonal, [2, 2, 1, 1])
+# diagonal = tf.constant([[1,0], [0,-1]], tf.float32)
+# diagonal_filter = tf.reshape(diagonal, [2, 2, 1, 1])
 
-antidiag = tf.constant([[0,1],[-1,0]], tf.float32)
-antidiag_filter = tf.reshape(antidiag, [2, 2, 1, 1])
+# antidiag = tf.constant([[0,1],[-1,0]], tf.float32)
+# antidiag_filter = tf.reshape(antidiag, [2, 2, 1, 1])
 
 #x_image_filtered = conv2d(x_image, laplacian_filter)
 #x_image_filtered = x_image
@@ -111,7 +115,7 @@ antidiag_filter = tf.reshape(antidiag, [2, 2, 1, 1])
 # conv_matrix nb channel ??? : 1
 # nb matrices : 32 ?
 
-
+batch_size = tf.shape(x)[0] 
 
 W_conv1 = weight_variable([5, 5, 1, 32], seed = random_seed)
 b_conv1 = bias_variable([32])
@@ -119,35 +123,42 @@ b_conv1 = bias_variable([32])
 # relu on the conv layer
 h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
 
+print(h_conv1.shape)
 #m_pool = max_pool_2x2(h_conv1)
 #
 # second conv 
-W_conv2 = weight_variable([5, 5, 32, 64])
-b_conv2 = bias_variable([64])
-h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
+# W_conv2 = weight_variable([5, 5, 32, 64])
+# b_conv2 = bias_variable([64])
+# h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
 
+nbins = 50
 
+function_to_map = lambda x: tf.stack([tf.nn.l2_normalize(histogram(x[:,:,i], nbins), dim = 0) for i in range(32)])
+
+hist = tf.map_fn(function_to_map, h_conv1)
+
+print(hist.shape)
 
 # max pool
 #m_pool3 = max_pool_10x10(h_conv1)
-m_pool3 = max_pool_2x2(h_conv2)
+# m_pool3 = max_pool_2x2(h_conv2)
 
 # average pool
-a_pool3 = avg_pool_2x2(h_conv2)
+# a_pool3 = avg_pool_2x2(h_conv2)
 #m_pool4 = max_pool_2x2(h_conv2)
 
 # difference between max and average
-diff_1 = tf.subtract(m_pool3, a_pool3)
+# diff_1 = tf.subtract(m_pool3, a_pool3)
 # diff_1 = m_pool3
 
 # flattern 
 # with the 2 pooling, the image size is 7x7
 # there are 64 conv matrices
-h_pool2_flat = tf.reshape(diff_1, [-1, int(image_size/2)*int(image_size/2)*64])
+h_pool2_flat = tf.reshape(hist, [-1, nbins*32])
 
 # Densely Connected Layer
 # we add a fully-connected layer with 1024 neurons 
-W_fc1 = weight_variable([int(image_size/2)*int(image_size/2) * 64, 1024])
+W_fc1 = weight_variable([nbins*32, 1024])
 b_fc1 = bias_variable([1024])
 # put a relu
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
