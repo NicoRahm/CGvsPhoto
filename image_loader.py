@@ -18,12 +18,13 @@ import random
 
 class Database_loader :
 
-    def __init__(self, directory, size, seed=42, only_green=True) :
+    def __init__(self, directory, size, proportion = 1.0, seed=42, only_green=True) :
 
         # data init
-        self.dir = directory                # directory with the train / test / validation sudirectories
+        self.dir = directory          # directory with the train / test / validation sudirectories
         self.size = size              # size of the sub image that should be croped
         self.nb_channels = 3          # return only the green channel of the images
+        self.proportion = proportion
         if(only_green == True) :
             self.nb_channels = 1
         self.file_train = []          # list of the train images : tuple (image name / class)
@@ -51,18 +52,23 @@ class Database_loader :
     def load_images_in_dir(self, dir_name, image_class) :
 
         # file extension accepted as image data
+        proportion = self.proportion
         valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG"]
 
         file_list = []
 
         for c in image_class :
             nb_image_per_class = 0
+            file_list_by_class = []
             for filename in os.listdir(dir_name+'/'+c):
                 # check if the file is an image
                 extension = os.path.splitext(filename)[1]
                 if extension.lower() in valid_image_extension:
-                    file_list.append((filename,c))
-                    nb_image_per_class += 1
+                    file_list_by_class.append(filename)
+
+            for i in range(int(len(file_list_by_class)*proportion)):
+                file_list.append((file_list_by_class[i],c))
+                nb_image_per_class += 1
             print('    ',c,nb_image_per_class,'images loaded')
 
         return file_list

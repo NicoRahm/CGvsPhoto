@@ -122,7 +122,7 @@ image_size = 100
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 #data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
+data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, proportion = 0.2,   only_green=True)
 
 
 
@@ -211,7 +211,7 @@ with tf.name_scope('Conv1'):
 # with tf.name_scope('MaxPool'):
 #   m_pool = max_pool_2x2(h_conv2)
 
-nbins = 5
+nbins = 4
 size_hist = nbins*16
 # with tf.name_scope('Histograms'):
 #   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
