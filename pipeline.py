@@ -5,7 +5,7 @@ clear = lambda: os.system('clear')
 clear()
 import time
 import random
-import plot_history as ph
+# import plot_history as ph
 import image_loader as il
 import tensorflow as tf
 
@@ -121,8 +121,9 @@ image_size = 100
 
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
-#data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
+# data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
+# data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
+data = il.Database_loader('/home/nicolas/Documents/Test', image_size, only_green=True)
 
 
 
@@ -172,14 +173,16 @@ with tf.name_scope('Input_Data'):
 # conv_matrix nb channel ??? : 1
 # nb matrices : 32 ?
 
+nb_conv1 = 32
+filter_size1 = 5
 
 with tf.name_scope('Conv1'):
 
   with tf.name_scope('Weights'):
-    W_conv1 = weight_variable([3, 3, 1, 16], seed = random_seed)
+    W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
     variable_summaries(W_conv1)
   with tf.name_scope('Bias'):
-    b_conv1 = bias_variable([16])
+    b_conv1 = bias_variable([nb_conv1])
     variable_summaries(b_conv1)
 
   # relu on the conv layer
@@ -212,7 +215,7 @@ with tf.name_scope('Conv1'):
 #   m_pool = max_pool_2x2(h_conv2)
 
 nbins = 5
-size_hist = nbins*16
+size_hist = nbins*nb_conv1
 # with tf.name_scope('Histograms'):
 #   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
 #   hist = tf.map_fn(function_to_map, h_conv1)
@@ -220,7 +223,7 @@ size_hist = nbins*16
 
 
 with tf.name_scope('Classic_Histogram'): 
-  hist = classic_histogram(h_conv1, nbins = nbins, k = 16, image_size = image_size)
+  hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
 
 # max pool
 #m_pool3 = max_pool_10x10(h_conv1)
@@ -379,16 +382,16 @@ for i in range(81): # in the test 20000
 
     
 # history
-print('   plot history')
-with open("/tmp/history.txt", "w") as history_file:
-    for item in history:
-        history_file.write("%f\n" %item)
+# print('   plot history')
+# with open("/tmp/history.txt", "w") as history_file:
+#     for item in history:
+#         history_file.write("%f\n" %item)
 
-with open("./history_v2.txt", "w") as history_file:
-    for item in history:
-        history_file.write("%f\n" %item)
+# with open("./history_v2.txt", "w") as history_file:
+#     for item in history:
+#         history_file.write("%f\n" %item)
         
-ph.plot_history("/tmp/history.txt")
+# ph.plot_history("/tmp/history.txt")
 
 
 # final test
@@ -418,42 +421,42 @@ print('   done.')
 
 
 # test some images
-print('   do some test on doctored images.')
-final_prediction = tf.argmax(y_conv,1)
-images = il.get_image_filename_from_dir('/home/nozick/Dropbox/deepLearning/keras/cg_pi/data/test') 
+# print('   do some test on doctored images.')
+# final_prediction = tf.argmax(y_conv,1)
+# images = il.get_image_filename_from_dir('/home/nozick/Dropbox/deepLearning/keras/cg_pi/data/test') 
 
-for im in images :
+# for im in images :
     
-    random_prefix = ''.join(random.choice('0123456789ABCDEF') for i in range(7))
-    im.save('/tmp/' + random_prefix + '_image.jpg')  
-    print('random prefix =',random_prefix)
+#     random_prefix = ''.join(random.choice('0123456789ABCDEF') for i in range(7))
+#     im.save('/tmp/' + random_prefix + '_image.jpg')  
+#     print('random prefix =',random_prefix)
        
-    # for each sub image
-    for i in range(0, im.size[0]-image_size, image_size) :
-        for j in range(0, im.size[1]-image_size, image_size) :
-            box = (i, j, i+image_size, j+image_size)
-            sub_im = im.crop(box)
-            sub_im = np.asarray(sub_im)
-            sub_im = sub_im[:,:,1]
-            sub_im = sub_im.astype(np.float32) / 255.
-            sub_im = sub_im.reshape(1,image_size, image_size, 1)
+#     # for each sub image
+#     for i in range(0, im.size[0]-image_size, image_size) :
+#         for j in range(0, im.size[1]-image_size, image_size) :
+#             box = (i, j, i+image_size, j+image_size)
+#             sub_im = im.crop(box)
+#             sub_im = np.asarray(sub_im)
+#             sub_im = sub_im[:,:,1]
+#             sub_im = sub_im.astype(np.float32) / 255.
+#             sub_im = sub_im.reshape(1,image_size, image_size, 1)
             
-            feed_dict = {x:sub_im, keep_prob: 1.0}
-            result = final_prediction.eval(feed_dict) 
-            #print('result = ', result[0])
-            if (result[0] == 0) :
-                draw = ImageDraw.Draw(im)
-                box = (i, j, i+image_size, j+image_size)  
-                draw.arc(box, 0, 360)
-                # simulate thinckness = 2
-                box = (i+2, j+2, i+image_size-2, j+image_size-2)  
-                draw.arc(box, 0, 360)
-                del draw
+#             feed_dict = {x:sub_im, keep_prob: 1.0}
+#             result = final_prediction.eval(feed_dict) 
+#             #print('result = ', result[0])
+#             if (result[0] == 0) :
+#                 draw = ImageDraw.Draw(im)
+#                 box = (i, j, i+image_size, j+image_size)  
+#                 draw.arc(box, 0, 360)
+#                 # simulate thinckness = 2
+#                 box = (i+2, j+2, i+image_size-2, j+image_size-2)  
+#                 draw.arc(box, 0, 360)
+#                 del draw
                 
-    # save the images
-    im.save('/tmp/' + random_prefix + '_cnn.jpg')    
+#     # save the images
+#     im.save('/tmp/' + random_prefix + '_cnn.jpg')    
 
-print('   done.')
+# print('   done.')
 
 
 
