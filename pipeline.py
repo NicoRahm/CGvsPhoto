@@ -64,12 +64,53 @@ def avg_pool_10x10(x):
                            strides=[1, 10, 10, 1], padding='SAME')
 
 def histogram(x, nbins):
-  h = tf.histogram_fixed_width(x, 
-                               value_range = [0.0,255.0], 
+  h = tf.histogram_fixed_width(x, value_range = [-1.0,1.0], 
                                nbins = nbins, dtype = tf.float32)
   # mom = tf.nn.moments(h, axes = [0]) 
   # h = (h-mom[0])/mom[1]
   return(h)
+
+
+def learnable_histogram(x, nbins, k, image_size): 
+
+  l = []
+  for i in range(nbins):
+    b = bias_variable([k])
+    l.append(x - b)
+
+  conv1 = tf.abs(tf.transpose(tf.stack(l), perm = [1,2,3,0,4]))
+
+  W = weight_variable([1, 1, 1, k, k], seed = random_seed)
+
+  relu = tf.nn.relu(tf.constant(1.0, shape=[k]) - tf.nn.conv3d(conv1, W, strides=[1, 1, 1, 1, 1], padding='SAME'))
+
+  avg_pool = tf.reshape(tf.nn.pool(relu, window_shape=[image_size, image_size, 1], 
+                        pooling_type = 'AVG', strides=[image_size, image_size, 1], 
+                        padding='SAME'), [-1, nbins, k])
+  return(avg_pool)
+
+def classic_histogram(x, nbins, k, image_size):
+
+  l = []
+  for i in range(nbins):
+    b = float(i)/float(nbins)
+    l.append(b)
+
+  b = tf.constant(l, shape = [k,nbins])
+  x_3d = tf.reshape(x, [-1,image_size, image_size, k, 1])
+  W1 = tf.constant(1.0, shape=[1,1,k,1,nbins])
+  conv1 = tf.abs(tf.nn.conv3d(x_3d, W1,strides=[1, 1, 1, 1, 1], padding='SAME') - b)
+  conv1 = tf.transpose(conv1, [0,1,2,4,3])
+
+  W = tf.constant(1.0/float(nbins), shape=[1,1,nbins,k,k])
+
+  relu = tf.nn.relu(tf.constant(1.0, shape=[k]) - tf.nn.conv3d(conv1, W, strides=[1, 1, 1, 1, 1], padding='SAME'))
+
+  avg_pool = tf.reshape(tf.nn.pool(relu, window_shape=[image_size, image_size, 1], 
+                        pooling_type = 'AVG', strides=[image_size, image_size, 1], 
+                        padding='SAME'), [-1, nbins, k])
+  return(avg_pool)  
+
 
   
   # start process
@@ -79,7 +120,7 @@ image_size = 100
 
 
 # load data
-print('   import data ...')
+print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 #data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
 data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
 
@@ -135,10 +176,10 @@ with tf.name_scope('Input_Data'):
 with tf.name_scope('Conv1'):
 
   with tf.name_scope('Weights'):
-    W_conv1 = weight_variable([5, 5, 1, 32], seed = random_seed)
+    W_conv1 = weight_variable([3, 3, 1, 16], seed = random_seed)
     variable_summaries(W_conv1)
   with tf.name_scope('Bias'):
-    b_conv1 = bias_variable([32])
+    b_conv1 = bias_variable([16])
     variable_summaries(b_conv1)
 
   # relu on the conv layer
@@ -153,29 +194,33 @@ with tf.name_scope('Conv1'):
 #   m_pool = max_pool_2x2(h_conv1)
 
 # second conv 
-with tf.name_scope('Conv2'):
-  with tf.name_scope('Weights'):
-    W_conv2 = weight_variable([5, 5, 32, 64])
-    variable_summaries(W_conv1)
-  with tf.name_scope('Bias'):
-    b_conv2 = bias_variable([64])
-    variable_summaries(b_conv2)
+# with tf.name_scope('Conv2'):
+#   with tf.name_scope('Weights'):
+#     W_conv2 = weight_variable([5, 5, 32, 64])
+#     variable_summaries(W_conv1)
+#   with tf.name_scope('Bias'):
+#     b_conv2 = bias_variable([64])
+#     variable_summaries(b_conv2)
 
-  h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
-  tf.summary.histogram('activated', h_conv2)
+#   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
+#   tf.summary.histogram('activated', h_conv2)
 
-  with tf.variable_scope('Conv2_visualization'):
-    tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
+#   with tf.variable_scope('Conv2_visualization'):
+#     tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
 
-with tf.name_scope('MaxPool'):
-  m_pool = max_pool_2x2(h_conv2)
+# with tf.name_scope('MaxPool'):
+#   m_pool = max_pool_2x2(h_conv2)
 
-# nbins = 100
-
+nbins = 5
+size_hist = nbins*16
 # with tf.name_scope('Histograms'):
 #   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
 #   hist = tf.map_fn(function_to_map, h_conv1)
 #   variable_summaries(hist)
+
+
+with tf.name_scope('Classic_Histogram'): 
+  hist = classic_histogram(h_conv1, nbins = nbins, k = 16, image_size = image_size)
 
 # max pool
 #m_pool3 = max_pool_10x10(h_conv1)
@@ -192,28 +237,29 @@ with tf.name_scope('MaxPool'):
 # flattern 
 # with the 2 pooling, the image size is 7x7
 # there are 64 conv matrices
-size = tf.cast((image_size/2)*(image_size/2)*64, tf.int32)
-h_pool1_flat = tf.reshape(m_pool, [-1, size], name = "Flatten_Conv")
 
-# h_pool2_flat = tf.reshape(hist, [-1, nbins*32], name = "Flatten_Hist")
+# size_conv = tf.cast((image_size/2)*(image_size/2)*32, tf.int32)
+# h_pool1_flat = tf.reshape(m_pool, [-1, size_conv], name = "Flatten_Conv")
+
+h_pool2_flat = tf.reshape(hist, [-1, size_hist], name = "Flatten_Hist")
 
 
-# concat = tf.concat([h_pool1_flat, h_pool2_flat], 1, name = "Concat")
+# concat = tf.concat([h_pool1_flat, h_pool2_flat], 1, name = "Concatenate")
 
 # Densely Connected Layer
 # we add a fully-connected layer with 1024 neurons 
 
-# size_dense = tf.cast((image_size/2)*(image_size/2)*32 + nbins*32, tf.int32)
+# size_tot = tf.cast((image_size/2)*(image_size/2)*32 + nbins*32, tf.int32)
 
 with tf.variable_scope('Dense1'):
   with tf.name_scope('Weights'):
-    W_fc1 = weight_variable([size, 1024])
+    W_fc1 = weight_variable([size_hist, 1024])
     variable_summaries(W_fc1)
   with tf.name_scope('Bias'):
     b_fc1 = bias_variable([1024])
     variable_summaries(b_fc1)
   # put a relu
-  h_fc1 = tf.nn.relu(tf.matmul(h_pool1_flat, W_fc1) + b_fc1, name = 'activated')
+  h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1, name = 'activated')
   tf.summary.histogram('activated', h_fc1)
 
 # dropout
@@ -225,22 +271,22 @@ with tf.name_scope('Dropout1'):
 # Densely Connected Layer
 # we add a fully-connected layer with 1024 neurons 
 
-with tf.variable_scope('Dense2'):
-  with tf.name_scope('Weights'):
-    W_fc2 = weight_variable([1024, 1024]) 
-    variable_summaries(W_fc2)
-  with tf.name_scope('Bias'):
-    b_fc2 = bias_variable([1024])
-    variable_summaries(b_fc2)
-  # put a relu
-  h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2, name = 'activated')
-  tf.summary.histogram('activated', h_fc2)
+# with tf.variable_scope('Dense2'):
+#   with tf.name_scope('Weights'):
+#     W_fc2 = weight_variable([1024, 1024]) 
+#     variable_summaries(W_fc2)
+#   with tf.name_scope('Bias'):
+#     b_fc2 = bias_variable([1024])
+#     variable_summaries(b_fc2)
+#   # put a relu
+#   h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2, name = 'activated')
+#   tf.summary.histogram('activated', h_fc2)
 
-# dropout
-with tf.name_scope('Dropout2'):
-  keep_prob2 = tf.placeholder(tf.float32)
-  tf.summary.scalar('dropout_keep_probability', keep_prob)
-  h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
+# # dropout
+# with tf.name_scope('Dropout2'):
+#   keep_prob2 = tf.placeholder(tf.float32)
+#   tf.summary.scalar('dropout_keep_probability', keep_prob)
+#   h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
 
 # readout layer
 with tf.variable_scope('Readout'):
@@ -250,7 +296,7 @@ with tf.variable_scope('Readout'):
   with tf.name_scope('Bias'):
     b_fc3 = bias_variable([data.nb_class])
     variable_summaries(b_fc3)
-  y_conv = tf.matmul(h_fc2_drop, W_fc3) + b_fc3
+  y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
 
 # support for the learning label
 y_ = tf.placeholder(tf.float32, [None, data.nb_class])
