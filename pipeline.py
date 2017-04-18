@@ -73,9 +73,9 @@ def histogram(x, nbins):
 
 def gaussian_func(mu, x, n, sigma):
   gauss = tf.contrib.distributions.Normal(mu=mu, sigma=sigma)
-  function_to_map = lambda y: gauss.pdf(x)/n
-  res = tf.map_fn(function_to_map, tf.reshape(x,[-1]))
-  return(tf.reduce_sum(res))
+  # function_to_map = lambda y: gauss.pdf(x)/n
+  # res = tf.map_fn(function_to_map, tf.reshape(x,[-1]))
+  return(tf.reduce_sum(gauss.pdf(x)/n))
 
 
 def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size = 100):
@@ -158,8 +158,8 @@ image_size = 200
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-# data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
-data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
+data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, proportion = 1, only_green=True)
+# data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
 
 
 
