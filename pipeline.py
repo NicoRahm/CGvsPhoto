@@ -71,18 +71,18 @@ def histogram(x, nbins):
   # h = (h-mom[0])/mom[1]
   return(h)
 
-def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1):
-  shape = x.shape
-  n = 1
+def gaussian_func(mu, x, n, sigma):
+  gauss = tf.contrib.distributions.Normal(mu=mu, sigma=sigma)
+  function_to_map = lambda y: gauss.pdf(x)/n
+  res = tf.map_fn(function_to_map, tf.reshape(x,[-1]))
+  return(tf.reduce_sum(res))
 
-  r = values_range[1] - values_range[0]
-  mu_list = []
-  for i in range(nbins+1):
-    mu_list.append(values_range[0] + i*r/(nbins+1))
-  for i in range(len(shape)):
-    n *= shape[i]  
 
-  return(np.array([np.sum(np.exp(-(x-mu)**2/(sigma**2)))/n for mu in mu_list]).astype(np.float32))
+def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size = 100):
+  mu_list = np.float32(np.linspace(values_range[0], values_range[1], nbins + 1))
+  n = np.float32(image_size**2)
+  function_to_map = lambda m : tf.stack(gaussian_func(m, x, n, sigma))
+  return(tf.map_fn(function_to_map, mu_list))
 
 
 def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
@@ -97,7 +97,7 @@ def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
   plt.figure()
   for mu in mu_list:
     plt.plot(range_plot, np.exp(-(range_plot-mu)**2/(sigma**2)))
-
+  plt.title("Gaussian kernels used for estimating the histograms")
   plt.show()
 
 # plot_gaussian_kernel()
@@ -144,7 +144,7 @@ def classic_histogram(x, nbins, k, image_size):
   return(avg_pool)  
 
 def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0.6):
-  function_to_map = lambda y: tf.stack([tf.py_func(gaussian_kernel, [y[:,:,i], nbins, values_range, sigma], tf.float32) for i in range(k)])
+  function_to_map = lambda y: tf.stack([gaussian_kernel(y[:,:,i], nbins, values_range, sigma) for i in range(k)])
   res = tf.map_fn(function_to_map, x)
   return(res)
 
@@ -230,16 +230,21 @@ with tf.name_scope('Conv1'):
     tf.summary.image('conv1/filters', W_conv1[:,:,:,0:1])
 
 
+
 # with tf.name_scope('MaxPool'):
 #   m_pool = max_pool_2x2(h_conv1)
 
+
 # second conv 
+
+# nb_conv2 = 64
+# filter_size2 = 5
 # with tf.name_scope('Conv2'):
 #   with tf.name_scope('Weights'):
-#     W_conv2 = weight_variable([5, 5, 32, 64])
+#     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
 #     variable_summaries(W_conv1)
 #   with tf.name_scope('Bias'):
-#     b_conv2 = bias_variable([64])
+#     b_conv2 = bias_variable([nb_conv2])
 #     variable_summaries(b_conv2)
 
 #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
@@ -248,8 +253,12 @@ with tf.name_scope('Conv1'):
 #   with tf.variable_scope('Conv2_visualization'):
 #     tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
 
+
+
 # with tf.name_scope('MaxPool'):
 #   m_pool = max_pool_2x2(h_conv2)
+
+
 
 nbins = 8
 size_hist = (nbins + 1)*nb_conv1
@@ -263,8 +272,13 @@ size_hist = (nbins + 1)*nb_conv1
 # with tf.name_scope('Classic_Histogram'): 
 #   hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
 
+range_hist = [0,1]
+
+plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
+
 with tf.name_scope('Gaussian_Histogram'): 
-  hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = [0, 1], sigma = 0.1)
+  hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = 0.1)
+  tf.summary.tensor_summary('hist', hist)
 
 
 # max pool
@@ -376,7 +390,7 @@ with tf.name_scope('accuracy'):
 tf.summary.scalar('accuracy', accuracy)
 
 
-
+# a = tf.constant([[[[1.0,1.0],[1.0,1.]]]])
 
 
 # start a session
@@ -390,7 +404,8 @@ train_writer = tf.summary.FileWriter('/home/nicolas/Documents/summaries',
 print('   variable initialization ...')
 tf.global_variables_initializer().run()
 
-
+# print(gaussian_func(0., a, 1, 1.).eval())
+# print(classic_histogram_gaussian(a, 1, nbins = 8, values_range = [0, 1], sigma = 0.6).eval())
 
 # Train
 print('   train ...')
@@ -410,6 +425,24 @@ for i in range(81): # in the test 20000
           
         validation_accuracy /= nb_iterations
         print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
+
+
+        hist_plot = hist.eval(feed_dict)
+        
+        for k in range(validation_batch_size):
+          fig = plt.figure(k)
+          for j in range(4):
+            
+            plt.subplot(2, 2, j+1)
+            plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], width = 1/(nbins + 1))
+            plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], 'r')
+          
+          if batch_validation[1][k][0] == 0.:
+            fig.suptitle("CGG", fontsize=14)
+          else:
+            fig.suptitle("Real", fontsize=14)
+
+          plt.show()
         history.append(validation_accuracy)
         
         
