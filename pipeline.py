@@ -5,9 +5,10 @@ clear = lambda: os.system('clear')
 clear()
 import time
 import random
-# import plot_history as ph
+import plot_history as ph
 import image_loader as il
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 from PIL import Image, ImageDraw
 import numpy as np
@@ -70,6 +71,37 @@ def histogram(x, nbins):
   # h = (h-mom[0])/mom[1]
   return(h)
 
+def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1):
+  shape = x.shape
+  n = 1
+
+  r = values_range[1] - values_range[0]
+  mu_list = []
+  for i in range(nbins+1):
+    mu_list.append(values_range[0] + i*r/(nbins+1))
+  for i in range(len(shape)):
+    n *= shape[i]  
+
+  return(np.array([np.sum(np.exp(-(x-mu)**2/(sigma**2)))/n for mu in mu_list]).astype(np.float32))
+
+
+def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
+
+  r = values_range[1] - values_range[0]
+  mu_list = []
+  for i in range(nbins+1):
+    mu_list.append(values_range[0] + i*r/(nbins+1))
+
+  range_plot = np.linspace(values_range[0], values_range[1], 100)
+
+  plt.figure()
+  for mu in mu_list:
+    plt.plot(range_plot, np.exp(-(range_plot-mu)**2/(sigma**2)))
+
+  plt.show()
+
+# plot_gaussian_kernel()
+# print(gaussian_kernel(np.array([[0,10],[10, 0.5]]), nbins = 4, values_range = [0,10], sigma = 6))
 
 def learnable_histogram(x, nbins, k, image_size): 
 
@@ -111,11 +143,15 @@ def classic_histogram(x, nbins, k, image_size):
                         padding='SAME'), [-1, nbins, k])
   return(avg_pool)  
 
+def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0.6):
+  function_to_map = lambda y: tf.stack([tf.py_func(gaussian_kernel, [y[:,:,i], nbins, values_range, sigma], tf.float32) for i in range(k)])
+  res = tf.map_fn(function_to_map, x)
+  return(res)
 
   
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 100
+image_size = 200
 
 
 
@@ -123,7 +159,8 @@ image_size = 100
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
-data = il.Database_loader('/home/nicolas/Documents/Test', image_size, only_green=True)
+data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
+
 
 
 
@@ -214,16 +251,21 @@ with tf.name_scope('Conv1'):
 # with tf.name_scope('MaxPool'):
 #   m_pool = max_pool_2x2(h_conv2)
 
-nbins = 5
-size_hist = nbins*nb_conv1
+nbins = 8
+size_hist = (nbins + 1)*nb_conv1
+
 # with tf.name_scope('Histograms'):
 #   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
 #   hist = tf.map_fn(function_to_map, h_conv1)
 #   variable_summaries(hist)
 
 
-with tf.name_scope('Classic_Histogram'): 
-  hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
+# with tf.name_scope('Classic_Histogram'): 
+#   hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
+
+with tf.name_scope('Gaussian_Histogram'): 
+  hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = [0, 1], sigma = 0.1)
+
 
 # max pool
 #m_pool3 = max_pool_10x10(h_conv1)
@@ -360,7 +402,7 @@ for i in range(81): # in the test 20000
         validation_batch_size = 10       # size of the batches
         validation_accuracy = 0
         data.validation_iterator = 0
-        nb_iterations = 50
+        nb_iterations = 25
         for _ in range( nb_iterations ) :
             batch_validation = data.get_batch_validation(batch_size=validation_batch_size, random_flip_flop = True, random_rotate = True)
             feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
@@ -382,16 +424,16 @@ for i in range(81): # in the test 20000
 
     
 # history
-# print('   plot history')
-# with open("/tmp/history.txt", "w") as history_file:
-#     for item in history:
-#         history_file.write("%f\n" %item)
+print('   plot history')
+with open("/tmp/history.txt", "w") as history_file:
+    for item in history:
+        history_file.write("%f\n" %item)
 
-# with open("./history_v2.txt", "w") as history_file:
-#     for item in history:
-#         history_file.write("%f\n" %item)
+with open("./history_v2.txt", "w") as history_file:
+    for item in history:
+        history_file.write("%f\n" %item)
         
-# ph.plot_history("/tmp/history.txt")
+ph.plot_history("/tmp/history.txt")
 
 
 # final test
