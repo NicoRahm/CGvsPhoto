@@ -38,11 +38,11 @@ def variable_summaries(var):
 # tool functions
 print('   python function setup')
 def weight_variable(shape, seed = None):
-  initial = tf.truncated_normal(shape, stddev=0.1, seed = seed)
+  initial = tf.truncated_normal(shape, stddev=0.5, seed = random_seed)
   return tf.Variable(initial)
 
 def bias_variable(shape):
-  initial = tf.constant(0.1, shape=shape)
+  initial = tf.truncated_normal(shape, stddev=0.1, seed = random_seed)
   return tf.Variable(initial)
   
 def conv2d(x, W):
@@ -73,15 +73,13 @@ def histogram(x, nbins):
 
 def gaussian_func(mu, x, n, sigma):
   gauss = tf.contrib.distributions.Normal(mu=mu, sigma=sigma)
-  function_to_map = lambda y: gauss.pdf(x)/n
-  res = tf.map_fn(function_to_map, tf.reshape(x,[-1]))
-  return(tf.reduce_sum(res))
+  return(tf.reduce_sum(gauss.pdf(x)/n))
 
 
 def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size = 100):
   mu_list = np.float32(np.linspace(values_range[0], values_range[1], nbins + 1))
   n = np.float32(image_size**2)
-  function_to_map = lambda m : tf.stack(gaussian_func(m, x, n, sigma))
+  function_to_map = lambda m : gaussian_func(m, x, n, sigma)
   return(tf.map_fn(function_to_map, mu_list))
 
 
@@ -151,15 +149,20 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
   
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 200
+image_size = 100
 
 
 
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
+<<<<<<< HEAD
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
 data = il.Database_loader('/work/smg/v-nicolas/Test', image_size, proportion = 1, only_green=True)
+=======
+data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, proportion = 0.6, only_green=True)
+# data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
+>>>>>>> 9a5f3b5608b9a24e45bc6eb7752bfb897e9634a9
 
 
 
@@ -211,7 +214,7 @@ with tf.name_scope('Input_Data'):
 # nb matrices : 32 ?
 
 nb_conv1 = 32
-filter_size1 = 5
+filter_size1 = 3
 
 with tf.name_scope('Conv1'):
 
@@ -238,7 +241,7 @@ with tf.name_scope('Conv1'):
 # second conv 
 
 # nb_conv2 = 64
-# filter_size2 = 5
+# filter_size2 = 2
 # with tf.name_scope('Conv2'):
 #   with tf.name_scope('Weights'):
 #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
@@ -260,7 +263,7 @@ with tf.name_scope('Conv1'):
 
 
 
-nbins = 8
+nbins = 10
 size_hist = (nbins + 1)*nb_conv1
 
 # with tf.name_scope('Histograms'):
@@ -273,11 +276,13 @@ size_hist = (nbins + 1)*nb_conv1
 #   hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
 
 range_hist = [0,1]
+sigma = 0.07
 
 # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
 
+
 with tf.name_scope('Gaussian_Histogram'): 
-  hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = 0.1)
+  hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = sigma)
   tf.summary.tensor_summary('hist', hist)
 
 
@@ -307,8 +312,6 @@ h_pool2_flat = tf.reshape(hist, [-1, size_hist], name = "Flatten_Hist")
 
 # Densely Connected Layer
 # we add a fully-connected layer with 1024 neurons 
-
-# size_tot = tf.cast((image_size/2)*(image_size/2)*32 + nbins*32, tf.int32)
 
 with tf.variable_scope('Dense1'):
   with tf.name_scope('Weights'):
@@ -377,7 +380,7 @@ with tf.name_scope('cross_entropy'):
 tf.summary.scalar('cross_entropy', cross_entropy_mean)
 
 with tf.name_scope('train'):
-  train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy_mean)
+  train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy_mean)
 
 print('   test ...')
 # 'correct_prediction' is a function. argmax(y, 1), here 1 is for the axis number 1
@@ -410,48 +413,94 @@ tf.global_variables_initializer().run()
 # Train
 print('   train ...')
 history = []
-for i in range(81): # in the test 20000
+for i in range(201): # in the test 20000
   
     # evry 100 batches, test the accuracy
     if i%10 == 0 :
         validation_batch_size = 10       # size of the batches
         validation_accuracy = 0
         data.validation_iterator = 0
-        nb_iterations = 25
+        nb_iterations = 50
+
+        selected_hist_nb = 4
+        nb_CGG = 0
+        hist_CGG = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
+        nb_real = 0
+        hist_real = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
         for _ in range( nb_iterations ) :
             batch_validation = data.get_batch_validation(batch_size=validation_batch_size, random_flip_flop = True, random_rotate = True)
             feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
             validation_accuracy += accuracy.eval(feed_dict)
+
+        #     # Computing the mean histogram for each class
+        #     hist_plot = hist.eval(feed_dict)
+        #     for k in range(validation_batch_size): 
+        #       if batch_validation[1][k][0] == 0.:
+        #         nb_real +=1
+        #         is_real = True
+        #       else:
+        #         nb_CGG += 1
+        #         is_real = False
+        #       for j in range(selected_hist_nb):
+        #         for l in range(nbins+1): 
+        #           if is_real:
+        #             hist_real[j][l] += hist_plot[k,j,l]
+        #           else:
+        #             hist_CGG[j][l] += hist_plot[k,j,l]
+        
+        # for p in range(selected_hist_nb):
+        #   hist_CGG[p] /= nb_CGG
+        #   hist_real[p] /= nb_real
+
+        # # Plotting mean histogram for CGG
+        # fig = plt.figure(1)
+        # for k in range(selected_hist_nb):
+        #   plt.subplot(selected_hist_nb/2, 2, k+1)
+        #   plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_CGG[k], width = 1/(nbins + 1))
+        #   plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_CGG[k], 'r')
+        #   fig.suptitle("Mean histogram for CGG", fontsize=14)
+        # plt.show()
+
+        # # Plotting mean histogram for Real
+        # fig = plt.figure(2)
+        # for k in range(selected_hist_nb):
+        #   plt.subplot(selected_hist_nb/2, 2, k+1)
+        #   plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_real[k], width = 1/(nbins + 1))
+        #   plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_real[k], 'r')
+        #   fig.suptitle("Mean histogram for Real", fontsize=14)
+        # plt.show()
           
         validation_accuracy /= nb_iterations
         print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
 
-
-        hist_plot = hist.eval(feed_dict)
+        # # Plot all histograms for last batch
+        # hist_plot = hist.eval(feed_dict)
         
-        for k in range(validation_batch_size):
-          fig = plt.figure(k)
-          for j in range(4):
+        # for k in range(validation_batch_size):
+        #   fig = plt.figure(k)
+        #   for j in range(4):
             
-            plt.subplot(2, 2, j+1)
-            plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], width = 1/(nbins + 1))
-            plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], 'r')
+        #     plt.subplot(2, 2, j+1)
+        #     plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], width = 1/(nbins + 1))
+        #     plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], 'r')
           
-          if batch_validation[1][k][0] == 0.:
-            fig.suptitle("CGG", fontsize=14)
-          else:
-            fig.suptitle("Real", fontsize=14)
+        #   if batch_validation[1][k][0] == 0.:
+        #     fig.suptitle("CGG", fontsize=14)
+        #   else:
+        #     fig.suptitle("Real", fontsize=14)
 
-          plt.show()
+        #   plt.show()
+
+
         history.append(validation_accuracy)
         
         
     # regular training
 #    print('get batch ...')
-    batch_size = 50
+    batch_size = 100
     batch = data.get_next_train_batch(batch_size, True, True)
 #    print('train ...')
-    feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.7}
+    feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.85}
     summary, _ = sess.run([merged, train_step], feed_dict = feed_dict)
     train_writer.add_summary(summary, i)
 
