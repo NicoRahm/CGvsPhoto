@@ -156,13 +156,9 @@ image_size = 100
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-<<<<<<< HEAD
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
 data = il.Database_loader('/work/smg/v-nicolas/Test', image_size, proportion = 1, only_green=True)
-=======
-data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, proportion = 0.6, only_green=True)
-# data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
->>>>>>> 9a5f3b5608b9a24e45bc6eb7752bfb897e9634a9
+
 
 
 
