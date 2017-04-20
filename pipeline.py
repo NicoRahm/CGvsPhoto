@@ -5,12 +5,12 @@ clear = lambda: os.system('clear')
 clear()
 import time
 import random
-import plot_history as ph
+# import plot_history as ph
 import image_loader as il
 import tensorflow as tf
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-from PIL import Image, ImageDraw
+# from PIL import Image, ImageDraw
 import numpy as np
 
 # computation time tick
@@ -159,7 +159,7 @@ image_size = 200
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
-data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
+data = il.Database_loader('/work/smg/v-nicolas/Test', image_size, proportion = 1, only_green=True)
 
 
 
@@ -274,7 +274,7 @@ size_hist = (nbins + 1)*nb_conv1
 
 range_hist = [0,1]
 
-plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
+# plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
 
 with tf.name_scope('Gaussian_Histogram'): 
   hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = 0.1)
@@ -398,7 +398,7 @@ print('   start session ...')
 sess = tf.InteractiveSession()
 
 merged = tf.summary.merge_all()
-train_writer = tf.summary.FileWriter('/home/nicolas/Documents/summaries',
+train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
                                       sess.graph)
 
 print('   variable initialization ...')
@@ -457,16 +457,16 @@ for i in range(81): # in the test 20000
 
     
 # history
-print('   plot history')
-with open("/tmp/history.txt", "w") as history_file:
-    for item in history:
-        history_file.write("%f\n" %item)
+# print('   plot history')
+# with open("/tmp/history.txt", "w") as history_file:
+#     for item in history:
+#         history_file.write("%f\n" %item)
 
-with open("./history_v2.txt", "w") as history_file:
-    for item in history:
-        history_file.write("%f\n" %item)
+# with open("./history_v2.txt", "w") as history_file:
+#     for item in history:
+#         history_file.write("%f\n" %item)
         
-ph.plot_history("/tmp/history.txt")
+# ph.plot_history("/tmp/history.txt")
 
 
 # final test
