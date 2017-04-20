@@ -10,7 +10,7 @@ import image_loader as il
 import tensorflow as tf
 # import matplotlib.pyplot as plt
 
-# from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw
 import numpy as np
 
 # computation time tick
@@ -157,7 +157,7 @@ image_size = 100
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
-data = il.Database_loader('/work/smg/v-nicolas/Test', image_size, proportion = 1, only_green=True)
+data = il.Database_loader('/work/smg/v-nicolas/Test_DB_100', image_size, proportion = 1, only_green=True)
 
 
 
@@ -166,227 +166,232 @@ data = il.Database_loader('/work/smg/v-nicolas/Test', image_size, proportion = 1
 print('   create model ...')
 # input layer. One entry is a float size x size, 3-channels image. 
 # None means that the number of such vector can be of any lenght.
-with tf.name_scope('Input_Data'):
-  x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
 
-# reshape the input data:
-# size,size: width and height
-# 1: color channels
-# -1 :  ???
-  x_image = tf.reshape(x, [-1,image_size, image_size, 1])
-  with tf.name_scope('Image_Visualization'):
-    tf.summary.image('Input_Data', x_image)
+graph = tf.Graph()
 
-# Filtering with laplacian filter
-# laplacian = tf.constant([[0, -1, 0], [-1, 4, -1], [0, -1, 0]], tf.float32)
-# laplacian_filter = tf.reshape(laplacian, [3, 3, 1, 1])
+with graph.as_default():
 
-# horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
-# horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
+  with tf.name_scope('Input_Data'):
+    x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
 
-# vertical = tf.constant([[1,0],[-1,0]], tf.float32)
-# vertical_filter = tf.reshape(vertical, [2, 2, 1, 1])
+  # reshape the input data:
+  # size,size: width and height
+  # 1: color channels
+  # -1 :  ???
+    x_image = tf.reshape(x, [-1,image_size, image_size, 1])
+    with tf.name_scope('Image_Visualization'):
+      tf.summary.image('Input_Data', x_image)
 
-# diagonal = tf.constant([[1,0], [0,-1]], tf.float32)
-# diagonal_filter = tf.reshape(diagonal, [2, 2, 1, 1])
+  # Filtering with laplacian filter
+  # laplacian = tf.constant([[0, -1, 0], [-1, 4, -1], [0, -1, 0]], tf.float32)
+  # laplacian_filter = tf.reshape(laplacian, [3, 3, 1, 1])
 
-# antidiag = tf.constant([[0,1],[-1,0]], tf.float32)
-# antidiag_filter = tf.reshape(antidiag, [2, 2, 1, 1])
+  # horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
+  # horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
 
-#x_image_filtered = conv2d(x_image, laplacian_filter)
-#x_image_filtered = x_image
+  # vertical = tf.constant([[1,0],[-1,0]], tf.float32)
+  # vertical_filter = tf.reshape(vertical, [2, 2, 1, 1])
 
-#x_image_h = conv2d(x_image, horizontal_filter)
-#x_image_v = conv2d(x_image, vertical_filter)
-#x_image_d = conv2d(x_image, diagonal_filter)
-#x_image_a = conv2d(x_image, antidiag_filter)
+  # diagonal = tf.constant([[1,0], [0,-1]], tf.float32)
+  # diagonal_filter = tf.reshape(diagonal, [2, 2, 1, 1])
 
-#hist = tf.histogram_fixed_width(x_image, [-1.0,1.0], nbins = 100, dtype=tf.float32)
+  # antidiag = tf.constant([[0,1],[-1,0]], tf.float32)
+  # antidiag_filter = tf.reshape(antidiag, [2, 2, 1, 1])
 
-# first conv net layer
-# conv_matrix_width : 5
-# conv_matrix_height : 5
-# conv_matrix nb channel ??? : 1
-# nb matrices : 32 ?
+  #x_image_filtered = conv2d(x_image, laplacian_filter)
+  #x_image_filtered = x_image
 
-nb_conv1 = 32
-filter_size1 = 3
+  #x_image_h = conv2d(x_image, horizontal_filter)
+  #x_image_v = conv2d(x_image, vertical_filter)
+  #x_image_d = conv2d(x_image, diagonal_filter)
+  #x_image_a = conv2d(x_image, antidiag_filter)
 
-with tf.name_scope('Conv1'):
+  #hist = tf.histogram_fixed_width(x_image, [-1.0,1.0], nbins = 100, dtype=tf.float32)
 
-  with tf.name_scope('Weights'):
-    W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
-    variable_summaries(W_conv1)
-  with tf.name_scope('Bias'):
-    b_conv1 = bias_variable([nb_conv1])
-    variable_summaries(b_conv1)
+  # first conv net layer
+  # conv_matrix_width : 5
+  # conv_matrix_height : 5
+  # conv_matrix nb channel ??? : 1
+  # nb matrices : 32 ?
 
-  # relu on the conv layer
-  h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, name = 'activated')
-  tf.summary.histogram('activated', h_conv1)
+  nb_conv1 = 32
+  filter_size1 = 3
 
-  with tf.variable_scope('Conv1_visualization'):
-    tf.summary.image('conv1/filters', W_conv1[:,:,:,0:1])
+  with tf.name_scope('Conv1'):
 
+    with tf.name_scope('Weights'):
+      W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
+      # variable_summaries(W_conv1)
+    with tf.name_scope('Bias'):
+      b_conv1 = bias_variable([nb_conv1])
+      # variable_summaries(b_conv1)
 
+    # relu on the conv layer
+    h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, name = 'activated')
+    # tf.summary.histogram('activated', h_conv1)
 
-# with tf.name_scope('MaxPool'):
-#   m_pool = max_pool_2x2(h_conv1)
+    # with tf.variable_scope('Conv1_visualization'):
+    #   tf.summary.image('conv1/filters', W_conv1[:,:,:,0:1])
 
 
-# second conv 
 
-# nb_conv2 = 64
-# filter_size2 = 2
-# with tf.name_scope('Conv2'):
-#   with tf.name_scope('Weights'):
-#     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-#     variable_summaries(W_conv1)
-#   with tf.name_scope('Bias'):
-#     b_conv2 = bias_variable([nb_conv2])
-#     variable_summaries(b_conv2)
+  # with tf.name_scope('MaxPool'):
+  #   m_pool = max_pool_2x2(h_conv1)
 
-#   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
-#   tf.summary.histogram('activated', h_conv2)
 
-#   with tf.variable_scope('Conv2_visualization'):
-#     tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
+  # second conv 
 
+  # nb_conv2 = 64
+  # filter_size2 = 2
+  # with tf.name_scope('Conv2'):
+  #   with tf.name_scope('Weights'):
+  #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+  #     variable_summaries(W_conv1)
+  #   with tf.name_scope('Bias'):
+  #     b_conv2 = bias_variable([nb_conv2])
+  #     variable_summaries(b_conv2)
 
+  #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
+  #   tf.summary.histogram('activated', h_conv2)
 
-# with tf.name_scope('MaxPool'):
-#   m_pool = max_pool_2x2(h_conv2)
+  #   with tf.variable_scope('Conv2_visualization'):
+  #     tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
 
 
+  # size_pool = int(nb_conv1*(image_size**2)/4)
+  # with tf.name_scope('MaxPool'):
+  #   m_pool = max_pool_2x2(h_conv1)
 
-nbins = 10
-size_hist = (nbins + 1)*nb_conv1
 
-# with tf.name_scope('Histograms'):
-#   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
-#   hist = tf.map_fn(function_to_map, h_conv1)
-#   variable_summaries(hist)
 
+  nbins = 10
+  size_hist = (nbins + 1)*nb_conv1
 
-# with tf.name_scope('Classic_Histogram'): 
-#   hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
+  # with tf.name_scope('Histograms'):
+  #   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
+  #   hist = tf.map_fn(function_to_map, h_conv1)
+  #   variable_summaries(hist)
 
-range_hist = [0,1]
-sigma = 0.07
 
-# plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
+  # with tf.name_scope('Classic_Histogram'): 
+  #   hist = classic_histogram(h_conv1, nbins = nbins, k = nb_conv1, image_size = image_size)
 
+  range_hist = [0,1]
+  sigma = 0.07
 
-with tf.name_scope('Gaussian_Histogram'): 
-  hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = sigma)
-  tf.summary.tensor_summary('hist', hist)
+  # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
 
 
-# max pool
-#m_pool3 = max_pool_10x10(h_conv1)
-# m_pool3 = max_pool_2x2(h_conv2)
+  with tf.name_scope('Gaussian_Histogram'): 
+    hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = sigma)
+    tf.summary.tensor_summary('hist', hist)
 
-# average pool
-# a_pool3 = avg_pool_2x2(h_conv2)
-#m_pool4 = max_pool_2x2(h_conv2)
 
-# difference between max and average
-# diff_1 = tf.subtract(m_pool3, a_pool3)
-# diff_1 = m_pool3
+  # max pool
+  #m_pool3 = max_pool_10x10(h_conv1)
+  # m_pool3 = max_pool_2x2(h_conv2)
 
-# flattern 
-# with the 2 pooling, the image size is 7x7
-# there are 64 conv matrices
+  # average pool
+  # a_pool3 = avg_pool_2x2(h_conv2)
+  #m_pool4 = max_pool_2x2(h_conv2)
 
-# size_conv = tf.cast((image_size/2)*(image_size/2)*32, tf.int32)
-# h_pool1_flat = tf.reshape(m_pool, [-1, size_conv], name = "Flatten_Conv")
+  # difference between max and average
+  # diff_1 = tf.subtract(m_pool3, a_pool3)
+  # diff_1 = m_pool3
 
-h_pool2_flat = tf.reshape(hist, [-1, size_hist], name = "Flatten_Hist")
+  # flattern 
+  # with the 2 pooling, the image size is 7x7
+  # there are 64 conv matrices
 
+  # size_conv = tf.cast((image_size/2)*(image_size/2)*32, tf.int32)
+  # h_pool1_flat = tf.reshape(m_pool, [-1, size_conv], name = "Flatten_Conv")
 
-# concat = tf.concat([h_pool1_flat, h_pool2_flat], 1, name = "Concatenate")
+  h_pool2_flat = tf.reshape(hist, [-1, size_hist], name = "Flatten_Hist")
 
-# Densely Connected Layer
-# we add a fully-connected layer with 1024 neurons 
 
-with tf.variable_scope('Dense1'):
-  with tf.name_scope('Weights'):
-    W_fc1 = weight_variable([size_hist, 1024])
-    variable_summaries(W_fc1)
-  with tf.name_scope('Bias'):
-    b_fc1 = bias_variable([1024])
-    variable_summaries(b_fc1)
-  # put a relu
-  h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1, name = 'activated')
-  tf.summary.histogram('activated', h_fc1)
+  # concat = tf.concat([h_pool1_flat, h_pool2_flat], 1, name = "Concatenate")
 
-# dropout
-with tf.name_scope('Dropout1'):
-  keep_prob = tf.placeholder(tf.float32)
-  tf.summary.scalar('dropout_keep_probability', keep_prob)
-  h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+  # Densely Connected Layer
+  # we add a fully-connected layer with 1024 neurons 
 
-# Densely Connected Layer
-# we add a fully-connected layer with 1024 neurons 
+  with tf.variable_scope('Dense1'):
+    with tf.name_scope('Weights'):
+      W_fc1 = weight_variable([size_hist, 1024])
+      # variable_summaries(W_fc1)
+    with tf.name_scope('Bias'):
+      b_fc1 = bias_variable([1024])
+      # variable_summaries(b_fc1)
+    # put a relu
+    h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1, name = 'activated')
+    # tf.summary.histogram('activated', h_fc1)
 
-# with tf.variable_scope('Dense2'):
-#   with tf.name_scope('Weights'):
-#     W_fc2 = weight_variable([1024, 1024]) 
-#     variable_summaries(W_fc2)
-#   with tf.name_scope('Bias'):
-#     b_fc2 = bias_variable([1024])
-#     variable_summaries(b_fc2)
-#   # put a relu
-#   h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2, name = 'activated')
-#   tf.summary.histogram('activated', h_fc2)
+  # dropout
+  with tf.name_scope('Dropout1'):
+    keep_prob = tf.placeholder(tf.float32)
+    # tf.summary.scalar('dropout_keep_probability', keep_prob)
+    h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-# # dropout
-# with tf.name_scope('Dropout2'):
-#   keep_prob2 = tf.placeholder(tf.float32)
-#   tf.summary.scalar('dropout_keep_probability', keep_prob)
-#   h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
+  # Densely Connected Layer
+  # we add a fully-connected layer with 1024 neurons 
 
-# readout layer
-with tf.variable_scope('Readout'):
-  with tf.name_scope('Weights'):
-    W_fc3 = weight_variable([1024, data.nb_class])
-    variable_summaries(W_fc3)
-  with tf.name_scope('Bias'):
-    b_fc3 = bias_variable([data.nb_class])
-    variable_summaries(b_fc3)
-  y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
+  # with tf.variable_scope('Dense2'):
+  #   with tf.name_scope('Weights'):
+  #     W_fc2 = weight_variable([1024, 1024]) 
+  #     variable_summaries(W_fc2)
+  #   with tf.name_scope('Bias'):
+  #     b_fc2 = bias_variable([1024])
+  #     variable_summaries(b_fc2)
+  #   # put a relu
+  #   h_fc2 = tf.nn.relu(tf.matmul(h_fc1_drop, W_fc2) + b_fc2, name = 'activated')
+  #   tf.summary.histogram('activated', h_fc2)
 
-# support for the learning label
-y_ = tf.placeholder(tf.float32, [None, data.nb_class])
+  # # dropout
+  # with tf.name_scope('Dropout2'):
+  #   keep_prob2 = tf.placeholder(tf.float32)
+  #   tf.summary.scalar('dropout_keep_probability', keep_prob)
+  #   h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
 
+  # readout layer
+  with tf.variable_scope('Readout'):
+    with tf.name_scope('Weights'):
+      W_fc3 = weight_variable([1024, data.nb_class])
+      # variable_summaries(W_fc3)
+    with tf.name_scope('Bias'):
+      b_fc3 = bias_variable([data.nb_class])
+      # variable_summaries(b_fc3)
+    y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
 
+  # support for the learning label
+  y_ = tf.placeholder(tf.float32, [None, data.nb_class])
 
 
-# Define loss (cost) function and optimizer
-print('   setup loss function and optimizer ...')
 
-# softmax to have normalized class probabilities + cross-entropy
-with tf.name_scope('cross_entropy'):
 
-  softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels = y_, logits = y_conv)
-  #print('\nsoftmax_cross_entropy shape : ', softmax_cross_entropy.get_shape() )
-  with tf.name_scope('total'):
-    cross_entropy_mean = tf.reduce_mean(softmax_cross_entropy)
+  # Define loss (cost) function and optimizer
+  print('   setup loss function and optimizer ...')
 
-tf.summary.scalar('cross_entropy', cross_entropy_mean)
+  # softmax to have normalized class probabilities + cross-entropy
+  with tf.name_scope('cross_entropy'):
 
-with tf.name_scope('train'):
-  train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy_mean)
+    softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels = y_, logits = y_conv)
+    #print('\nsoftmax_cross_entropy shape : ', softmax_cross_entropy.get_shape() )
+    with tf.name_scope('total'):
+      cross_entropy_mean = tf.reduce_mean(softmax_cross_entropy)
 
-print('   test ...')
-# 'correct_prediction' is a function. argmax(y, 1), here 1 is for the axis number 1
-correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
+  tf.summary.scalar('cross_entropy', cross_entropy_mean)
 
-# 'accuracy' is a function: cast the boolean prediction to float and average them
-with tf.name_scope('accuracy'):
-  accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+  with tf.name_scope('train'):
+    train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy_mean)
 
-tf.summary.scalar('accuracy', accuracy)
+  print('   test ...')
+  # 'correct_prediction' is a function. argmax(y, 1), here 1 is for the axis number 1
+  correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
+
+  # 'accuracy' is a function: cast the boolean prediction to float and average them
+  with tf.name_scope('accuracy'):
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+
+  tf.summary.scalar('accuracy', accuracy)
 
 
 # a = tf.constant([[[[1.0,1.0],[1.0,1.]]]])
@@ -394,139 +399,139 @@ tf.summary.scalar('accuracy', accuracy)
 
 # start a session
 print('   start session ...')
-sess = tf.InteractiveSession()
+with tf.Session(graph=graph) as sess:
 
-merged = tf.summary.merge_all()
-train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
-                                      sess.graph)
+  merged = tf.summary.merge_all()
+  train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
+                                        sess.graph)
 
-print('   variable initialization ...')
-tf.global_variables_initializer().run()
+  print('   variable initialization ...')
+  tf.global_variables_initializer().run()
 
-# print(gaussian_func(0., a, 1, 1.).eval())
-# print(classic_histogram_gaussian(a, 1, nbins = 8, values_range = [0, 1], sigma = 0.6).eval())
+  # print(gaussian_func(0., a, 1, 1.).eval())
+  # print(classic_histogram_gaussian(a, 1, nbins = 8, values_range = [0, 1], sigma = 0.6).eval())
 
-# Train
-print('   train ...')
-history = []
-for i in range(201): # in the test 20000
-  
-    # evry 100 batches, test the accuracy
-    if i%10 == 0 :
-        validation_batch_size = 10       # size of the batches
-        validation_accuracy = 0
-        data.validation_iterator = 0
-        nb_iterations = 50
+  # Train
+  print('   train ...')
+  history = []
+  for i in range(201): # in the test 20000
+    
+      # evry 100 batches, test the accuracy
+      if i%10 == 0 :
+          validation_batch_size = 10       # size of the batches
+          validation_accuracy = 0
+          data.validation_iterator = 0
+          nb_iterations = 50
 
-        selected_hist_nb = 4
-        nb_CGG = 0
-        hist_CGG = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
-        nb_real = 0
-        hist_real = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
-        for _ in range( nb_iterations ) :
-            batch_validation = data.get_batch_validation(batch_size=validation_batch_size, random_flip_flop = True, random_rotate = True)
-            feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
-            validation_accuracy += accuracy.eval(feed_dict)
+          selected_hist_nb = 4
+          nb_CGG = 0
+          hist_CGG = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
+          nb_real = 0
+          hist_real = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
+          for _ in range( nb_iterations ) :
+              batch_validation = data.get_batch_validation(batch_size=validation_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
+              feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
+              validation_accuracy += accuracy.eval(feed_dict)
 
-        #     # Computing the mean histogram for each class
-        #     hist_plot = hist.eval(feed_dict)
-        #     for k in range(validation_batch_size): 
-        #       if batch_validation[1][k][0] == 0.:
-        #         nb_real +=1
-        #         is_real = True
-        #       else:
-        #         nb_CGG += 1
-        #         is_real = False
-        #       for j in range(selected_hist_nb):
-        #         for l in range(nbins+1): 
-        #           if is_real:
-        #             hist_real[j][l] += hist_plot[k,j,l]
-        #           else:
-        #             hist_CGG[j][l] += hist_plot[k,j,l]
-        
-        # for p in range(selected_hist_nb):
-        #   hist_CGG[p] /= nb_CGG
-        #   hist_real[p] /= nb_real
-
-        # # Plotting mean histogram for CGG
-        # fig = plt.figure(1)
-        # for k in range(selected_hist_nb):
-        #   plt.subplot(selected_hist_nb/2, 2, k+1)
-        #   plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_CGG[k], width = 1/(nbins + 1))
-        #   plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_CGG[k], 'r')
-        #   fig.suptitle("Mean histogram for CGG", fontsize=14)
-        # plt.show()
-
-        # # Plotting mean histogram for Real
-        # fig = plt.figure(2)
-        # for k in range(selected_hist_nb):
-        #   plt.subplot(selected_hist_nb/2, 2, k+1)
-        #   plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_real[k], width = 1/(nbins + 1))
-        #   plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_real[k], 'r')
-        #   fig.suptitle("Mean histogram for Real", fontsize=14)
-        # plt.show()
+          #     # Computing the mean histogram for each class
+          #     hist_plot = hist.eval(feed_dict)
+          #     for k in range(validation_batch_size): 
+          #       if batch_validation[1][k][0] == 0.:
+          #         nb_real +=1
+          #         is_real = True
+          #       else:
+          #         nb_CGG += 1
+          #         is_real = False
+          #       for j in range(selected_hist_nb):
+          #         for l in range(nbins+1): 
+          #           if is_real:
+          #             hist_real[j][l] += hist_plot[k,j,l]
+          #           else:
+          #             hist_CGG[j][l] += hist_plot[k,j,l]
           
-        validation_accuracy /= nb_iterations
-        print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
+          # for p in range(selected_hist_nb):
+          #   hist_CGG[p] /= nb_CGG
+          #   hist_real[p] /= nb_real
 
-        # # Plot all histograms for last batch
-        # hist_plot = hist.eval(feed_dict)
-        
-        # for k in range(validation_batch_size):
-        #   fig = plt.figure(k)
-        #   for j in range(4):
+          # # Plotting mean histogram for CGG
+          # fig = plt.figure(1)
+          # for k in range(selected_hist_nb):
+          #   plt.subplot(selected_hist_nb/2, 2, k+1)
+          #   plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_CGG[k], width = 1/(nbins + 1))
+          #   plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_CGG[k], 'r')
+          #   fig.suptitle("Mean histogram for CGG", fontsize=14)
+          # plt.show()
+
+          # # Plotting mean histogram for Real
+          # fig = plt.figure(2)
+          # for k in range(selected_hist_nb):
+          #   plt.subplot(selected_hist_nb/2, 2, k+1)
+          #   plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_real[k], width = 1/(nbins + 1))
+          #   plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_real[k], 'r')
+          #   fig.suptitle("Mean histogram for Real", fontsize=14)
+          # plt.show()
             
-        #     plt.subplot(2, 2, j+1)
-        #     plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], width = 1/(nbins + 1))
-        #     plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], 'r')
+          validation_accuracy /= nb_iterations
+          print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
+
+          # # Plot all histograms for last batch
+          # hist_plot = hist.eval(feed_dict)
           
-        #   if batch_validation[1][k][0] == 0.:
-        #     fig.suptitle("CGG", fontsize=14)
-        #   else:
-        #     fig.suptitle("Real", fontsize=14)
+          # for k in range(validation_batch_size):
+          #   fig = plt.figure(k)
+          #   for j in range(4):
+              
+          #     plt.subplot(2, 2, j+1)
+          #     plt.bar(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], width = 1/(nbins + 1))
+          #     plt.plot(np.linspace(range_hist[0], range_hist[1],nbins+1), hist_plot[k,j], 'r')
+            
+          #   if batch_validation[1][k][0] == 0.:
+          #     fig.suptitle("CGG", fontsize=14)
+          #   else:
+          #     fig.suptitle("Real", fontsize=14)
 
-        #   plt.show()
+          #   plt.show()
 
 
-        history.append(validation_accuracy)
-        
-        
-    # regular training
-#    print('get batch ...')
-    batch_size = 100
-    batch = data.get_next_train_batch(batch_size, True, True)
-#    print('train ...')
-    feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.85}
-    summary, _ = sess.run([merged, train_step], feed_dict = feed_dict)
-    train_writer.add_summary(summary, i)
+          history.append(validation_accuracy)
+          
+          
+      # regular training
+  #    print('get batch ...')
+      batch_size = 20
+      batch = data.get_next_train_batch(batch_size, False, True, True)
+  #    print('train ...')
+      feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.85}
+      summary, _ = sess.run([merged, train_step], feed_dict = feed_dict)
+      train_writer.add_summary(summary, i)
 
     
-# history
-# print('   plot history')
-# with open("/tmp/history.txt", "w") as history_file:
-#     for item in history:
-#         history_file.write("%f\n" %item)
+  # history
+  # print('   plot history')
+  # with open("/tmp/history.txt", "w") as history_file:
+  #     for item in history:
+  #         history_file.write("%f\n" %item)
 
-# with open("./history_v2.txt", "w") as history_file:
-#     for item in history:
-#         history_file.write("%f\n" %item)
-        
-# ph.plot_history("/tmp/history.txt")
+  # with open("./history_v2.txt", "w") as history_file:
+  #     for item in history:
+  #         history_file.write("%f\n" %item)
+          
+  # ph.plot_history("/tmp/history.txt")
 
 
 # final test
-print('   final test ...')
-test_batch_size = 10       # size of the batches
-test_accuracy = 0
-nb_iterations = 200
-data.test_iterator = 0
-for _ in range( nb_iterations ) :
-    batch_test = data.get_batch_test(batch_size=test_batch_size, random_flip_flop = True, random_rotate = True)
-    feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
-    test_accuracy += accuracy.eval(feed_dict)
-          
-test_accuracy /= nb_iterations
-print("   test accuracy %g"%test_accuracy)
+  print('   final test ...')
+  test_batch_size = 10       # size of the batches
+  test_accuracy = 0
+  nb_iterations = 200
+  data.test_iterator = 0
+  for _ in range( nb_iterations ) :
+      batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
+      feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
+      test_accuracy += accuracy.eval(feed_dict)
+            
+  test_accuracy /= nb_iterations
+  print("   test accuracy %g"%test_accuracy)
 
 
 #batch_test = data.get_batch_test(max_images=50)
