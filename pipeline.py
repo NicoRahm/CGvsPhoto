@@ -159,11 +159,10 @@ print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size)
 data = il.Database_loader('/work/smg/v-nicolas/Test_DB_100', image_size, proportion = 1, only_green=True)
 
 
-
-path_save = '/work/smg/v-nicolas/weights/'
+folder_ckpt = '/work/smg/v-nicolas/weights/'
 filename = input("Choose a file name for the weigths : ")
 
-path_save += filename
+path_save = folder_ckpt + filename
 
 
 print('   create model ...')
@@ -412,15 +411,16 @@ with tf.Session(graph=graph) as sess:
   saver = tf.train.Saver()
   print('   variable initialization ...')
 
-  restore_weigths = input("Restore weight from previous session ? (Y/n) : ")
+  restore_weigths = input("Restore weight from previous session ? (y/N) : ")
 
-  if restore_weigths == 'n':
-    tf.global_variables_initializer().run()
+  if restore_weigths == 'y':
+    file_to_restore = input("Name of the file to restore (Directory : " + folder_ckpt + ') : ')
+    saver.restore(sess, folder_ckpt + file_to_restore)
+    print('   Model restored')
 
   else: 
-    file_to_restore = input("Name of the file to restore (Directory : " + path_save + ') : ')
-    saver.restore(sess, path_save + file_to_restore)
-    print('   Model restored')
+    tf.global_variables_initializer().run()
+    
 
   
 
