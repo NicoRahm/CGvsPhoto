@@ -13,6 +13,7 @@ import numpy as np
 import os, os.path
 import sys
 import random
+import matplotlib.pyplot as plt 
 
 
 
@@ -468,28 +469,59 @@ def get_image_filename_from_dir(directory_path) :
 
     return image_list
 
+
+def compute_useless_images(directory_path, image_size, nb_images = 100, treshold = 0.3): 
+    data =  Database_loader(directory_path, image_size, only_green=True)  
     
-        
+    i = 0
+    batch_size = 50
+    max_height = np.zeros((nb_images,))
+    while(i < nb_images):
+        batch = data.get_next_train_batch(50, False)
+        ind_batch = 0
+        for image in batch[0]:
+            image = np.reshape(image, [-1])
+            hist = np.histogram(image, 256, [0.,1.])[0]
+            # print(hist)
+            # print(image)
+            # print(batch[1][ind_batch])
+            # plt.imshow(np.reshape(image, [image_size, image_size]))
+            # plt.show()
+            max_height[i] = max(hist)/(image_size**2)
+            i+=1
+            ind_batch+=1
+
+    nb_useless = 0
+    for m in max_height:
+        if(m > treshold):
+            nb_useless+=1
+
+    print("Number of useless images : " + str(nb_useless) + "/" + str(nb_images))
+
+
+
 
 if __name__ == "__main__":    
     #file_names = load_images('/home/nozick/Desktop/cg_pi_64', 100)
-    a = Database_loader('/work/smg/v-nicolas/Test', 100, only_green=True)
-    b = a.get_next_train(random_flip_flop=True,random_rotate=True)
-    print(b[0].shape)
-#    im = Image.fromarray(np.uint8(b[0]*255))
-#    im.save(a.dir+'/caca_'+str(a.train_iterator -1)+'.jpg')
+#     a = Database_loader('/work/smg/v-nicolas/Test', 100, only_green=True)
+#     b = a.get_next_train(random_flip_flop=True,random_rotate=True)
+#     print(b[0].shape)
+# #    im = Image.fromarray(np.uint8(b[0]*255))
+# #    im.save(a.dir+'/caca_'+str(a.train_iterator -1)+'.jpg')
 
-    c = a.get_next_test()
-    d = a.get_next_validation()
+#     c = a.get_next_test()
+#     d = a.get_next_validation()
     
-    print('Loading batch')
-    e = a.get_next_train_batch(10)
+    # print('Loading batch')
+    # e = a.get_next_train_batch(10)
 #    print(e)
     
-    a.export_database('/work/smg/v-nicolas/Test_DB_100', nb_train = 0, nb_test = 2000, nb_validation = 0)
+    # a.export_database('/work/smg/v-nicolas/Test_DB_100', nb_train = 0, nb_test = 2000, nb_validation = 0)
 
-    f = Database_loader('/work/smg/v-nicolas/Test_DB_100', 100, only_green=True)
-    print("Loading batch")
-    g = f.get_batch_validation(50, crop = False)
+    # f = Database_loader('/work/smg/v-nicolas/Test_DB_100', 100, only_green=True)
+    # print("Loading batch")
+    # g = f.get_batch_validation(50, crop = False)
 
-    print(g[0][0].shape)
+    # print(g[0][0].shape)
+
+    compute_useless_images('/work/smg/v-nicolas/Test_DB_100', 100, nb_images = 1000, treshold = 0.5)

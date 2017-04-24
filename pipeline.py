@@ -161,6 +161,10 @@ data = il.Database_loader('/work/smg/v-nicolas/Test_DB_100', image_size, proport
 
 
 
+path_save = '/work/smg/v-nicolas/weights/'
+filename = input("Choose a file name for the weigths : ")
+
+path_save += filename
 
 
 print('   create model ...')
@@ -222,12 +226,12 @@ with graph.as_default():
     with tf.name_scope('Weights'):
       W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
       # variable_summaries(W_conv1)
-    with tf.name_scope('Bias'):
-      b_conv1 = bias_variable([nb_conv1])
+    # with tf.name_scope('Bias'):
+      # b_conv1 = bias_variable([nb_conv1])
       # variable_summaries(b_conv1)
 
     # relu on the conv layer
-    h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, name = 'activated')
+    h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1), name = 'activated')
     # tf.summary.histogram('activated', h_conv1)
 
     # with tf.variable_scope('Conv1_visualization'):
@@ -241,21 +245,21 @@ with graph.as_default():
 
   # second conv 
 
-  # nb_conv2 = 64
-  # filter_size2 = 2
-  # with tf.name_scope('Conv2'):
-  #   with tf.name_scope('Weights'):
-  #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-  #     variable_summaries(W_conv1)
-  #   with tf.name_scope('Bias'):
-  #     b_conv2 = bias_variable([nb_conv2])
-  #     variable_summaries(b_conv2)
+  nb_conv2 = 64
+  filter_size2 = 3
+  with tf.name_scope('Conv2'):
+    with tf.name_scope('Weights'):
+      W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+      variable_summaries(W_conv1)
+    # with tf.name_scope('Bias'):
+    #   b_conv2 = bias_variable([nb_conv2])
+    #   variable_summaries(b_conv2)
 
-  #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2)
-  #   tf.summary.histogram('activated', h_conv2)
+    h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2))
+    # tf.summary.histogram('activated', h_conv2)
 
-  #   with tf.variable_scope('Conv2_visualization'):
-  #     tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
+    with tf.variable_scope('Conv2_visualization'):
+      tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
 
 
   # size_pool = int(nb_conv1*(image_size**2)/4)
@@ -265,7 +269,8 @@ with graph.as_default():
 
 
   nbins = 10
-  size_hist = (nbins + 1)*nb_conv1
+  nb_filters = nb_conv2
+  size_hist = (nbins + 1)*nb_filters
 
   # with tf.name_scope('Histograms'):
   #   function_to_map = lambda x: tf.stack([histogram(x[:,:,i], nbins) for i in range(32)])
@@ -283,7 +288,7 @@ with graph.as_default():
 
 
   with tf.name_scope('Gaussian_Histogram'): 
-    hist = classic_histogram_gaussian(h_conv1, k = nb_conv1, nbins = nbins, values_range = range_hist, sigma = sigma)
+    hist = classic_histogram_gaussian(h_conv2, k = nb_filters, nbins = nbins, values_range = range_hist, sigma = sigma)
     tf.summary.tensor_summary('hist', hist)
 
 
@@ -347,8 +352,8 @@ with graph.as_default():
 
   # # dropout
   # with tf.name_scope('Dropout2'):
-  #   keep_prob2 = tf.placeholder(tf.float32)
-  #   tf.summary.scalar('dropout_keep_probability', keep_prob)
+  #   # keep_prob2 = tf.placeholder(tf.float32)
+  #   # tf.summary.scalar('dropout_keep_probability', keep_prob)
   #   h_fc2_drop = tf.nn.dropout(h_fc2, keep_prob)
 
   # readout layer
@@ -381,7 +386,7 @@ with graph.as_default():
   tf.summary.scalar('cross_entropy', cross_entropy_mean)
 
   with tf.name_scope('train'):
-    train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy_mean)
+    train_step = tf.train.AdamOptimizer(5e-4).minimize(cross_entropy_mean)
 
   print('   test ...')
   # 'correct_prediction' is a function. argmax(y, 1), here 1 is for the axis number 1
@@ -401,12 +406,18 @@ with graph.as_default():
 print('   start session ...')
 with tf.Session(graph=graph) as sess:
 
+
+
+
+
+
   merged = tf.summary.merge_all()
   train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
                                         sess.graph)
 
   print('   variable initialization ...')
   tf.global_variables_initializer().run()
+  saver = tf.train.Saver()
 
   # print(gaussian_func(0., a, 1, 1.).eval())
   # print(classic_histogram_gaussian(a, 1, nbins = 8, values_range = [0, 1], sigma = 0.6).eval())
@@ -414,11 +425,11 @@ with tf.Session(graph=graph) as sess:
   # Train
   print('   train ...')
   history = []
-  for i in range(201): # in the test 20000
+  for i in range(12000): # in the test 20000
     
       # evry 100 batches, test the accuracy
       if i%10 == 0 :
-          validation_batch_size = 10       # size of the batches
+          validation_batch_size = 20       # size of the batches
           validation_accuracy = 0
           data.validation_iterator = 0
           nb_iterations = 50
@@ -498,14 +509,20 @@ with tf.Session(graph=graph) as sess:
           
       # regular training
   #    print('get batch ...')
-      batch_size = 20
+      batch_size = 50
       batch = data.get_next_train_batch(batch_size, False, True, True)
   #    print('train ...')
       feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.85}
       summary, _ = sess.run([merged, train_step], feed_dict = feed_dict)
       train_writer.add_summary(summary, i)
+      if i%100 == 0:
+        
+        path_save_batch = path_save + str(i) + ".ckpt"
+        print('   saving weights in file : ' + path_save)
+        saver.save(sess, path_save_batch)
 
-    
+
+
   # history
   # print('   plot history')
   # with open("/tmp/history.txt", "w") as history_file:
@@ -518,6 +535,7 @@ with tf.Session(graph=graph) as sess:
           
   # ph.plot_history("/tmp/history.txt")
 
+  
 
 # final test
   print('   final test ...')
