@@ -13,8 +13,6 @@ import numpy as np
 import os, os.path
 import sys
 import random
-import matplotlib.pyplot as plt 
-
 
 
 class Database_loader :

@@ -430,7 +430,7 @@ with tf.Session(graph=graph) as sess:
   # Train
   print('   train ...')
   history = []
-  for i in range(501): # in the test 20000
+  for i in range(6001): # in the test 20000
     
       # evry 100 batches, test the accuracy
       if i%10 == 0 :
