@@ -10,7 +10,6 @@ import image_loader as il
 import tensorflow as tf
 # import matplotlib.pyplot as plt
 
-from PIL import Image, ImageDraw
 import numpy as np
 
 # computation time tick
@@ -83,20 +82,20 @@ def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size 
   return(tf.map_fn(function_to_map, mu_list))
 
 
-def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
+# def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
 
-  r = values_range[1] - values_range[0]
-  mu_list = []
-  for i in range(nbins+1):
-    mu_list.append(values_range[0] + i*r/(nbins+1))
+#   r = values_range[1] - values_range[0]
+#   mu_list = []
+#   for i in range(nbins+1):
+#     mu_list.append(values_range[0] + i*r/(nbins+1))
 
-  range_plot = np.linspace(values_range[0], values_range[1], 100)
+#   range_plot = np.linspace(values_range[0], values_range[1], 100)
 
-  plt.figure()
-  for mu in mu_list:
-    plt.plot(range_plot, np.exp(-(range_plot-mu)**2/(sigma**2)))
-  plt.title("Gaussian kernels used for estimating the histograms")
-  plt.show()
+#   plt.figure()
+#   for mu in mu_list:
+#     plt.plot(range_plot, np.exp(-(range_plot-mu)**2/(sigma**2)))
+#   plt.title("Gaussian kernels used for estimating the histograms")
+#   plt.show()
 
 # plot_gaussian_kernel()
 # print(gaussian_kernel(np.array([[0,10],[10, 0.5]]), nbins = 4, values_range = [0,10], sigma = 6))
@@ -406,18 +405,24 @@ with graph.as_default():
 print('   start session ...')
 with tf.Session(graph=graph) as sess:
 
-
-
-
-
-
   merged = tf.summary.merge_all()
   train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
                                         sess.graph)
 
-  print('   variable initialization ...')
-  tf.global_variables_initializer().run()
   saver = tf.train.Saver()
+  print('   variable initialization ...')
+
+  restore_weigths = input("Restore weight from previous session ? (Y/n) : ")
+
+  if restore_weigths == 'n':
+    tf.global_variables_initializer().run()
+
+  else: 
+    file_to_restore = input("Name of the file to restore (Directory : " + path_save + ') : ')
+    saver.restore(sess, path_save + file_to_restore)
+    print('   Model restored')
+
+  
 
   # print(gaussian_func(0., a, 1, 1.).eval())
   # print(classic_histogram_gaussian(a, 1, nbins = 8, values_range = [0, 1], sigma = 0.6).eval())
@@ -425,7 +430,7 @@ with tf.Session(graph=graph) as sess:
   # Train
   print('   train ...')
   history = []
-  for i in range(12000): # in the test 20000
+  for i in range(100): # in the test 20000
     
       # evry 100 batches, test the accuracy
       if i%10 == 0 :
