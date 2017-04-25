@@ -148,7 +148,7 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
   
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 100
+image_size = 200
 
 
 
@@ -156,7 +156,7 @@ image_size = 100
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
-data = il.Database_loader('/work/smg/v-nicolas/Test_DB_100', image_size, proportion = 1, only_green=True)
+data = il.Database_loader('/work/smg/v-nicolas/Test_DB_200', image_size, proportion = 1, only_green=True)
 
 
 folder_ckpt = '/work/smg/v-nicolas/weights/'
@@ -409,7 +409,9 @@ print('   start session ...')
 with tf.Session(graph=graph) as sess:
 
   merged = tf.summary.merge_all()
-  train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
+  summary_folder = '200x200_2conv'
+  train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries/' + 
+                                        summary_folder,
                                         sess.graph)
 
   tf.global_variables_initializer().run()
@@ -435,7 +437,7 @@ with tf.Session(graph=graph) as sess:
   # Train
   print('   train ...')
   history = []
-  for i in range(0): # in the test 20000
+  for i in range(6001): # in the test 20000
     
       # evry 100 batches, test the accuracy
       if i%10 == 0 :
@@ -550,10 +552,10 @@ with tf.Session(graph=graph) as sess:
 
 # final test
   print('   final test ...')
-  test_batch_size = 200     # size of the batches
+  test_batch_size = 100     # size of the batches
   test_accuracy = 0
   test_auc = 0
-  nb_iterations = 10
+  nb_iterations = 20
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
