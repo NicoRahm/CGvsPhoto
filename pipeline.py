@@ -160,7 +160,7 @@ data = il.Database_loader('/work/smg/v-nicolas/Test_DB_100', image_size, proport
 
 
 folder_ckpt = '/work/smg/v-nicolas/weights/'
-filename = input("Choose a file name for the weigths : ")
+filename = input("   Choose a file name for the weigths : ")
 
 path_save = folder_ckpt + filename
 
@@ -407,7 +407,7 @@ with graph.as_default():
 # start a session
 print('   start session ...')
 with tf.Session(graph=graph) as sess:
-
+  
   merged = tf.summary.merge_all()
   train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
                                         sess.graph)
@@ -425,7 +425,7 @@ with tf.Session(graph=graph) as sess:
   else: 
     tf.global_variables_initializer().run()
     
-
+  sess.run(tf.initialize_local_variables())
   
 
   # print(gaussian_func(0., a, 1, 1.).eval())
