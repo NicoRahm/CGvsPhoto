@@ -514,7 +514,7 @@ if __name__ == "__main__":
     # e = a.get_next_train_batch(10)
 #    print(e)
     
-    a.export_database('/work/smg/v-nicolas/Test_DB_200', nb_train = 10000, nb_test = 2000, nb_validation = 1000)
+    a.export_database('/work/smg/v-nicolas/Test_DB_200', nb_train = 0, nb_test = 2000, nb_validation = 1000)
 
     f = Database_loader('/work/smg/v-nicolas/Test_DB_200', 200, only_green=True)
     # print("Loading batch")

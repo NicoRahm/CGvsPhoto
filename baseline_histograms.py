@@ -68,14 +68,14 @@ def avg_pool_10x10(x):
 
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 100
+image_size = 200
 
 
 
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-data = il.Database_loader('/home/nicolas/Documents/Test_DB_100', image_size, proportion = 1, only_green=True)
+data = il.Database_loader('/home/nicolas/Documents/Test_DB_200', image_size, proportion = 1, only_green=True)
 # data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
 
 
@@ -321,8 +321,8 @@ def extract_features_hist(h):
 
 
 clf = LinearDiscriminantAnalysis()
-for i in range(501):
-  batch_size = 200
+for i in range(1001):
+  batch_size = 100
   batch = data.get_next_train_batch(batch_size, False, True, True)
   
   feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.8}
