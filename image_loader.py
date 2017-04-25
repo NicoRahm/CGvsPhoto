@@ -382,50 +382,80 @@ class Database_loader :
         print("Exporting training set : " + str(nb_train) + " images to process...")
         batch_size = 100
         i = 0
+        n_class0 = 0
+        n_class1 = 0
+
         while(i < nb_train):
 
             batch = self.get_next_train_batch(batch_size)
             for j in range(batch_size):
+                save = True
                 exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
                 if batch[1][j][0] == 0.:
                     name_class = self.image_class[0]
+                    n_class0 += 1
+                    if(n_class0 > int(nb_train/2)):
+                        save = False
                 else:
                     name_class = self.image_class[1]
-                exp.save(export_path + '/train/' + name_class + '/' + 'train' + str(i+j) + '.jpg')
+                    n_class1 += 1
+                    if(n_class1 > int(nb_train/2)):
+                        save = False
+                if save :
+                    exp.save(export_path + '/train/' + name_class + '/' + 'train' + str(i+j) + '.jpg')
+                i+=1
 
-            i+=batch_size
             print(str(i) + " images exported")
 
         print("Exporting testing set : " + str(nb_test) + " images to process...")
         batch_size = 100
         i = 0
+        n_class0 = 0
+        n_class1 = 0
         while(i < nb_test):
-
+            save = True
             batch = self.get_batch_test(batch_size)
             for j in range(batch_size):
                 if batch[1][j][0] == 0.:
                     name_class = self.image_class[0]
+                    n_class0 += 1
+                    if(n_class0 > int(nb_test/2)):
+                        save = False
                 else:
                     name_class = self.image_class[1]
-                exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
-                exp.save(export_path + '/test/' + name_class + '/' + 'test' + str(i + j) + '.jpg')
-            i+=batch_size
+                    n_class1 += 1
+                    if(n_class1 > int(nb_test/2)):
+                        save = False
+                if save:
+                    exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    exp.save(export_path + '/test/' + name_class + '/' + 'test' + str(i + j) + '.jpg')
+                i+=1
             print(str(i) + " images exported")
 
         print("Exporting validation set : " + str(nb_validation) + " images to process...")
         batch_size = 100
         i = 0
+        n_class0 = 0
+        n_class1 = 0
         while(i < nb_validation):
 
             batch = self.get_batch_validation(batch_size)
             for j in range(batch_size):
                 if batch[1][j][0] == 0.:
                     name_class = self.image_class[0]
+                    n_class0 += 1
+                    if(n_class0 > int(nb_validation/2)):
+                        save = False
                 else:
                     name_class = self.image_class[1]
-                exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
-                exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i + j) + '.jpg')
-            i+=batch_size
+                    n_class1 += 1
+                    if(n_class1 > int(nb_validation/2)):
+                        save = False
+
+                if save:
+                    exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i + j) + '.jpg')
+                i+=1
             print(str(i) + " images exported")
 
         def get_next_batch(self, category = 'train', batch_size = 50):
