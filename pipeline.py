@@ -454,7 +454,6 @@ with tf.Session(graph=graph) as sess:
               batch_validation = data.get_batch_validation(batch_size=validation_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
               feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
               validation_accuracy += accuracy.eval(feed_dict)
-              validation_auc += sess.run(auc, feed_dict)[0]
 
           #     # Computing the mean histogram for each class
           #     hist_plot = hist.eval(feed_dict)
@@ -495,9 +494,7 @@ with tf.Session(graph=graph) as sess:
           # plt.show()
             
           validation_accuracy /= nb_iterations
-          validation_auc /= nb_iterations
           print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
-          print("     step %d, training AUC %g (%d validations tests)"%(i, validation_auc, validation_batch_size*nb_iterations))
 
           # # Plot all histograms for last batch
           # hist_plot = hist.eval(feed_dict)
@@ -563,12 +560,12 @@ with tf.Session(graph=graph) as sess:
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
       test_auc = sess.run(auc, feed_dict)[0]
-      print(test_auc)
+
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
 
-  # test_auc /= nb_iterations
+  test_auc /= (nb_iterations - 1)
   print("   test AUC %g"%test_auc)
 
 
