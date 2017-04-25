@@ -403,7 +403,7 @@ class Database_loader :
                         save = False
                 if save :
                     exp.save(export_path + '/train/' + name_class + '/' + 'train' + str(i+j) + '.jpg')
-                i+=1
+                    i+=1
 
             print(str(i) + " images exported")
 
@@ -429,7 +429,7 @@ class Database_loader :
                 if save:
                     exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
                     exp.save(export_path + '/test/' + name_class + '/' + 'test' + str(i + j) + '.jpg')
-                i+=1
+                    i+=1
             print(str(i) + " images exported")
 
         print("Exporting validation set : " + str(nb_validation) + " images to process...")
@@ -455,17 +455,9 @@ class Database_loader :
                 if save:
                     exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
                     exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i + j) + '.jpg')
-                i+=1
+                    i+=1
             print(str(i) + " images exported")
 
-        def get_next_batch(self, category = 'train', batch_size = 50):
-            if category == 'train':
-
-                self.train_iterator += 1
-            if category == 'test':
-                self.test_iterator
-            if category == 'validation':
-                self.validation_iterator
 
             
 def get_image_filename_from_dir(directory_path) :
