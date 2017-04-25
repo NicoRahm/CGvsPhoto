@@ -407,11 +407,11 @@ with graph.as_default():
 # start a session
 print('   start session ...')
 with tf.Session(graph=graph) as sess:
-  
+
   merged = tf.summary.merge_all()
   train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
                                         sess.graph)
-
+  tf.global_variables_initializer().run()
   saver = tf.train.Saver()
   print('   variable initialization ...')
 
@@ -425,7 +425,7 @@ with tf.Session(graph=graph) as sess:
   else: 
     tf.global_variables_initializer().run()
     
-  sess.run(tf.initialize_local_variables())
+  # sess.run(tf.initialize_local_variables())
   
 
   # print(gaussian_func(0., a, 1, 1.).eval())
@@ -561,13 +561,13 @@ with tf.Session(graph=graph) as sess:
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
-      test_auc += sess.run(auc, feed_dict)[0]
+      test_auc += sess.run(auc, feed_dict)
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
 
   test_auc /= nb_iterations
-  print("   test accuracy %g"%test_auc)
+  print("   test AUC %g"%test_auc)
 
 
 #batch_test = data.get_batch_test(max_images=50)
