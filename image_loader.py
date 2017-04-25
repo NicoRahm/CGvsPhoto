@@ -388,6 +388,7 @@ class Database_loader :
         while(i < nb_train):
 
             batch = self.get_next_train_batch(batch_size)
+
             for j in range(batch_size):
                 save = True
                 exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
@@ -413,9 +414,10 @@ class Database_loader :
         n_class0 = 0
         n_class1 = 0
         while(i < nb_test):
-            save = True
+            
             batch = self.get_batch_test(batch_size)
             for j in range(batch_size):
+                save = True
                 if batch[1][j][0] == 0.:
                     name_class = self.image_class[0]
                     n_class0 += 1
@@ -441,6 +443,7 @@ class Database_loader :
 
             batch = self.get_batch_validation(batch_size)
             for j in range(batch_size):
+                save = True
                 if batch[1][j][0] == 0.:
                     name_class = self.image_class[0]
                     n_class0 += 1
