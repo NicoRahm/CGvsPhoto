@@ -395,7 +395,7 @@ with graph.as_default():
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
   with tf.name_scope('AUC'):
-    auc = tf.metrics.auc(tf.transpose(y_, (1,0))[0], tf.transpose(y_conv, (1,0))[0])
+    auc = tf.metrics.auc(tf.argmax(y_,1), tf.argmax(y_conv,1))
 
   tf.summary.scalar('accuracy', accuracy)
   tf.summary.scalar('AUC', auc)
