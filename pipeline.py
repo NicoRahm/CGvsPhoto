@@ -453,7 +453,7 @@ with tf.Session(graph=graph) as sess:
               batch_validation = data.get_batch_validation(batch_size=validation_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
               feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
               validation_accuracy += accuracy.eval(feed_dict)
-              validation_auc += auc.eval(feed_dict)
+              validation_auc += auc[0].eval(feed_dict)
 
           #     # Computing the mean histogram for each class
           #     hist_plot = hist.eval(feed_dict)
@@ -561,7 +561,7 @@ with tf.Session(graph=graph) as sess:
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
-      test_auc += auc.eval(feed_dict)
+      test_auc += auc[0].eval(feed_dict)
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
