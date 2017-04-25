@@ -561,7 +561,7 @@ with tf.Session(graph=graph) as sess:
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
-      test_auc += auc[0].eval(feed_dict)
+      test_auc += sess.run(auc, feed_dict)[0]
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
