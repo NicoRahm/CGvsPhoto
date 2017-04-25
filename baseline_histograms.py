@@ -9,9 +9,9 @@ import image_loader as il
 import tensorflow as tf
 # import matplotlib.pyplot as plt
 
-from PIL import Image, ImageDraw
 import numpy as np
-
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score as acc
 
 
 # computation time tick
@@ -68,14 +68,14 @@ def avg_pool_10x10(x):
 
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 200
+image_size = 100
 
 
 
 # load data
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-data = il.Database_loader('/work/smg/v-nicolas/Test', image_size, proportion = 1, only_green=True)
+data = il.Database_loader('/home/nicolas/Documents/Test_DB_100', image_size, proportion = 1, only_green=True)
 # data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
 
 
@@ -127,31 +127,28 @@ x_filtered.append(x_image_a)
 # Second order filtering 
 x_image_hv = conv2d(x_image_v, horizontal_filter)
 x_filtered.append(x_image_hv)
-x_image_vh = conv2d(x_image_h, vertical_filter)
-x_filtered.append(x_image_vh)
+x_image_hh = conv2d(x_image_h, horizontal_filter)
+x_filtered.append(x_image_hh)
 x_image_hd = conv2d(x_image_d, horizontal_filter)
 x_filtered.append(x_image_hd)
-x_image_dh = conv2d(x_image_h, diagonal_filter)
-x_filtered.append(x_image_dh)
+x_image_dd = conv2d(x_image_d, diagonal_filter)
+x_filtered.append(x_image_dd)
 x_image_ha = conv2d(x_image_a, horizontal_filter)
 x_filtered.append(x_image_ha)
-x_image_ah = conv2d(x_image_h, antidiag_filter)
-x_filtered.append(x_image_ah)
+x_image_aa = conv2d(x_image_a, antidiag_filter)
+x_filtered.append(x_image_aa)
 x_image_vd = conv2d(x_image_d, vertical_filter)
 x_filtered.append(x_image_vd)
-x_image_dv = conv2d(x_image_v, diagonal_filter)
-x_filtered.append(x_image_dv)
+x_image_vv = conv2d(x_image_v, vertical_filter)
+x_filtered.append(x_image_vv)
 x_image_va = conv2d(x_image_a, vertical_filter)
 x_filtered.append(x_image_va)
-x_image_av = conv2d(x_image_v, antidiag_filter)
-x_filtered.append(x_image_av)
 x_image_da = conv2d(x_image_a, diagonal_filter)
 x_filtered.append(x_image_da)
-x_image_ad = conv2d(x_image_d, antidiag_filter)
-x_filtered.append(x_image_ad)
 
-nb_filters = 16
-nbins = 16
+
+nb_filters = 14
+nbins = 15
 
 size_features = nbins*nb_filters 
 
@@ -161,7 +158,9 @@ function_to_map = lambda x: tf.histogram_fixed_width(x, [-1.0,1.0], nbins = nbin
 for x_filt in x_filtered:
 	hist.append(tf.map_fn(function_to_map, x_filt))
 
-hist_features = tf.reshape(tf.transpose(tf.stack(hist), [1,2,0]), [-1,size_features], name = "Histogram_features")
+hist = tf.stack(hist)
+
+hist_features = tf.reshape(tf.transpose(hist, [1,2,0]), [-1,size_features], name = "Histogram_features")
 variable_summaries(hist_features)
 
 with tf.variable_scope('Dense1'):
@@ -248,8 +247,8 @@ print('   start session ...')
 sess = tf.InteractiveSession()
 
 merged = tf.summary.merge_all()
-train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
-                                      sess.graph)
+# train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
+#                                       sess.graph)
 
 print('   variable initialization ...')
 tf.global_variables_initializer().run()
@@ -258,38 +257,38 @@ tf.global_variables_initializer().run()
 # print(classic_histogram_gaussian(a, 1, nbins = 8, values_range = [0, 1], sigma = 0.6).eval())
 
 # Train
-print('   train ...')
-history = []
-for i in range(151): # in the test 20000
+# print('   train ...')
+# history = []
+# for i in range(151): # in the test 20000
   
-    # evry 100 batches, test the accuracy
-    if i%10 == 0 :
-        validation_batch_size = 10       # size of the batches
-        validation_accuracy = 0
-        data.validation_iterator = 0
+#     # evry 100 batches, test the accuracy
+#     if i%10 == 0 :
+#         validation_batch_size = 10       # size of the batches
+#         validation_accuracy = 0
+#         data.validation_iterator = 0
 
-        nb_iterations = 25
-        for _ in range( nb_iterations ) :
-            batch_validation = data.get_batch_validation(batch_size=validation_batch_size, random_flip_flop = True, random_rotate = True)
-            feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
-            validation_accuracy += accuracy.eval(feed_dict)
+#         nb_iterations = 25
+#         for _ in range( nb_iterations ) :
+#             batch_validation = data.get_batch_validation(batch_size=validation_batch_size, random_flip_flop = True, random_rotate = True)
+#             feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
+#             validation_accuracy += accuracy.eval(feed_dict)
           
-        validation_accuracy /= nb_iterations
-        print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
+#         validation_accuracy /= nb_iterations
+#         print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
 
-        history.append(validation_accuracy)
+#         history.append(validation_accuracy)
         
         
-    # regular training
-#    print('get batch ...')
-    batch_size = 50
-    batch = data.get_next_train_batch(batch_size, True, True)
-#    print('train ...')
-    feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.8}
-    summary, _ = sess.run([merged, train_step], feed_dict = feed_dict)
-    train_writer.add_summary(summary, i)
+#     # regular training
+# #    print('get batch ...')
+#     batch_size = 50
+#     batch = data.get_next_train_batch(batch_size, True, True)
+# #    print('train ...')
+#     feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.8}
+#     summary, _ = sess.run([merged, train_step], feed_dict = feed_dict)
+#     train_writer.add_summary(summary, i)
 
-    
+
 # history
 # print('   plot history')
 # with open("/tmp/history.txt", "w") as history_file:
@@ -303,25 +302,79 @@ for i in range(151): # in the test 20000
 # ph.plot_history("/tmp/history.txt")
 
 
-# final test
+# training the LDA classifier
+
+def extract_features_hist(h): 
+
+  nbins = h.shape[2]
+  nb_filters = h.shape[0]
+  batch_size = h.shape[1]
+  h = np.transpose(h, (1,0,2))
+  feat_size = nb_filters*(int(nbins/2) + 1)
+  features = np.zeros((batch_size, nb_filters, int(nbins/2) + 1))
+  for k in range(int(nbins/2)):
+    features[:, :, k] = (h[:, :, k] + h[:, :, nbins-k-1])/2
+
+  features[:, :, int(nbins/2)] = h[:, :, int(nbins/2)]
+  features = np.reshape(features, (batch_size, feat_size))
+  return(features)
+
+
+clf = LinearDiscriminantAnalysis()
+for i in range(501):
+  batch_size = 200
+  batch = data.get_next_train_batch(batch_size, False, True, True)
+  
+  feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.8}
+  h = hist.eval(feed_dict = feed_dict)
+
+  features = extract_features_hist(h)
+  
+  clf.fit(features, np.transpose(batch[1], (1,0))[0])
+  if (i%10 == 0):
+    print("Training batch " + str(i))
+
 print('   final test ...')
 test_batch_size = 10       # size of the batches
 test_accuracy = 0
 nb_iterations = 200
 data.test_iterator = 0
 for _ in range( nb_iterations ) :
-    batch_test = data.get_batch_test(batch_size=test_batch_size, random_flip_flop = True, random_rotate = True)
+    batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
     feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
-    test_accuracy += accuracy.eval(feed_dict)
+    h = hist.eval(feed_dict = feed_dict)
+    features = extract_features_hist(h)
+
+    y_pred = clf.predict(features)
+
+    test_accuracy += acc(y_pred, np.transpose(batch_test[1], (1,0))[0])
           
 test_accuracy /= nb_iterations
 print("   test accuracy %g"%test_accuracy)
+
+
+# final test
+# print('   final test ...')
+# test_batch_size = 10       # size of the batches
+# test_accuracy = 0
+# nb_iterations = 200
+# data.test_iterator = 0
+# for _ in range( nb_iterations ) :
+#     batch_test = data.get_batch_test(batch_size=test_batch_size, random_flip_flop = True, random_rotate = True)
+#     feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
+#     test_accuracy += accuracy.eval(feed_dict)
+          
+# test_accuracy /= nb_iterations
+# print("   test accuracy %g"%test_accuracy)
 
 
 #batch_test = data.get_batch_test(max_images=50)
 #print("   test accuracy %g"%accuracy.eval(feed_dict={x: batch_test[0], 
 #                                                     y_: batch_test[1], 
 #                                                     keep_prob: 1.0}))
+
+
+
 
 # done
 print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))

@@ -1,6 +1,5 @@
-id_deb = 16733
-id_fin = 17726
-
+id_deb = 58406
+id_fin = 58743
 with open("/home/nicolas/Documents/data_level_design/download", 'w') as file:
 	for i in range(id_deb, id_fin + 1):
 		file.write(" wget -O level_design_" + str(i) + 

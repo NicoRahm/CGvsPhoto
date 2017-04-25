@@ -394,7 +394,11 @@ with graph.as_default():
   with tf.name_scope('accuracy'):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+  with tf.name_scope('AUC'):
+    auc = tf.metrics.auc(y_, y_conv)
+
   tf.summary.scalar('accuracy', accuracy)
+  tf.summary.scalar('AUC', auc)
 
 
 # a = tf.constant([[[[1.0,1.0],[1.0,1.]]]])
@@ -430,12 +434,13 @@ with tf.Session(graph=graph) as sess:
   # Train
   print('   train ...')
   history = []
-  for i in range(6001): # in the test 20000
+  for i in range(0): # in the test 20000
     
       # evry 100 batches, test the accuracy
       if i%10 == 0 :
           validation_batch_size = 20       # size of the batches
           validation_accuracy = 0
+          validation_auc = 0
           data.validation_iterator = 0
           nb_iterations = 50
 
@@ -448,6 +453,7 @@ with tf.Session(graph=graph) as sess:
               batch_validation = data.get_batch_validation(batch_size=validation_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
               feed_dict = {x:batch_validation[0], y_: batch_validation[1], keep_prob: 1.0}
               validation_accuracy += accuracy.eval(feed_dict)
+              validation_auc += auc.eval(feed_dict)
 
           #     # Computing the mean histogram for each class
           #     hist_plot = hist.eval(feed_dict)
@@ -488,7 +494,9 @@ with tf.Session(graph=graph) as sess:
           # plt.show()
             
           validation_accuracy /= nb_iterations
+          validation_auc /= nb_iterations
           print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
+          print("     step %d, training AUC %g (%d validations tests)"%(i, validation_auc, validation_batch_size*nb_iterations))
 
           # # Plot all histograms for last batch
           # hist_plot = hist.eval(feed_dict)
@@ -546,15 +554,20 @@ with tf.Session(graph=graph) as sess:
   print('   final test ...')
   test_batch_size = 10       # size of the batches
   test_accuracy = 0
+  test_auc = 0
   nb_iterations = 200
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
+      test_auc += auc.eval(feed_dict)
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
+
+  test_auc /= nb_iterations
+  print("   test accuracy %g"%test_auc)
 
 
 #batch_test = data.get_batch_test(max_images=50)
