@@ -395,7 +395,7 @@ with graph.as_default():
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
   with tf.name_scope('AUC'):
-    auc = tf.metrics.auc(y_, y_conv)
+    auc = tf.metrics.auc(tf.transpose(y_, (1,0))[0], tf.transpose(y_conv, (1,0))[0])
 
   tf.summary.scalar('accuracy', accuracy)
   tf.summary.scalar('AUC', auc)
@@ -413,7 +413,7 @@ with tf.Session(graph=graph) as sess:
                                         sess.graph)
 
   tf.global_variables_initializer().run()
-  sess.run(tf.initialize_local_variables())
+  tf.local_variables_initializer().run()
   saver = tf.train.Saver()
   print('   variable initialization ...')
 
