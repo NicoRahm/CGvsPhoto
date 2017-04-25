@@ -411,7 +411,7 @@ with tf.Session(graph=graph) as sess:
   merged = tf.summary.merge_all()
   train_writer = tf.summary.FileWriter('/home/smg/v-nicolas/summaries',
                                         sess.graph)
-  
+
   tf.global_variables_initializer().run()
   sess.run(tf.initialize_local_variables())
   saver = tf.train.Saver()
@@ -553,10 +553,10 @@ with tf.Session(graph=graph) as sess:
 
 # final test
   print('   final test ...')
-  test_batch_size = 10       # size of the batches
+  test_batch_size = 200      # size of the batches
   test_accuracy = 0
   test_auc = 0
-  nb_iterations = 200
+  nb_iterations = 10
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
