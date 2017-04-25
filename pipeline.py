@@ -394,11 +394,11 @@ with graph.as_default():
   with tf.name_scope('accuracy'):
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-  with tf.name_scope('AUC'):
-    auc = tf.metrics.auc(tf.argmax(y_,1), tf.argmax(y_conv,1))
+  # with tf.name_scope('AUC'):
+  #   auc = tf.metrics.auc(tf.argmax(y_,1), tf.argmax(y_conv,1))
 
   tf.summary.scalar('accuracy', accuracy)
-  tf.summary.scalar('AUC', auc)
+  # tf.summary.scalar('AUC', auc)
 
 
 # a = tf.constant([[[[1.0,1.0],[1.0,1.]]]])

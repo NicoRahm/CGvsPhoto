@@ -403,7 +403,7 @@ class Database_loader :
                     if(n_class1 > int(nb_train/2)):
                         save = False
                 if save :
-                    exp.save(export_path + '/train/' + name_class + '/' + 'train' + str(i+j) + '.jpg')
+                    exp.save(export_path + '/train/' + name_class + '/' + 'train' + str(i) + '.jpg')
                     i+=1
 
             print(str(i) + " images exported")
@@ -430,7 +430,7 @@ class Database_loader :
                         save = False
                 if save:
                     exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
-                    exp.save(export_path + '/test/' + name_class + '/' + 'test' + str(i + j) + '.jpg')
+                    exp.save(export_path + '/test/' + name_class + '/' + 'test' + str(i) + '.jpg')
                     i+=1
             print(str(i) + " images exported")
 
@@ -457,7 +457,7 @@ class Database_loader :
 
                 if save:
                     exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
-                    exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i + j) + '.jpg')
+                    exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i) + '.jpg')
                     i+=1
             print(str(i) + " images exported")
 
