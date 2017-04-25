@@ -553,16 +553,17 @@ with tf.Session(graph=graph) as sess:
 
 # final test
   print('   final test ...')
-  test_batch_size = 2000      # size of the batches
+  test_batch_size = 200     # size of the batches
   test_accuracy = 0
   test_auc = 0
-  nb_iterations = 1
+  nb_iterations = 10
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
       test_auc += sess.run(auc, feed_dict)[0]
+      print(test_auc / (_ + 1))
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
