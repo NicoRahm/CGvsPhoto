@@ -475,7 +475,7 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
     batch_size = 50
     max_height = np.zeros((nb_images,))
     while(i < nb_images):
-        batch = data.get_next_train_batch(50, False)
+        batch = data.get_next_train_batch(batch_size, False)
         ind_batch = 0
         for image in batch[0]:
             image = np.reshape(image, [-1])
@@ -501,7 +501,7 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 
 if __name__ == "__main__":    
     #file_names = load_images('/home/nozick/Desktop/cg_pi_64', 100)
-#     a = Database_loader('/work/smg/v-nicolas/Test', 100, only_green=True)
+    a = Database_loader('/work/smg/v-nicolas/Test', 200, only_green=True)
 #     b = a.get_next_train(random_flip_flop=True,random_rotate=True)
 #     print(b[0].shape)
 # #    im = Image.fromarray(np.uint8(b[0]*255))
@@ -514,12 +514,12 @@ if __name__ == "__main__":
     # e = a.get_next_train_batch(10)
 #    print(e)
     
-    # a.export_database('/work/smg/v-nicolas/Test_DB_100', nb_train = 0, nb_test = 2000, nb_validation = 0)
+    a.export_database('/work/smg/v-nicolas/Test_DB_200', nb_train = 10000, nb_test = 2000, nb_validation = 1000)
 
-    # f = Database_loader('/work/smg/v-nicolas/Test_DB_100', 100, only_green=True)
+    f = Database_loader('/work/smg/v-nicolas/Test_DB_200', 200, only_green=True)
     # print("Loading batch")
-    # g = f.get_batch_validation(50, crop = False)
+    g = f.get_batch_validation(50, crop = False)
 
-    # print(g[0][0].shape)
+    print(g[0][0].shape)
 
-    compute_useless_images('/work/smg/v-nicolas/Test_DB_100', 100, nb_images = 1000, treshold = 0.5)
+    # compute_useless_images('/work/smg/v-nicolas/Test_DB_100', 100, nb_images = 1000, treshold = 0.5)
