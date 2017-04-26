@@ -379,6 +379,25 @@ class Database_loader :
 
 
     def export_database(self, export_path, nb_train, nb_test, nb_validation, proportion = 0.5):
+
+        train_dir = export_path + 'train/'
+        test_dir = export_path + 'test/'
+        validation_dir = export_path + 'validation/'
+        if not os.path.exists(export_path):
+            os.mkdir(export_path)
+
+            os.mkdir(train_dir)
+            os.mkdir(train_dir + 'CGG/')
+            os.mkdir(train_dir + 'Real/')
+
+            os.mkdir(test_dir)
+            os.mkdir(test_dir + 'CGG/')
+            os.mkdir(test_dir + 'Real/')
+
+            os.mkdir(validation_dir)
+            os.mkdir(validation_dir + 'CGG/')
+            os.mkdir(validation_dir + 'Real/')
+
         print("Exporting training set : " + str(nb_train) + " images to process...")
         batch_size = 100
         i = 0
@@ -526,7 +545,7 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 
 if __name__ == "__main__":    
     #file_names = load_images('/home/nozick/Desktop/cg_pi_64', 100)
-    a = Database_loader('/work/smg/v-nicolas/Test', 200, only_green=True)
+    a = Database_loader('/home/nicolas/Database/level-design_raise/', 200, only_green=True)
 #     b = a.get_next_train(random_flip_flop=True,random_rotate=True)
 #     print(b[0].shape)
 # #    im = Image.fromarray(np.uint8(b[0]*255))
@@ -539,9 +558,9 @@ if __name__ == "__main__":
     # e = a.get_next_train_batch(10)
 #    print(e)
     
-    a.export_database('/work/smg/v-nicolas/Test_DB_200', nb_train = 0, nb_test = 2000, nb_validation = 1000)
+    a.export_database('/home/nicolas/Database/level-design_raise_200/', nb_train = 10000, nb_test = 2000, nb_validation = 1000)
 
-    f = Database_loader('/work/smg/v-nicolas/Test_DB_200', 200, only_green=True)
+    f = Database_loader('/home/nicolas/Database/level-design_raise_200/', 200, only_green=True)
     # print("Loading batch")
     g = f.get_batch_validation(50, crop = False)
 

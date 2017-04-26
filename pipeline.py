@@ -148,11 +148,9 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
   
   # start process
 print('   tensorFlow version: ', tf.__version__)
-image_size = 200
-
-
 
 # load data
+image_size = 200
 print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
 # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
 # data = il.Database_loader('/media/nicolas/Home/nicolas/Documents/Stage 3A/Test', image_size, only_green=True)
@@ -437,7 +435,7 @@ with tf.Session(graph=graph) as sess:
   # Train
   print('   train ...')
   history = []
-  for i in range(6001): # in the test 20000
+  for i in range(0): # in the test 20000
     
       # evry 100 batches, test the accuracy
       if i%10 == 0 :
@@ -554,21 +552,21 @@ with tf.Session(graph=graph) as sess:
   print('   final test ...')
   test_batch_size = 100     # size of the batches
   test_accuracy = 0
-  test_auc = 0
+  # test_auc = 0
   nb_iterations = 20
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       batch_test = data.get_batch_test(batch_size=test_batch_size, crop = False, random_flip_flop = True, random_rotate = True)
       feed_dict = {x:batch_test[0], y_: batch_test[1], keep_prob: 1.0}
       test_accuracy += accuracy.eval(feed_dict)
-      test_auc += sess.run(auc, feed_dict)[0]
+      # test_auc += sess.run(auc, feed_dict)[0]
 
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
 
-  test_auc /= (nb_iterations - 1)
-  print("   test AUC %g"%test_auc)
+  # test_auc /= (nb_iterations - 1)
+  # print("   test AUC %g"%test_auc)
 
 
 #batch_test = data.get_batch_test(max_images=50)
