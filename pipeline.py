@@ -271,7 +271,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 
       # relu on the conv layer
-      h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, name = 'Activated 1')
+      h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, 
+                           name = 'Activated_1')
 
     # second conv 
     nb_conv2 = 64
@@ -282,7 +283,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
       with tf.name_scope('Bias'):
         b_conv2 = bias_variable([nb_conv2])
 
-      h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, name = 'Activated 2')
+      h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+                           name = 'Activated_2')
 
     # Histograms
     nbins = 10
@@ -319,10 +321,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
     with tf.variable_scope('Readout'):
       with tf.name_scope('Weights'):
         W_fc3 = weight_variable([1024, data.nb_class])
-        # variable_summaries(W_fc3)
       with tf.name_scope('Bias'):
         b_fc3 = bias_variable([data.nb_class])
-        # variable_summaries(b_fc3)
       y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
 
 
@@ -376,9 +376,9 @@ def train_classifier(database_path, image_size, nb_train_batch,
       with tf.variable_scope('Conv_visualization'):
         tf.summary.image('conv1/filters', W_conv1[:,:,:,0:1])
         tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
-      tf.summary.histogram('Activated Conv 1', h_conv1)
-      tf.summary.histogram('Activated Conv 2', h_conv2)
-      tf.summary.histogram('Activated Fully Connected', h_fc1)
+      tf.summary.histogram('Activated_Conv_1', h_conv1)
+      tf.summary.histogram('Activated_Conv_2', h_conv2)
+      tf.summary.histogram('Activated_Fully_Connected', h_fc1)
 
 
   # start a session
