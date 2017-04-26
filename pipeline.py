@@ -222,7 +222,7 @@ def validation_testing(x, y_, keep_prob, accuracy, hist, nbins, it,
 
 
 def train_classifier(database_path, image_size, nb_train_batch,
-                     nb_test_batch, nb_validation_batch, summary_folder, 
+                     nb_test_batch, nb_validation_batch, 
                      batch_size = 50, clf = None, all_summaries = False):
 
   # start process
@@ -238,9 +238,9 @@ def train_classifier(database_path, image_size, nb_train_batch,
   dir_summaries = '/home/smg/v-nicolas/summaries/'
 
   folder_ckpt = '/work/smg/v-nicolas/weights/'
-  filename = input("   Choose a file name for the weigths : ")
+  run_name = input("   Choose a name for the run : ")
 
-  path_save = folder_ckpt + filename
+  path_save = folder_ckpt + run_name
 
 
   print('   create model ...')
@@ -387,11 +387,11 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
     merged = tf.summary.merge_all()
 
-    if not os.path.exists(dir_summaries + summary_folder):
-      os.mkdir(dir_summaries + summary_folder)
+    if not os.path.exists(dir_summaries + run_name):
+      os.mkdir(dir_summaries + run_name)
 
 
-    train_writer = tf.summary.FileWriter(dir_summaries + summary_folder,
+    train_writer = tf.summary.FileWriter(dir_summaries + run_name,
                                          sess.graph)
 
     tf.global_variables_initializer().run()
@@ -465,10 +465,9 @@ if __name__ == '__main__':
   nb_train_batch = 2000
   nb_test_batch = 40
   nb_validation_batch = 20
-  summary_folder = "200x200_retrain_1"
 
   train_classifier(database_path, image_size, nb_train_batch,
-                   nb_test_batch, nb_validation_batch, summary_folder, 
+                   nb_test_batch, nb_validation_batch, 
                    batch_size = 50, clf = None, all_summaries = False)
 
 
