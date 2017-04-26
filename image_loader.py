@@ -556,8 +556,8 @@ if __name__ == "__main__":
                       nb_test = 2000, 
                       nb_validation = 1000)
 
-    f = Database_loader(source_db, image_size, only_green=True)
-    # print("Loading batch")
+    f = Database_loader(target_db, image_size, only_green=True)
+
     g = f.get_batch_validation(50, crop = False)
 
     print(g[0][0].shape)

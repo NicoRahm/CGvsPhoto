@@ -62,7 +62,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 
   print('   create model ...')
-  
+
   # input layer. One entry is a float size x size, 3-channels image. 
   # None means that the number of such vector can be of any lenght.
   with tf.name_scope('Input_Data'):
@@ -196,8 +196,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/home/nicolas/Database/level-design_raise_200'
-  image_size = 200
+  database_path = '/home/nicolas/Database/level-design_raise_100'
+  image_size = 100
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,

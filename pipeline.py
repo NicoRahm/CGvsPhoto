@@ -5,7 +5,6 @@ clear = lambda: os.system('clear')
 clear()
 import time
 import random
-# import plot_history as ph
 import image_loader as il
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -21,10 +20,6 @@ print("\n   random initialisation ...")
 random_seed = int(time.time() % 10000 ) 
 random.seed(random_seed)  # for reproducibility
 print('   random seed =', random_seed)
-
-
-
-
 
 
 def variable_summaries(var):
@@ -147,15 +142,15 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
 
 
 def validation_testing(x, y_, keep_prob, accuracy, hist, nbins, it,
-                       data, nb_iteration = 20, batch_size = 50,
+                       data, nb_iterations = 20, batch_size = 50,
                        plot_histograms = False, range_hist = [0.,1.], 
                        selected_hist_nb = 4):
 
-  validation_batch_size = batch_size       # size of the batches
+  validation_batch_size = batch_size 
   validation_accuracy = 0
   # validation_auc = 0
   data.validation_iterator = 0
-  nb_iterations = 50
+
   if plot_histograms:
     nb_CGG = 0
     hist_CGG = [np.zeros((nbins+1,)) for i in range(selected_hist_nb)]
@@ -416,7 +411,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
         if i%10 == 0 :
             
             validation_testing(x, y_, keep_prob, accuracy, hist, nbins, i,
-                               data, nb_iteration = nb_validation_batch, 
+                               data, nb_iterations = nb_validation_batch, 
                                batch_size = batch_size, 
                                plot_histograms = False)
             
@@ -430,8 +425,9 @@ def train_classifier(database_path, image_size, nb_train_batch,
         # Saving weights every 100 batches
         if i%100 == 0:
           path_save_batch = path_save + str(i) + ".ckpt"
-          print('   saving weights in file : ' + path_save)
+          print('   saving weights in file : ' + path_save_batch)
           saver.save(sess, path_save_batch)
+          print('   OK')
 
   # final test
     print('   final test ...')
