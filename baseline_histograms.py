@@ -38,7 +38,8 @@ def extract_features_hist(h):
   # print('Rank : ' + str(np.linalg.matrix_rank(features)))
   return(features)
 
-def train_classifier(database_path, image_size, clf = None):
+def train_classifier(database_path, image_size, nb_train_batch,
+                     nb_test_batch, batch_size = 50, clf = None):
 
   # computation time tick
   start_clock = time.clock()
@@ -54,25 +55,23 @@ def train_classifier(database_path, image_size, clf = None):
   print('   tensorFlow version: ', tf.__version__)
 
   # load data
-  image_size = 200
-  print('   import data : image_size = ' + str(image_size) + 'x' + str(image_size) + '...')
-  # data = il.Database_loader('/home/nozick/Desktop/database/cg_pi_64/test5', image_size, only_green=True)
-  data = il.Database_loader('/home/nicolas/Documents/Test_DB_200', image_size, proportion = 1, only_green=True)
-  # data = il.Database_loader('/home/nicolas/Documents/Test', image_size, proportion = 1, only_green=True)
-
-
+  print('   import data : image_size = ' + str(image_size) + 'x' + 
+        str(image_size) + '...')
+  data = il.Database_loader(database_path, image_size, 
+                            proportion = 1, only_green=True)
 
 
   print('   create model ...')
+  
   # input layer. One entry is a float size x size, 3-channels image. 
   # None means that the number of such vector can be of any lenght.
   with tf.name_scope('Input_Data'):
     x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
 
-  # reshape the input data:
-  # size,size: width and height
-  # 1: color channels
-  # -1 :  ???
+    # reshape the input data:
+    # size,size: width and height
+    # 1: color channels
+    # -1 :  ???
     x_image = tf.reshape(x, [-1,image_size, image_size, 1])
     with tf.name_scope('Image_Visualization'):
       tf.summary.image('Input_Data', x_image)
@@ -141,9 +140,9 @@ def train_classifier(database_path, image_size, clf = None):
 
   hist = tf.stack(hist)
 
-  # # start a session
-  # print('   start session ...')
-  # sess = tf.InteractiveSession()
+  # start a session
+  print('   start session ...')
+  tf.InteractiveSession()
 
   print('   variable initialization ...')
   tf.global_variables_initializer().run()
@@ -152,10 +151,9 @@ def train_classifier(database_path, image_size, clf = None):
   if clf == None:
     clf = LinearDiscriminantAnalysis()
 
-  for i in range(101):
+  for i in range(nb_train_batch):
     if (i%10 == 0):
       print("Training batch " + str(i))
-    batch_size = 100
     batch = data.get_next_train_batch(batch_size, False, True, True)
     
     feed_dict = {x: batch[0]}
@@ -167,9 +165,9 @@ def train_classifier(database_path, image_size, clf = None):
     
 
   print('   final test ...')
-  test_batch_size = 10       # size of the batches
+  test_batch_size = batch_size      # size of the batches
   test_accuracy = 0
-  nb_iterations = 200
+  nb_iterations = nb_test_batch
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       batch_test = data.get_batch_test(batch_size=test_batch_size, 
@@ -194,11 +192,15 @@ def train_classifier(database_path, image_size, clf = None):
 
   return(clf)
 
+
+
 if __name__ == '__main__': 
 
-  database_path = '/home/nicolas/Documents/Test_DB_200'
+  database_path = '/home/nicolas/Database/level-design_raise_200'
   image_size = 200
 
   clf = train_classifier(database_path = database_path, 
-                         image_size = image_size)
-
+                         image_size = image_size,
+                         nb_train_batch = 200,
+                         nb_test_batch = 40,
+                         batch_size = 50)
