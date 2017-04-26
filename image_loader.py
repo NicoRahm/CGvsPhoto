@@ -481,7 +481,31 @@ class Database_loader :
             print(str(i) + " images exported")
 
 
-            
+
+
+
+def extract_all_subimages(image, subimage_size):
+
+    subimages = []
+    width = image.size[0]
+    height = image.size[1]
+
+    current_height = 0
+    
+    while current_height + subimage_size < height: 
+        current_width = 0
+        while current_width + subimage_size < width: 
+            box = (current_width, current_height, 
+                   current_width + subimage_size, 
+                   current_height + subimage_size)
+            subimages.append(np.asarray(image.crop(box))[:,:,1].astype(np.float32)/255)
+
+            current_width += subimage_size
+
+        current_height += subimage_size
+    return(subimages)
+
+          
 def get_image_filename_from_dir(directory_path) :
     # file extension accepted as image data
     valid_image_extension = [".jpg",".gif",".png",".tga",".tif"]

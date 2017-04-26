@@ -21,6 +21,12 @@ random_seed = int(time.time() % 10000 )
 random.seed(random_seed)  # for reproducibility
 print('   random seed =', random_seed)
 
+folder_ckpt = '/work/smg/v-nicolas/weights/'
+dir_summaries = '/home/smg/v-nicolas/summaries/'
+
+
+# tool functions
+print('   python function setup')
 
 def variable_summaries(var):
   """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
@@ -34,8 +40,6 @@ def variable_summaries(var):
     tf.summary.scalar('min', tf.reduce_min(var))
     tf.summary.histogram('histogram', var)
 
-# tool functions
-print('   python function setup')
 def weight_variable(shape, seed = None):
   initial = tf.truncated_normal(shape, stddev=0.5, seed = random_seed)
   return tf.Variable(initial)
@@ -230,9 +234,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   data = il.Database_loader(database_path, image_size, 
                             proportion = 1, only_green=True)
 
-  dir_summaries = '/home/smg/v-nicolas/summaries/'
-
-  folder_ckpt = '/work/smg/v-nicolas/weights/'
+  
   run_name = input("   Choose a name for the run : ")
 
   path_save = folder_ckpt + run_name
@@ -415,7 +417,6 @@ def train_classifier(database_path, image_size, nb_train_batch,
                                batch_size = batch_size, 
                                plot_histograms = False)
             
-            
         # regular training
         batch = data.get_next_train_batch(batch_size, False, True, True)
         feed_dict = {x: batch[0], y_: batch[1], keep_prob: 0.85}
@@ -453,6 +454,19 @@ def train_classifier(database_path, image_size, nb_train_batch,
   print("   computation time (real):",time.strftime("%H:%M:%S", time.gmtime(time.time()-start_time)))
   print('   done.')
 
+  return(graph)
+
+def test_all_images(graph): 
+
+  print('   start session ...')
+  with tf.Session(graph=graph) as sess:
+    saver = tf.train.Saver()
+    print('   variable initialization ...')
+    tf.global_variables_initializer().run()
+    tf.local_variables_initializer().run()
+    file_to_restore = input("Name of the file to restore (Directory : " + 
+                            folder_ckpt + ') : ')
+    saver.restore(sess, folder_ckpt + file_to_restore)
 
 if __name__ == '__main__':
 
@@ -462,19 +476,9 @@ if __name__ == '__main__':
   nb_test_batch = 40
   nb_validation_batch = 20
 
-  train_classifier(database_path, image_size, nb_train_batch,
-                   nb_test_batch, nb_validation_batch, 
-                   batch_size = 50, clf = None, all_summaries = False)
+  clf = train_classifier(database_path, image_size, nb_train_batch,
+                         nb_test_batch, nb_validation_batch, 
+                         batch_size = 50, clf = None, 
+                         all_summaries = False)
 
-
-
-
-
-
-
-
-
-
-
-
- 
+  test_all_images(clf)
