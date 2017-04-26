@@ -146,7 +146,7 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
 
 
 
-def validation_testing(x, y_, keep_prob, accuracy, hist, nbins,
+def validation_testing(x, y_, keep_prob, accuracy, hist, nbins, it,
                        data, nb_iteration = 20, batch_size = 50,
                        plot_histograms = False, range_hist = [0.,1.], 
                        selected_hist_nb = 4):
@@ -214,7 +214,7 @@ def validation_testing(x, y_, keep_prob, accuracy, hist, nbins,
     plt.show()
 
   validation_accuracy /= nb_iterations
-  print("     step %d, training accuracy %g (%d validations tests)"%(i, validation_accuracy, validation_batch_size*nb_iterations))
+  print("     step %d, training accuracy %g (%d validations tests)"%(it, validation_accuracy, validation_batch_size*nb_iterations))
 
   return(validation_accuracy)
 
@@ -415,7 +415,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
         # evry 100 batches, test the accuracy
         if i%10 == 0 :
             
-            validation_testing(x, y_, keep_prob, accuracy, hist, nbins,
+            validation_testing(x, y_, keep_prob, accuracy, hist, nbins, i,
                                data, nb_iteration = nb_validation_batch, 
                                batch_size = batch_size, 
                                plot_histograms = False)

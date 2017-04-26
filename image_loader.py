@@ -544,23 +544,19 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 
 
 if __name__ == "__main__":    
-    #file_names = load_images('/home/nozick/Desktop/cg_pi_64', 100)
-    a = Database_loader('/home/nicolas/Database/level-design_raise/', 200, only_green=True)
-#     b = a.get_next_train(random_flip_flop=True,random_rotate=True)
-#     print(b[0].shape)
-# #    im = Image.fromarray(np.uint8(b[0]*255))
-# #    im.save(a.dir+'/caca_'+str(a.train_iterator -1)+'.jpg')
 
-#     c = a.get_next_test()
-#     d = a.get_next_validation()
-    
-    # print('Loading batch')
-    # e = a.get_next_train_batch(10)
-#    print(e)
-    
-    a.export_database('/home/nicolas/Database/level-design_raise_200/', nb_train = 10000, nb_test = 2000, nb_validation = 1000)
+    source_db = '/home/nicolas/Database/level-design_raise/'
+    image_size = 100
+    target_db = '/home/nicolas/Database/level-design_raise_100/'
 
-    f = Database_loader('/home/nicolas/Database/level-design_raise_200/', 200, only_green=True)
+    a = Database_loader(source_db, image_size, only_green=True)
+    
+    a.export_database(target_db, 
+                      nb_train = 10000, 
+                      nb_test = 2000, 
+                      nb_validation = 1000)
+
+    f = Database_loader(source_db, image_size, only_green=True)
     # print("Loading batch")
     g = f.get_batch_validation(50, crop = False)
 
