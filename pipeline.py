@@ -408,159 +408,9 @@ class Model:
 
   def train(self, nb_train_batch, nb_test_batch, 
             nb_validation_batch, batch_size = 50):
-
-    # # start process
-    # print('   tensorFlow version: ', tf.__version__)
-
-    # # load data
-    # print('   import data : image_size = ' + 
-    #       str(image_size) + 'x' + str(image_size) + '...')
-
-    # data = il.Database_loader(database_path, image_size, 
-    #                           proportion = 1, only_green=True)
-
     
     run_name = input("   Choose a name for the run : ")
     path_save = folder_ckpt + run_name
-
-
-    # print('   create model ...')
-    # # input layer. One entry is a float size x size, 3-channels image. 
-    # # None means that the number of such vector can be of any lenght.
-
-    # graph = tf.Graph()
-
-    # with graph.as_default():
-
-    #   with tf.name_scope('Input_Data'):
-    #     x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
-
-    #     # reshape the input data:
-    #     x_image = tf.reshape(x, [-1,image_size, image_size, 1])
-        
-
-    #   # first conv net layer
-    #   nb_conv1 = 32
-    #   filter_size1 = 3
-
-    #   with tf.name_scope('Conv1'):
-
-    #     with tf.name_scope('Weights'):
-    #       W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
-    #     with tf.name_scope('Bias'):
-    #       b_conv1 = bias_variable([nb_conv1])
-
-
-    #     # relu on the conv layer
-    #     h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, 
-    #                          name = 'Activated_1')
-
-    #   # second conv 
-    #   nb_conv2 = 64
-    #   filter_size2 = 3
-    #   with tf.name_scope('Conv2'):
-    #     with tf.name_scope('Weights'):
-    #       W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-    #     with tf.name_scope('Bias'):
-    #       b_conv2 = bias_variable([nb_conv2])
-
-    #     h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-    #                          name = 'Activated_2')
-
-    #   # Histograms
-    #   nbins = 10
-    #   nb_filters = nb_conv2
-    #   size_hist = (nbins + 1)*nb_filters
-    #   range_hist = [0,1]
-    #   sigma = 0.07
-
-    #   # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
-
-    #   with tf.name_scope('Gaussian_Histogram'): 
-    #     hist = classic_histogram_gaussian(h_conv2, k = nb_filters, nbins = nbins, values_range = range_hist, sigma = sigma)
-    #     tf.summary.tensor_summary('hist', hist)
-
-    #   h_pool_flat = tf.reshape(hist, [-1, size_hist], name = "Flatten_Hist")
-
-
-    #   # Densely Connected Layer
-    #   # we add a fully-connected layer with 1024 neurons 
-    #   with tf.variable_scope('Dense1'):
-    #     with tf.name_scope('Weights'):
-    #       W_fc1 = weight_variable([size_hist, 1024])
-    #     with tf.name_scope('Bias'):
-    #       b_fc1 = bias_variable([1024])
-    #     # put a relu
-    #     h_fc1 = tf.nn.relu(tf.matmul(h_pool_flat, W_fc1) + b_fc1, name = 'activated')
-
-    #   # dropout
-    #   with tf.name_scope('Dropout1'):
-    #     keep_prob = tf.placeholder(tf.float32)
-    #     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-
-    #   # readout layer
-    #   with tf.variable_scope('Readout'):
-    #     with tf.name_scope('Weights'):
-    #       W_fc3 = weight_variable([1024, data.nb_class])
-    #     with tf.name_scope('Bias'):
-    #       b_fc3 = bias_variable([data.nb_class])
-    #     y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
-
-
-    #   # support for the learning label
-    #   y_ = tf.placeholder(tf.float32, [None, data.nb_class])
-
-
-
-
-    #   # Define loss (cost) function and optimizer
-    #   print('   setup loss function and optimizer ...')
-
-    #   # softmax to have normalized class probabilities + cross-entropy
-    #   with tf.name_scope('cross_entropy'):
-
-    #     softmax_cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels = y_, logits = y_conv)
-    #     with tf.name_scope('total'):
-    #       cross_entropy_mean = tf.reduce_mean(softmax_cross_entropy)
-
-    #   tf.summary.scalar('cross_entropy', cross_entropy_mean)
-
-    #   with tf.name_scope('train'):
-    #     train_step = tf.train.AdamOptimizer(5e-4).minimize(cross_entropy_mean)
-
-    #   print('   test ...')
-    #   # 'correct_prediction' is a function. argmax(y, 1), here 1 is for the axis number 1
-    #   correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
-
-    #   # 'accuracy' is a function: cast the boolean prediction to float and average them
-    #   with tf.name_scope('accuracy'):
-    #     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    #     tf.summary.scalar('accuracy', accuracy)
-
-    #   # with tf.name_scope('AUC'):
-    #   #   auc = tf.metrics.auc(tf.argmax(y_,1), tf.argmax(y_conv,1))
-    #   #   tf.summary.scalar('AUC', auc)
-
-    #   if all_summaries:
-    #     with tf.name_scope('Image_Visualization'):
-    #       tf.summary.image('Input_Data', x_image)
-    #     with tf.name_scope('Weights'):
-    #       variable_summaries(W_conv1)
-    #       variable_summaries(W_conv2)
-    #       variable_summaries(W_fc1)
-    #       variable_summaries(W_fc3)
-    #     with tf.name_scope('Bias'):
-    #       variable_summaries(b_conv1)
-    #       variable_summaries(b_conv2)
-    #       variable_summaries(b_fc1)  
-    #       variable_summaries(b_fc3)  
-    #     with tf.variable_scope('Conv_visualization'):
-    #       tf.summary.image('conv1/filters', W_conv1[:,:,:,0:1])
-    #       tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
-    #     tf.summary.histogram('Activated_Conv_1', h_conv1)
-    #     tf.summary.histogram('Activated_Conv_2', h_conv2)
-    #     tf.summary.histogram('Activated_Fully_Connected', h_fc1)
-
 
     # start a session
     print('   start session ...')
@@ -718,7 +568,7 @@ class Model:
 if __name__ == '__main__':
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/Test_DB_100/'
+    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
