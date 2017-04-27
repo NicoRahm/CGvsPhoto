@@ -412,12 +412,12 @@ class Database_loader :
                 save = True
                 exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
                 if batch[1][j][0] == 0.:
-                    name_class = self.image_class[0]
+                    name_class = self.image_class[1]
                     n_class0 += 1
                     if(n_class0 > int(nb_train/2)):
                         save = False
                 else:
-                    name_class = self.image_class[1]
+                    name_class = self.image_class[0]
                     n_class1 += 1
                     if(n_class1 > int(nb_train/2)):
                         save = False
@@ -438,12 +438,12 @@ class Database_loader :
             for j in range(batch_size):
                 save = True
                 if batch[1][j][0] == 0.:
-                    name_class = self.image_class[0]
+                    name_class = self.image_class[1]
                     n_class0 += 1
                     if(n_class0 > int(nb_test/2)):
                         save = False
                 else:
-                    name_class = self.image_class[1]
+                    name_class = self.image_class[0]
                     n_class1 += 1
                     if(n_class1 > int(nb_test/2)):
                         save = False
@@ -464,12 +464,12 @@ class Database_loader :
             for j in range(batch_size):
                 save = True
                 if batch[1][j][0] == 0.:
-                    name_class = self.image_class[0]
+                    name_class = self.image_class[1]
                     n_class0 += 1
                     if(n_class0 > int(nb_validation/2)):
                         save = False
                 else:
-                    name_class = self.image_class[1]
+                    name_class = self.image_class[0]
                     n_class1 += 1
                     if(n_class1 > int(nb_validation/2)):
                         save = False
@@ -481,30 +481,94 @@ class Database_loader :
             print(str(i) + " images exported")
 
 
+class Test_loader: 
+
+    def __init__(self, directory, subimage_size, only_green = True):
+
+        self.dir = directory          # directory with the train / test / validation sudirectories
+        self.subimage_size = subimage_size              # size of the sub image that should be croped
+        self.nb_channels = 3          # return only the green channel of the images
+        if(only_green == True) :
+            self.nb_channels = 1
+        self.iterator = 0        # iterator over the test images
+        self.validation_iterator = 0  # iterator over the validation images
+        self.seed = 42
+
+        self.image_class = self.get_immediate_subdirectories(directory)
+        self.nb_class = len(self.image_class)
+        print('     number of classes :', self.nb_class, '   ', self.image_class)
+
+        self.file_test = self.load_images_in_dir(self.dir,self.image_class)
+        
+
+    def get_immediate_subdirectories(self,a_dir) :
+        # return the list of sub directories of a directory
+        return [name for name in os.listdir(a_dir)
+                if os.path.isdir(os.path.join(a_dir, name))]
 
 
+    def load_images_in_dir(self, dir_name, image_class) :
 
-def extract_all_subimages(image, subimage_size):
+        valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG"]
 
-    subimages = []
-    width = image.size[0]
-    height = image.size[1]
+        file_list = []
 
-    current_height = 0
-    
-    while current_height + subimage_size < height: 
-        current_width = 0
-        while current_width + subimage_size < width: 
-            box = (current_width, current_height, 
-                   current_width + subimage_size, 
-                   current_height + subimage_size)
-            subimages.append(np.asarray(image.crop(box))[:,:,1].astype(np.float32)/255)
+        for c in image_class :
+            nb_image_per_class = 0
+            file_list_by_class = []
+            for filename in os.listdir(dir_name+'/'+c):
+                # check if the file is an image
+                extension = os.path.splitext(filename)[1]
+                if extension.lower() in valid_image_extension:
+                    file_list_by_class.append(filename)
 
-            current_width += subimage_size
+            for i in range(int(len(file_list_by_class))):
+                file_list.append((file_list_by_class[i],c))
+                nb_image_per_class += 1
+            print('    ',c,nb_image_per_class,'images loaded')
+        random.seed(self.seed)
+        random.shuffle(file_list)
+        return file_list
 
-        current_height += subimage_size
-    return(subimages)
 
+    def extract_subimages(self, image_file, subimage_size):
+
+        image = Image.open(self.dir + image_file)
+        subimages = []
+        width = image.size[0]
+        height = image.size[1]
+
+        current_height = 0
+        
+        while current_height + subimage_size < height: 
+            current_width = 0
+            while current_width + subimage_size < width: 
+                box = (current_width, current_height, 
+                       current_width + subimage_size, 
+                       current_height + subimage_size)
+                subimages.append(np.asarray(image.crop(box))[:,:,1].astype(np.float32)/255)
+
+                current_width += subimage_size
+
+            current_height += subimage_size
+
+        nb_subimages = len(subimages)
+        print('Image of size ' + str(width) + 'x' + str(height) + 
+              ' cropped at ' + str(subimage_size) + 'x' + str (subimage_size) + 
+              ' : ' + str(nb_subimages) + ' outputed subimages.')
+        return((np.reshape(np.array(subimages), (nb_subimages, subimage_size, subimage_size, 1)), width, height))
+
+    def get_next_image(self):
+
+        if self.iterator >= len(self.file_test):
+            self.iterator = 0
+        labeled_image = self.file_test[self.iterator]
+        image_file = labeled_image[1] + '/' + labeled_image[0]
+        self.iterator += 1
+
+        subimages, width, height = self.extract_subimages(image_file, self.subimage_size)
+
+        return((subimages, labeled_image[1], width, height))
           
 def get_image_filename_from_dir(directory_path) :
     # file extension accepted as image data
@@ -573,17 +637,22 @@ if __name__ == "__main__":
     image_size = 100
     target_db = '/home/nicolas/Database/level-design_raise_100/'
 
-    a = Database_loader(source_db, image_size, only_green=True)
+    # a = Database_loader(source_db, image_size, only_green=True)
     
-    a.export_database(target_db, 
-                      nb_train = 10000, 
-                      nb_test = 2000, 
-                      nb_validation = 1000)
+    # a.export_database(target_db, 
+    #                   nb_train = 10000, 
+    #                   nb_test = 2000, 
+    #                   nb_validation = 1000)
 
-    f = Database_loader(target_db, image_size, only_green=True)
+    # f = Database_loader(target_db, image_size, only_green=True)
 
-    g = f.get_batch_validation(50, crop = False)
+    # g = f.get_batch_validation(50, crop = False)
 
-    print(g[0][0].shape)
+    # print(g[0][0].shape)
 
     # compute_useless_images('/work/smg/v-nicolas/Test_DB_100', 100, nb_images = 1000, treshold = 0.5)
+    
+    source_test = '/home/nicolas/Database/level-design_raise/test/'
+    test = Test_loader(source_test, subimage_size = 100)
+
+    test.get_next_image()

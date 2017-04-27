@@ -204,3 +204,5 @@ if __name__ == '__main__':
                          nb_train_batch = 200,
                          nb_test_batch = 40,
                          batch_size = 50)
+
+  
