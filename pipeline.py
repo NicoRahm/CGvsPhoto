@@ -524,7 +524,6 @@ class Model:
         prediction = data_test.image_class[int(np.round(prediction/batch_size))]
         if(label == prediction):
           accuracy+= 1
-
         print(prediction, label)
         self.image_visualization(path_save = visualization_dir + test_name, 
                                  file_name = str(i), 
@@ -573,7 +572,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 6000
+  nb_train_batch = 15000
   nb_test_batch = 40
   nb_validation_batch = 20
 
@@ -587,7 +586,7 @@ if __name__ == '__main__':
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
+    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 100, show = False)
+                        nb_images = 720, show = False)

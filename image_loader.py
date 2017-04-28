@@ -17,7 +17,7 @@ import random
 
 class Database_loader :
 
-    def __init__(self, directory, size, proportion = 1.0, seed=42, only_green=True) :
+    def __init__(self, directory, size, proportion = 1.0, seed=42, only_green=True, rand_crop = True) :
 
         # data init
         self.dir = directory          # directory with the train / test / validation sudirectories
@@ -29,12 +29,12 @@ class Database_loader :
         self.file_train = []          # list of the train images : tuple (image name / class)
         self.file_test = []           # list of the test images : tuple (image name / class)
         self.file_validation = []     # list of the validation images : tuple (image name / class)
-        self.image_class = []         # list of the class (label) used in the process
+        self.image_class = ['Real', 'CGG']         # list of the class (label) used in the process
         self.nb_class = 0
         self.train_iterator = 0       # iterator over the train images
         self.test_iterator = 0        # iterator over the test images
         self.validation_iterator = 0  # iterator over the validation images
-
+        self.rand_crop = rand_crop
         self.load_images(seed)        # load the data base
 
 
@@ -94,7 +94,7 @@ class Database_loader :
             sys.exit(0)
 
         # count number of classes
-        self.image_class = self.get_immediate_subdirectories(train_dir_name)
+        # self.image_class = self.get_immediate_subdirectories(train_dir_name)
         self.nb_class = len(self.image_class)
         print('     number of classes :', self.nb_class, '   ', self.image_class)
 
@@ -117,7 +117,7 @@ class Database_loader :
         #print("\n     loading done.")
 
 
-    def get_next_train(self, crop = True, random_flip_flop = False, random_rotate = False, verbose = False) :
+    def get_next_train(self, crop = True, rand_crop = True, random_flip_flop = False, random_rotate = False, verbose = False) :
 
         # load next image (size should be big enough)
         image = []
@@ -150,8 +150,13 @@ class Database_loader :
                 
         # crop image
         if crop:
-            crop_width  = random.randint(0, image.size[0]-self.size-1)
-            crop_height = random.randint(0, image.size[1]-self.size-1)
+            if rand_crop: 
+                crop_width  = random.randint(0, image.size[0]-self.size-1)
+                crop_height = random.randint(0, image.size[1]-self.size-1)
+            else: 
+                crop_width = 0
+                crop_height = 0
+
             box = (crop_width, crop_height, crop_width+self.size, crop_height+self.size)
     #        print('crop ', box)
             image = image.crop(box)
@@ -184,7 +189,7 @@ class Database_loader :
         #image = image.reshape(1, self.size, self.size, 3)
         image = image.reshape(self.size, self.size, self.nb_channels)
 
-        # buils class label
+        # build class label
         label = np.zeros(len(self.image_class))
         pos = self.image_class.index(data[1])
         label[pos] = 1.0
@@ -198,14 +203,14 @@ class Database_loader :
         batch_image = np.empty([batch_size, self.size, self.size, self.nb_channels])
         batch_label = np.empty([batch_size, self.nb_class])
         for i in range(0,batch_size) :
-            data = self.get_next_train(crop, random_flip_flop,random_rotate, verbose=False)
+            data = self.get_next_train(crop, self.rand_crop, random_flip_flop,random_rotate, verbose=False)
             batch_image[i] = data[0]
             batch_label[i] = data[1]
 
         return (batch_image.astype(np.float32),batch_label)
 
         
-    def get_next_test(self, crop = True, random_flip_flop = False, random_rotate = False, verbose = False) :
+    def get_next_test(self, crop = True, rand_crop = True, random_flip_flop = False, random_rotate = False, verbose = False) :
 
         
         # load next image (size should be big enough)
@@ -239,8 +244,13 @@ class Database_loader :
 
         # crop image
         if crop:
-            crop_width  = random.randint(0, image.size[0]-self.size-1)
-            crop_height = random.randint(0, image.size[1]-self.size-1)
+            if rand_crop: 
+                crop_width  = random.randint(0, image.size[0]-self.size-1)
+                crop_height = random.randint(0, image.size[1]-self.size-1)
+            else: 
+                crop_width = 0 
+                crop_height = 0
+
             box = (crop_width, crop_height, crop_width+self.size, crop_height+self.size)
             image = image.crop(box)
 
@@ -285,14 +295,14 @@ class Database_loader :
         batch_image = np.empty([batch_size, self.size, self.size, self.nb_channels])
         batch_label = np.empty([batch_size, self.nb_class])
         for i in range(0,batch_size) :
-            data = self.get_next_test(crop, random_flip_flop,random_rotate)
+            data = self.get_next_test(crop, self.rand_crop, random_flip_flop,random_rotate)
             batch_image[i] = data[0]
             batch_label[i] = data[1]
 
         return (batch_image.astype(np.float32),batch_label)
       
 
-    def get_next_validation(self, crop = True, random_flip_flop = False, random_rotate = False, verbose = False) :
+    def get_next_validation(self, crop = True, rand_crop = True, random_flip_flop = False, random_rotate = False, verbose = False) :
 
         
         # load next image (size should be big enough)
@@ -326,8 +336,13 @@ class Database_loader :
 
         if crop:
             # crop image
-            crop_width  = random.randint(0, image.size[0]-self.size-1)
-            crop_height = random.randint(0, image.size[1]-self.size-1)
+            if rand_crop: 
+                crop_width  = random.randint(0, image.size[0]-self.size-1)
+                crop_height = random.randint(0, image.size[1]-self.size-1)
+            else: 
+                crop_width = 0
+                crop_height = 0
+
             box = (crop_width, crop_height, crop_width+self.size, crop_height+self.size)
             image = image.crop(box)
 
@@ -371,7 +386,7 @@ class Database_loader :
         batch_image = np.empty([batch_size, self.size, self.size, self.nb_channels])
         batch_label = np.empty([batch_size, self.nb_class])
         for i in range(0,batch_size) :
-            data = self.get_next_validation(crop, random_flip_flop,random_rotate, verbose=False)
+            data = self.get_next_validation(crop, self.rand_crop, random_flip_flop,random_rotate, verbose=False)
             batch_image[i] = data[0]
             batch_label[i] = data[1]
 
@@ -494,7 +509,7 @@ class Test_loader:
         self.validation_iterator = 0  # iterator over the validation images
         self.seed = 42
 
-        self.image_class = self.get_immediate_subdirectories(directory)
+        self.image_class = ['Real', 'CGG']
         self.nb_class = len(self.image_class)
         print('     number of classes :', self.nb_class, '   ', self.image_class)
 
@@ -546,8 +561,11 @@ class Test_loader:
                 box = (current_width, current_height, 
                        current_width + subimage_size, 
                        current_height + subimage_size)
-                subimages.append(np.asarray(image.crop(box))[:,:,1].astype(np.float32)/255)
-
+                sub = np.asarray(image.crop(box))
+                if len(sub.shape) > 2: 
+                    subimages.append(sub[:,:,1].astype(np.float32)/255)
+                else: 
+                    subimages.append(sub.astype(np.float32)/255)
                 current_width += subimage_size
 
             current_height += subimage_size
@@ -637,12 +655,12 @@ if __name__ == "__main__":
     image_size = 100
     target_db = '/home/nicolas/Database/level-design_raise_100/'
 
-    # a = Database_loader(source_db, image_size, only_green=True)
+    a = Database_loader(source_db, image_size, only_green=True, rand_crop = False)
     
     # a.export_database(target_db, 
-    #                   nb_train = 10000, 
-    #                   nb_test = 2000, 
-    #                   nb_validation = 1000)
+    #                   nb_train = 40000, 
+    #                   nb_test = 4000, 
+    #                   nb_validation = 2000)
 
     # f = Database_loader(target_db, image_size, only_green=True)
 

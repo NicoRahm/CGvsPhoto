@@ -151,6 +151,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
   if clf == None:
     clf = LinearDiscriminantAnalysis()
 
+  features = []
+  labels = []
   for i in range(nb_train_batch):
     if (i%10 == 0):
       print("Training batch " + str(i))
@@ -158,10 +160,14 @@ def train_classifier(database_path, image_size, nb_train_batch,
     
     feed_dict = {x: batch[0]}
     h = hist.eval(feed_dict = feed_dict)
-
-    features = extract_features_hist(h)
-    
-    clf.fit(features, np.argmax(batch[1], 1))
+    features.append(extract_features_hist(h))
+    labels.append(np.argmax(batch[1], 1))
+  
+  features = np.reshape(np.array(features), (batch_size*nb_train_batch, features[0].shape[1])) 
+  labels = np.reshape(np.array(labels), (batch_size*nb_train_batch,)) 
+  print(features.shape)
+  print(labels.shape)
+  clf.fit(features, labels)
     
 
   print('   final test ...')
@@ -196,13 +202,11 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/home/nicolas/Database/level-design_raise_100'
-  image_size = 100
+  database_path = '/home/nicolas/Database/level-design_raise_650'
+  image_size = 650
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 200,
+                         nb_train_batch = 50,
                          nb_test_batch = 40,
                          batch_size = 50)
-
-  
