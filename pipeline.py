@@ -13,7 +13,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 
 config = ''
-config = 'server'
+# config = 'server'
 
 # computation time tick
 start_clock = time.clock()
@@ -234,7 +234,10 @@ class Model:
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
                              name = 'Activated_2')
 
-        tf.summary.image('Filtered_image', h_conv2[:,:,:,0:1])
+        tf.summary.image('Filtered_image_1', h_conv2[:,:,:,0:1])
+        tf.summary.image('Filtered_image_2', h_conv2[:,:,:,1:2])
+        tf.summary.image('Filtered_image_3', h_conv2[:,:,:,2:3])
+
 
       nb_filters = nb_conv2
       if histograms:
@@ -243,7 +246,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.07
+        sigma = 0.05
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -253,7 +256,8 @@ class Model:
                                             values_range = range_hist, 
                                             sigma = sigma)
           self.hist = hist
-          tf.summary.tensor_summary('hist', hist)
+          print(hist.shape)
+          # tf.summary.tensor_summary('hist', hist)
 
         flatten = tf.reshape(hist, [-1, size_flat], name = "Flatten_Hist")
 
@@ -352,7 +356,7 @@ class Model:
 
   def validation_testing(self, it, nb_iterations = 20, batch_size = 50,
                          plot_histograms = False, range_hist = [0.,1.], 
-                         selected_hist_nb = 4, run_name = ''):
+                         selected_hist_nb = 8, run_name = ''):
 
     validation_batch_size = batch_size 
     validation_accuracy = 0
@@ -380,7 +384,7 @@ class Model:
         # Computing the mean histogram for each class
         hist_plot = self.hist.eval(feed_dict)
         for k in range(validation_batch_size): 
-          if batch_validation[1][k][0] == 0.:
+          if batch_validation[1][k][0] == 1.:
             nb_real +=1
             is_real = True
           else:
@@ -468,9 +472,14 @@ class Model:
           # evry 100 batches, test the accuracy
           if i%10 == 0 :
               
+              if i%100 == 0:
+                plot_histograms = True
+              else:
+                plot_histograms = False
+
               self.validation_testing(i, nb_iterations = nb_validation_batch, 
                                       batch_size = batch_size, 
-                                      plot_histograms = True,
+                                      plot_histograms = plot_histograms,
                                       run_name = run_name)
               
           # regular training
