@@ -129,7 +129,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   x_filtered.append(x_image_da)
 
 
-  nbins = 15
+  nbins = 11
 
   hist = []
   function_to_map = lambda x: tf.histogram_fixed_width(x, 
@@ -213,5 +213,5 @@ if __name__ == '__main__':
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
                          nb_train_batch = 800,
-                         nb_test_batch = 14,
+                         nb_test_batch = 40,
                          batch_size = 50)

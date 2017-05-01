@@ -13,7 +13,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 
 config = ''
-config = 'server'
+# config = 'server'
 
 # computation time tick
 start_clock = time.clock()
@@ -100,7 +100,7 @@ def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
   for i in range(nbins+1):
     mu_list.append(values_range[0] + i*r/(nbins+1))
 
-  range_plot = np.linspace(values_range[0], values_range[1], 100)
+  range_plot = np.linspace(values_range[0]-0.1, values_range[1]+0.1, 1000)
 
   plt.figure()
   for mu in mu_list:
@@ -232,6 +232,7 @@ class Model:
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
                              name = 'Activated_2')
 
+        tf.summary.image('Filtered_image', h_conv2[:,:,:,0:1])
 
       nb_filters = nb_conv2
       if histograms:
@@ -242,7 +243,7 @@ class Model:
         range_hist = [0,1]
         sigma = 0.07
 
-        # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
+        # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
           hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
@@ -574,7 +575,7 @@ class Model:
         cmap = 'Greens'
       else: 
         cmap = 'Reds'
-      plt.imshow(images[i,:,:,0], cmap = cmap)
+      plt.imshow(images[i,:,:,0]/np.max(images[i,:,:,0]), cmap = cmap)
       ax1.set_xticklabels([])
       ax1.set_yticklabels([])
 
@@ -595,9 +596,9 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
-  nb_test_batch = 40
-  nb_validation_batch = 20
+  nb_train_batch = 0
+  nb_test_batch = 80
+  nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = False)
