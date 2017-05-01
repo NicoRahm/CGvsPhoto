@@ -407,7 +407,8 @@ class Model:
         plt.plot(np.linspace(range_hist[0], range_hist[1], self.nbins+1), 
                              hist_CGG[k], 'r')
         fig.suptitle("Mean histogram for CGG", fontsize=14)
-      plt.show()
+      plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + '_cgg_'+ str(it) + '.png')
+      plt.close()
 
       # Plotting mean histogram for Real
       fig = plt.figure(2)
@@ -418,8 +419,8 @@ class Model:
         plt.plot(np.linspace(range_hist[0], range_hist[1],self.nbins+1), 
                              hist_real[k], 'r')
         fig.suptitle("Mean histogram for Real", fontsize=14)
-      plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + str(it) + '.png')
-      # plt.show()
+      plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + '_real_'+ str(it) + '.png')
+      plt.close()
 
     validation_accuracy /= nb_iterations
     print("     step %d, training accuracy %g (%d validations tests)"%(it, validation_accuracy, validation_batch_size*nb_iterations))
