@@ -202,6 +202,8 @@ class Model:
         self.x = x
         # reshape the input data:
         x_image = tf.reshape(x, [-1,image_size, image_size, 1])
+        with tf.name_scope('Image_Visualization'):
+          tf.summary.image('Input_Data', x_image)
         
 
       # first conv net layer
@@ -327,8 +329,8 @@ class Model:
       #   tf.summary.scalar('AUC', auc)
 
       if all_summaries:
-        with tf.name_scope('Image_Visualization'):
-          tf.summary.image('Input_Data', x_image)
+        # with tf.name_scope('Image_Visualization'):
+          # tf.summary.image('Input_Data', x_image)
         with tf.name_scope('Weights'):
           variable_summaries(W_conv1)
           variable_summaries(W_conv2)
@@ -466,7 +468,7 @@ class Model:
               
               self.validation_testing(i, nb_iterations = nb_validation_batch, 
                                       batch_size = batch_size, 
-                                      plot_histograms = False)
+                                      plot_histograms = True)
               
           # regular training
           batch = self.data.get_next_train_batch(batch_size, False, True, True)
