@@ -208,5 +208,5 @@ if __name__ == '__main__':
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
                          nb_train_batch = 50,
-                         nb_test_batch = 40,
+                         nb_test_batch = 14,
                          batch_size = 50)

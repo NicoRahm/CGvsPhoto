@@ -13,7 +13,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 
 config = ''
-config = 'server'
+# config = 'server'
 
 # computation time tick
 start_clock = time.clock()
@@ -572,7 +572,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
+  nb_train_batch = 0
   nb_test_batch = 40
   nb_validation_batch = 20
 
