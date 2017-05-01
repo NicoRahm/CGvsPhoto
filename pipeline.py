@@ -352,7 +352,7 @@ class Model:
 
   def validation_testing(self, it, nb_iterations = 20, batch_size = 50,
                          plot_histograms = False, range_hist = [0.,1.], 
-                         selected_hist_nb = 4):
+                         selected_hist_nb = 4, run_name = ''):
 
     validation_batch_size = batch_size 
     validation_accuracy = 0
@@ -418,7 +418,8 @@ class Model:
         plt.plot(np.linspace(range_hist[0], range_hist[1],self.nbins+1), 
                              hist_real[k], 'r')
         fig.suptitle("Mean histogram for Real", fontsize=14)
-      plt.show()
+      plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + str(it) + '.png')
+      # plt.show()
 
     validation_accuracy /= nb_iterations
     print("     step %d, training accuracy %g (%d validations tests)"%(it, validation_accuracy, validation_batch_size*nb_iterations))
@@ -468,7 +469,8 @@ class Model:
               
               self.validation_testing(i, nb_iterations = nb_validation_batch, 
                                       batch_size = batch_size, 
-                                      plot_histograms = True)
+                                      plot_histograms = True,
+                                      run_name = run_name)
               
           # regular training
           batch = self.data.get_next_train_batch(batch_size, False, True, True)
