@@ -13,7 +13,7 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 
 config = ''
-# config = 'server'
+config = 'server'
 
 # computation time tick
 start_clock = time.clock()
