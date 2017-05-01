@@ -13,6 +13,8 @@ import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import accuracy_score as acc
 
+config = ''
+config = 'server'
 
 # tool functions
 print('   python function setup')
@@ -202,11 +204,14 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/home/nicolas/Database/level-design_raise_650'
-  image_size = 650
+  if config == 'server':
+    database_path = '/work/smg/v-nicolas/level-design_raise_100'
+  else:
+    database_path = '/home/nicolas/Database/level-design_raise_100'
+  image_size = 100
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 50,
+                         nb_train_batch = 800,
                          nb_test_batch = 14,
                          batch_size = 50)
