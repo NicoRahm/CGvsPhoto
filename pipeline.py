@@ -257,7 +257,7 @@ class Model:
       else: 
 
         m_pool = max_pool_2x2(h_conv2)
-        size_flat = nb_filters*(image_size**2)/4
+        size_flat = int(nb_filters*(image_size**2)/4)
         flatten = tf.reshape(m_pool, [-1, size_flat], name = "Flatten_MPool")
 
 
