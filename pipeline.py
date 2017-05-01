@@ -157,7 +157,7 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
 class Model:
 
   def __init__(self, database_path, image_size, nbins = 10, 
-               batch_size = 50, all_summaries = False):
+               batch_size = 50, histograms = True, all_summaries = False):
 
     print('   tensorFlow version: ', tf.__version__)
 
@@ -166,9 +166,12 @@ class Model:
     self.batch_size = batch_size
     self.all_summaries = all_summaries
     self.nbins = nbins
+    self.histograms = histograms
     
     self.import_database()
-    self.create_graph(self.nb_class, self.all_summaries)
+    self.create_graph(nb_class = self.nb_class, 
+                      histograms = self.histograms,
+                      all_summaries = self.all_summaries)
 
 
   def import_database(self): 
@@ -179,12 +182,17 @@ class Model:
                                    proportion = 1, only_green=True)
     self.nb_class = self.data.nb_class
 
-  def create_graph(self, nb_class, all_summaries = False): 
+  def create_graph(self, nb_class, histograms = True, all_summaries = False): 
 
     print('   create model ...')
     # input layer. One entry is a float size x size, 3-channels image. 
     # None means that the number of such vector can be of any lenght.
 
+    if (histograms): 
+      print('    Model with histograms.')
+
+    else: 
+      print('    Model without histograms.')
     graph = tf.Graph()
 
     with graph.as_default():
@@ -224,35 +232,44 @@ class Model:
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
                              name = 'Activated_2')
 
-      # Histograms
-      nbins = self.nbins
+
       nb_filters = nb_conv2
-      size_hist = (nbins + 1)*nb_filters
-      range_hist = [0,1]
-      sigma = 0.07
+      if histograms:
+        # Histograms
+        nbins = self.nbins
+        size_flat = (nbins + 1)*nb_filters
 
-      # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
+        range_hist = [0,1]
+        sigma = 0.07
 
-      with tf.name_scope('Gaussian_Histogram'): 
-        hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
-                                          nbins = nbins, 
-                                          values_range = range_hist, 
-                                          sigma = sigma)
-        self.hist = hist
-        tf.summary.tensor_summary('hist', hist)
+        # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = 0.1)
 
-      h_pool_flat = tf.reshape(hist, [-1, size_hist], name = "Flatten_Hist")
+        with tf.name_scope('Gaussian_Histogram'): 
+          hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
+                                            nbins = nbins, 
+                                            values_range = range_hist, 
+                                            sigma = sigma)
+          self.hist = hist
+          tf.summary.tensor_summary('hist', hist)
+
+        flatten = tf.reshape(hist, [-1, size_flat], name = "Flatten_Hist")
+
+      else: 
+
+        m_pool = max_pool_2x2(h_conv2)
+        size_flat = nb_filters*(image_size**2)/4
+        flatten = tf.reshape(m_pool, [-1, size_flat], name = "Flatten_MPool")
 
 
       # Densely Connected Layer
       # we add a fully-connected layer with 1024 neurons 
       with tf.variable_scope('Dense1'):
         with tf.name_scope('Weights'):
-          W_fc1 = weight_variable([size_hist, 1024])
+          W_fc1 = weight_variable([size_flat, 1024])
         with tf.name_scope('Bias'):
           b_fc1 = bias_variable([1024])
         # put a relu
-        h_fc1 = tf.nn.relu(tf.matmul(h_pool_flat, W_fc1) + b_fc1, 
+        h_fc1 = tf.nn.relu(tf.matmul(flatten, W_fc1) + b_fc1, 
                            name = 'activated')
 
       # dropout
@@ -491,8 +508,9 @@ class Model:
   def test_total_images(self, test_data_path, nb_images, 
                         minibatch_size = 25, show_images = False,
                         save_images = False): 
-    test_name = input("   Choose a name for the test : ")
-    if not os.path.exists(visualization_dir + test_name):
+    if(save_images):
+      test_name = input("   Choose a name for the test : ")
+      if not os.path.exists(visualization_dir + test_name):
         os.mkdir(visualization_dir + test_name)
 
     print('   start session ...')
@@ -577,12 +595,12 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 0
+  nb_train_batch = 15000
   nb_test_batch = 40
   nb_validation_batch = 20
 
   clf = Model(database_path, image_size, nbins = 11,
-              batch_size = 50)
+              batch_size = 50, histograms = False)
 
   clf.train(nb_train_batch = nb_train_batch,
             nb_test_batch = nb_test_batch, 
