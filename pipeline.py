@@ -489,7 +489,8 @@ class Model:
 
 
   def test_total_images(self, test_data_path, nb_images, 
-                        minibatch_size = 25, show = False): 
+                        minibatch_size = 25, show_images = False,
+                        save_images = False): 
     test_name = input("   Choose a name for the test : ")
     if not os.path.exists(visualization_dir + test_name):
         os.mkdir(visualization_dir + test_name)
@@ -525,18 +526,21 @@ class Model:
         if(label == prediction):
           accuracy+= 1
         print(prediction, label)
-        self.image_visualization(path_save = visualization_dir + test_name, 
-                                 file_name = str(i), 
-                                 images = batch, labels_pred = labels, 
-                                 true_label = label, width = width, 
-                                 height = height, show = show)
+        if save_images or show_images:
+          self.image_visualization(path_save = visualization_dir + test_name, 
+                                   file_name = str(i), 
+                                   images = batch, labels_pred = labels, 
+                                   true_label = label, width = width, 
+                                   height = height, show_images = show_images,
+                                   save_images = save_images)
 
     accuracy /= nb_images
     print('   Accuracy : ' + str(accuracy))
 
 
   def image_visualization(self, path_save, file_name, images, labels_pred, 
-                          true_label, width, height, show = False):
+                          true_label, width, height, show_images = False,
+                          save_images = False):
     nb_width = int(width/self.image_size)
     nb_height = int(height/self.image_size)
 
@@ -557,9 +561,10 @@ class Model:
       ax1.set_yticklabels([])
 
     gs1.update(wspace=0.0, hspace=0.0)
-    if show:
+    if show_images:
       plt.show(img)
-    plt.savefig(path_save + '/vis_' + file_name + '.png')
+    if save_images:
+      plt.savefig(path_save + '/vis_' + file_name + '.png')
 
     plt.close()
 
@@ -584,9 +589,10 @@ if __name__ == '__main__':
             nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, show = False)
+                        nb_images = 720, show_images = False, 
+                        save_images = False)
