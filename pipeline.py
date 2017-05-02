@@ -82,9 +82,10 @@ def histogram(x, nbins):
                                nbins = nbins, dtype = tf.float32)
   return(h)
 
-def gaussian_func(mu, x, n, sigma):
+def gaussian_func(mu, x, n, sigma, xmax = 1):
+  xmax = np.float32(xmax)
   gauss = tf.contrib.distributions.Normal(mu=mu, sigma=sigma)
-  return(tf.reduce_sum(gauss.pdf(x)/n))
+  return(tf.reduce_sum(gauss.pdf(xmax - tf.nn.relu(xmax - x))/n))
 
 
 def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size = 100):
@@ -207,8 +208,8 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 32
-      filter_size1 = 3
+      nb_conv1 = 16
+      filter_size1 = 5
 
       with tf.name_scope('Conv1'):
 
@@ -223,23 +224,23 @@ class Model:
                              name = 'Activated_1')
 
       # second conv 
-      nb_conv2 = 64
-      filter_size2 = 3
-      with tf.name_scope('Conv2'):
-        with tf.name_scope('Weights'):
-          W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-        with tf.name_scope('Bias'):
-          b_conv2 = bias_variable([nb_conv2])
+      # nb_conv2 = 64
+      # filter_size2 = 3
+      # with tf.name_scope('Conv2'):
+      #   with tf.name_scope('Weights'):
+      #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+      #   with tf.name_scope('Bias'):
+      #     b_conv2 = bias_variable([nb_conv2])
 
-        h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')
+      #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+      #                        name = 'Activated_2')
 
-        tf.summary.image('Filtered_image_1', h_conv2[:,:,:,0:1])
-        tf.summary.image('Filtered_image_2', h_conv2[:,:,:,1:2])
-        tf.summary.image('Filtered_image_3', h_conv2[:,:,:,2:3])
+      #   tf.summary.image('Filtered_image_1', h_conv2[:,:,:,0:1])
+      #   tf.summary.image('Filtered_image_2', h_conv2[:,:,:,1:2])
+      #   tf.summary.image('Filtered_image_3', h_conv2[:,:,:,2:3])
 
 
-      nb_filters = nb_conv2
+      nb_filters = nb_conv1
       if histograms:
         # Histograms
         nbins = self.nbins
@@ -251,12 +252,11 @@ class Model:
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
-          hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
+          hist = classic_histogram_gaussian(h_conv1, k = nb_filters, 
                                             nbins = nbins, 
                                             values_range = range_hist, 
                                             sigma = sigma)
           self.hist = hist
-          print(hist.shape)
           # tf.summary.tensor_summary('hist', hist)
 
         flatten = tf.reshape(hist, [-1, size_flat], name = "Flatten_Hist")
@@ -547,24 +547,35 @@ class Model:
         j = 0
         prediction = 0
         labels = []
+        diff = []
         while j < batch_size:
           feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
-          label_image = np.argmax(self.y_conv.eval(feed_dict), 1)
+          pred = self.y_conv.eval(feed_dict)
+          label_image = np.argmax(pred, 1)
+          d = np.max(pred, 1) - np.min(pred, 1)
+          for k in range(d.shape[0]):
+            diff.append(np.round(d[k], 1))
           prediction += np.sum(label_image)
           for l in label_image:
             labels.append(data_test.image_class[l])
           j+=minibatch_size
 
+        diff = np.array(diff)
         prediction = data_test.image_class[int(np.round(prediction/batch_size))]
         if(label == prediction):
           accuracy+= 1
         print(prediction, label)
+
+        if show_images and not save_images:
+          test_name = ''
+
         if save_images or show_images:
           self.image_visualization(path_save = visualization_dir + test_name, 
                                    file_name = str(i), 
                                    images = batch, labels_pred = labels, 
                                    true_label = label, width = width, 
-                                   height = height, show_images = show_images,
+                                   height = height, diff = diff,
+                                   show_images = show_images,
                                    save_images = save_images)
 
     accuracy /= nb_images
@@ -572,8 +583,8 @@ class Model:
 
 
   def image_visualization(self, path_save, file_name, images, labels_pred, 
-                          true_label, width, height, show_images = False,
-                          save_images = False):
+                          true_label, width, height, diff,
+                          show_images = False, save_images = False):
     nb_width = int(width/self.image_size)
     nb_height = int(height/self.image_size)
 
@@ -589,11 +600,12 @@ class Model:
         cmap = 'Greens'
       else: 
         cmap = 'Reds'
-      plt.imshow(images[i,:,:,0]/np.max(images[i,:,:,0]), cmap = cmap)
+      plt.imshow(images[i,:,:,0], cmap = cmap)
       ax1.set_xticklabels([])
       ax1.set_yticklabels([])
+      ax1.text(40, 50, str(diff[i]))
 
-    gs1.update(wspace=0.0, hspace=0.0)
+    gs1.update(wspace=.0, hspace=.0)
     if show_images:
       plt.show(img)
     if save_images:
@@ -610,7 +622,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 12000
+  nb_train_batch = 10000
   nb_test_batch = 80
   nb_validation_batch = 40
 
@@ -628,4 +640,4 @@ if __name__ == '__main__':
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, show_images = False, 
-                        save_images = False)
+                        save_images = True)
