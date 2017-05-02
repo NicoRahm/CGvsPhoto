@@ -55,7 +55,7 @@ def weight_variable(shape, seed = None):
   return tf.Variable(initial)
 
 def bias_variable(shape):
-  initial = tf.truncated_normal(shape, stddev=0.1, seed = random_seed)
+  initial = tf.truncated_normal(shape, mean = 0.5, stddev=0.1, seed = random_seed)
   return tf.Variable(initial)
   
 def conv2d(x, W):
@@ -235,9 +235,9 @@ class Model:
       #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
       #                        name = 'Activated_2')
 
-      #   tf.summary.image('Filtered_image_1', h_conv2[:,:,:,0:1])
-      #   tf.summary.image('Filtered_image_2', h_conv2[:,:,:,1:2])
-      #   tf.summary.image('Filtered_image_3', h_conv2[:,:,:,2:3])
+        tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
+        tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
+        tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
 
 
       nb_filters = nb_conv1
