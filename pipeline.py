@@ -314,7 +314,7 @@ class Model:
       tf.summary.scalar('cross_entropy', cross_entropy_mean)
 
       with tf.name_scope('train'):
-        train_step = tf.train.AdamOptimizer(5e-4).minimize(cross_entropy_mean)
+        train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy_mean)
 
       self.train_step = train_step
       print('   test ...')
