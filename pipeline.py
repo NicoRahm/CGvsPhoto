@@ -628,7 +628,7 @@ class Model:
       plt.imshow(images[i,:,:,0], cmap = cmap)
       ax1.set_xticklabels([])
       ax1.set_yticklabels([])
-      ax1.text(40, 50, str(diff[i]))
+      # ax1.text(40, 50, str(diff[i]))
 
     gs1.update(wspace=.0, hspace=.0)
     if show_images:
