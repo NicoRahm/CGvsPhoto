@@ -718,9 +718,9 @@ if __name__ == '__main__':
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
-  # clf.test_total_images(test_data_path = test_data_path,
-  #                       nb_images = 720, show_images = True, 
-  #                       save_images = False)
+  clf.test_total_images(test_data_path = test_data_path,
+                        nb_images = 720, show_images = False, 
+                        save_images = True)
 
   clf.test_splicing(data_path = '/home/nicolas/Database/splicing/', 
                     nb_images = 50,

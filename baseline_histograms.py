@@ -14,7 +14,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import accuracy_score as acc
 
 config = ''
-config = 'server'
+# config = 'server'
 
 # tool functions
 print('   python function setup')
