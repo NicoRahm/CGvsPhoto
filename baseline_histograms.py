@@ -14,7 +14,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import accuracy_score as acc
 
 config = ''
-# config = 'server'
+config = 'server'
 
 # tool functions
 print('   python function setup')
@@ -68,15 +68,15 @@ def train_classifier(database_path, image_size, nb_train_batch,
   # input layer. One entry is a float size x size, 3-channels image. 
   # None means that the number of such vector can be of any lenght.
   with tf.name_scope('Input_Data'):
-    x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
+    x = tf.placeholder(tf.float32, [None, None, None, 1])
 
     # reshape the input data:
     # size,size: width and height
     # 1: color channels
     # -1 :  ???
-    x_image = tf.reshape(x, [-1,image_size, image_size, 1])
+    x_image = x
     with tf.name_scope('Image_Visualization'):
-      tf.summary.image('Input_Data', x_image)
+      tf.summary.image('Input_Data', x)
 
   # Filtering to obtain derivation 
   horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
@@ -158,12 +158,14 @@ def train_classifier(database_path, image_size, nb_train_batch,
   for i in range(nb_train_batch):
     if (i%10 == 0):
       print("Training batch " + str(i))
-    batch = data.get_next_train_batch(batch_size, False, True, True)
+
+    batch = data.get_next_train(crop = False)
+    input_image = np.array([batch[0]])
     
-    feed_dict = {x: batch[0]}
+    feed_dict = {x: input_image}
     h = hist.eval(feed_dict = feed_dict)
     features.append(extract_features_hist(h))
-    labels.append(np.argmax(batch[1], 1))
+    labels.append(np.argmax(np.array([batch[1]]), 1))
   
   features = np.reshape(np.array(features), (batch_size*nb_train_batch, features[0].shape[1])) 
   labels = np.reshape(np.array(labels), (batch_size*nb_train_batch,)) 
@@ -173,22 +175,19 @@ def train_classifier(database_path, image_size, nb_train_batch,
     
 
   print('   final test ...')
-  test_batch_size = batch_size      # size of the batches
   test_accuracy = 0
   nb_iterations = nb_test_batch
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
-      batch_test = data.get_batch_test(batch_size=test_batch_size, 
-                                       crop = False, 
-                                       random_flip_flop = True, 
-                                       random_rotate = True)
-      feed_dict = {x:batch_test[0]}
+      batch_test = data.get_next_train(crop = False)
+      input_image = np.array([batch_test[0]])
+      feed_dict = {x: input_image}
       h = hist.eval(feed_dict = feed_dict)
       features = extract_features_hist(h)
 
       y_pred = clf.predict(features)
 
-      test_accuracy += acc(y_pred, np.argmax(batch_test[1], 1))
+      test_accuracy += acc(y_pred, np.argmax(np.array([batch[1]]), 1))
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
@@ -205,13 +204,13 @@ def train_classifier(database_path, image_size, nb_train_batch,
 if __name__ == '__main__': 
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_raise_100'
+    database_path = '/work/smg/v-nicolas/level-design_raise'
   else:
-    database_path = '/home/nicolas/Database/level-design_raise_100'
-  image_size = 100
+    database_path = '/home/nicolas/Database/level-design_raise'
+  image_size = None
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 800,
-                         nb_test_batch = 40,
-                         batch_size = 50)
+                         nb_train_batch = 2520,
+                         nb_test_batch = 720,
+                         batch_size = 1)

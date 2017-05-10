@@ -184,10 +184,16 @@ class Database_loader :
                 image = self.extract_channel(image,1)
         else: 
             image = np.asarray(image)
+
+            if( self.nb_channels == 1 and len(image.shape) > 2 ) :
+                image = self.extract_channel(image,1)
         # convert to float image
         image = image.astype(np.float32) / 255.
         #image = image.reshape(1, self.size, self.size, 3)
-        image = image.reshape(self.size, self.size, self.nb_channels)
+        if self.size == None: 
+            image = image.reshape(image.shape[0], image.shape[1], self.nb_channels)
+        else: 
+            image = image.reshape(self.size, self.size, self.nb_channels)
 
         # build class label
         label = np.zeros(len(self.image_class))
@@ -276,11 +282,16 @@ class Database_loader :
                 image = self.extract_channel(image,1)
         else: 
             image = np.asarray(image)
+
+            if( self.nb_channels == 1 and len(image.shape) > 2 ) :
+                image = self.extract_channel(image,1)
         # convert to float image
         image = image.astype(np.float32) / 255.
         #image = image.reshape(1, self.size, self.size, 3)
-        image = image.reshape(self.size, self.size, self.nb_channels)
-        
+        if self.size == None: 
+            image = image.reshape(image.shape[0], image.shape[1], self.nb_channels)
+        else: 
+            image = image.reshape(self.size, self.size, self.nb_channels)
         # buils class label
         label = np.zeros(len(self.image_class))
         pos = self.image_class.index(data[1])
@@ -391,6 +402,61 @@ class Database_loader :
             batch_label[i] = data[1]
 
         return (batch_image.astype(np.float32),batch_label)
+
+    def export_splicing(self, export_path, nb_images, radius = 300): 
+
+        batch_size = 10
+        if not os.path.exists(export_path):
+            os.mkdir(export_path)
+        i = 0
+        while(i < nb_images):
+            batch = []
+            batch.append([])
+            batch.append([])
+            k1 = 0
+            k2 = 0
+            while k1 < batch_size or k2 < batch_size:
+
+                data = self.file_test[self.test_iterator]
+                self.test_iterator += 1
+                if self.test_iterator >= len(self.file_test) :
+                    self.test_iterator = 0
+
+                file_name = self.dir + '/test/' + data[1] + '/' + data[0]
+                image = self.extract_channel(np.array(Image.open(file_name)), 1)
+                # print(data[1])
+                if data[1] == 'Real' and k1 < batch_size:
+                    batch[0].append(image)
+                    k1 += 1
+                if data[1] == 'CGG' and k2 < batch_size:
+                    batch[1].append(image)
+                    k2 += 1
+
+            for j in range(batch_size):
+                
+                image_real = batch[0][j]
+                image_cgg = batch[1][j]
+
+                shape_cgg = image_cgg.shape
+                shape_real = image_real.shape
+                r = radius
+                a, b = random.randint(radius, shape_cgg[0] - radius), random.randint(radius, shape_cgg[1] - radius)
+                
+                y,x = np.ogrid[-a:shape_cgg[0]-a, -b:shape_cgg[1]-b]
+                mask_cgg = x*x + y*y > r*r
+                image_cgg[mask_cgg] = 0
+                image_cgg = np.lib.pad(image_cgg, ((0,shape_real[0] - shape_cgg[0]), (0, shape_real[1] - shape_cgg[1])), 'constant', constant_values = (0,0))
+
+                y,x = np.ogrid[-a:shape_real[0]-a, -b:shape_real[1]-b]
+                mask_real = x*x + y*y <= r*r
+                image_real[mask_real] = 0
+
+                result = image_real + image_cgg
+                exp = Image.fromarray(result)
+                exp.save(export_path + str(i) + '.jpg')
+                i+=1
+
+            print(str(i) + " images exported")
 
 
     def export_database(self, export_path, nb_train, nb_test, nb_validation, proportion = 0.5):
@@ -661,7 +727,8 @@ if __name__ == "__main__":
     #                   nb_train = 40000, 
     #                   nb_test = 4000, 
     #                   nb_validation = 2000)
-
+    target_splicing = '/home/nicolas/Database/splicing/'
+    a.export_splicing(target_splicing, 50)
     # f = Database_loader(target_db, image_size, only_green=True)
 
     # g = f.get_batch_validation(50, crop = False)

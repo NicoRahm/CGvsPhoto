@@ -9,11 +9,12 @@ import image_loader as il
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
+import matplotlib.colors as mcolors
 
 import numpy as np
 
 config = ''
-config = 'server'
+# config = 'server'
 
 # computation time tick
 start_clock = time.clock()
@@ -85,7 +86,9 @@ def histogram(x, nbins):
 def gaussian_func(mu, x, n, sigma, xmax = 1):
   xmax = np.float32(xmax)
   gauss = tf.contrib.distributions.Normal(mu=mu, sigma=sigma)
-  return(tf.reduce_sum(gauss.pdf(xmax - tf.nn.relu(xmax - x))/n))
+  # return(tf.reduce_sum(gauss.pdf(xmax - tf.nn.relu(xmax - x))/n))
+  return(tf.reduce_sum(gauss.pdf(x)/n))
+
 
 
 def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size = 100):
@@ -208,8 +211,8 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 16
-      filter_size1 = 5
+      nb_conv1 = 32
+      filter_size1 = 3
 
       with tf.name_scope('Conv1'):
 
@@ -224,35 +227,35 @@ class Model:
                              name = 'Activated_1')
 
       # second conv 
-      # nb_conv2 = 64
-      # filter_size2 = 3
-      # with tf.name_scope('Conv2'):
-      #   with tf.name_scope('Weights'):
-      #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-      #   with tf.name_scope('Bias'):
-      #     b_conv2 = bias_variable([nb_conv2])
+      nb_conv2 = 64
+      filter_size2 = 3
+      with tf.name_scope('Conv2'):
+        with tf.name_scope('Weights'):
+          W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+        with tf.name_scope('Bias'):
+          b_conv2 = bias_variable([nb_conv2])
 
-      #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-      #                        name = 'Activated_2')
+        h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+                             name = 'Activated_2')
 
         tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
         tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
         tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
 
 
-      nb_filters = nb_conv1
+      nb_filters = nb_conv2
       if histograms:
         # Histograms
         nbins = self.nbins
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.05
+        sigma = 0.07
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
-          hist = classic_histogram_gaussian(h_conv1, k = nb_filters, 
+          hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
                                             nbins = nbins, 
                                             values_range = range_hist, 
                                             sigma = sigma)
@@ -592,14 +595,36 @@ class Model:
     
     gs1 = gridspec.GridSpec(nb_height, nb_width)
     
-
+    
     for i in range(len(images)):
+      cdict_green = {'red': ((0.0,0.0,0.0),
+                             (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                     'blue': ((0.0,0.0,0.0),
+                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                     'green': ((0.0,0.0,0.0),
+                               (1.0,1.0,1.0))}
+      cmap_green = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
+
+      cdict_red = {'red': ((0.0,0.0,0.0),
+                             (1.0,1.0,1.0)),
+                     'blue': ((0.0,0.0,0.0),
+                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                     'green': ((0.0,0.0,0.0),
+                               (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4))}
+      cmap_red = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
+
       ax1 = plt.subplot(gs1[i])
       ax1.axis('off')
       if labels_pred[i] == true_label:
-        cmap = 'Greens'
+        if diff[i] > 0.4:
+          cmap = cmap_green
+        else:
+          cmap = 'gray'
       else: 
-        cmap = 'Reds'
+        if diff[i] > 0.4:
+          cmap = cmap_red
+        else:
+          cmap = 'gray'
       plt.imshow(images[i,:,:,0], cmap = cmap)
       ax1.set_xticklabels([])
       ax1.set_yticklabels([])
@@ -612,6 +637,61 @@ class Model:
       plt.savefig(path_save + '/vis_' + file_name + '.png')
 
     plt.close()
+
+
+  def test_splicing(self, data_path, nb_images, save_images, show_images,
+                    minibatch_size = 25):
+
+    if(save_images):
+      test_name = input("   Choose a name for the test : ")
+      path_save = visualization_dir + test_name
+      if not os.path.exists(visualization_dir + test_name):
+        os.mkdir(visualization_dir + test_name)
+
+    else: 
+      path_save = ''
+      path_save = ''
+
+    print('   start session ...')
+    with tf.Session(graph=self.graph) as sess:
+      saver = tf.train.Saver()
+      print('   variable initialization ...')
+      tf.global_variables_initializer().run()
+      tf.local_variables_initializer().run()
+      file_to_restore = input("\nName of the file to restore (Directory : " + 
+                              folder_ckpt + ') : ')
+      saver.restore(sess, folder_ckpt + file_to_restore)
+
+      data_test = il.Test_loader(data_path, 
+                                 subimage_size = self.image_size)
+
+      for i in range(nb_images):
+        batch, label, width, height = data_test.get_next_image()
+        batch_size = batch.shape[0]
+        j = 0
+        labels = []
+        diff = []
+        while j < batch_size:
+          feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
+          pred = self.y_conv.eval(feed_dict)
+          label_image = np.argmax(pred, 1)
+          d = np.max(pred, 1) - np.min(pred, 1)
+          for k in range(d.shape[0]):
+            diff.append(np.round(d[k], 1))
+          for l in label_image:
+            labels.append(data_test.image_class[l])
+          j+=minibatch_size
+
+        diff = np.array(diff)
+
+        
+        self.image_visualization(path_save = path_save, 
+                                 file_name = str(i), 
+                                 images = batch, labels_pred = labels, 
+                                 true_label = label, width = width, 
+                                 height = height, diff = diff,
+                                 show_images = show_images,
+                                 save_images = save_images)    
 
 
 if __name__ == '__main__':
@@ -629,15 +709,21 @@ if __name__ == '__main__':
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = True)
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
-  clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, show_images = False, 
-                        save_images = True)
+  # clf.test_total_images(test_data_path = test_data_path,
+  #                       nb_images = 720, show_images = True, 
+  #                       save_images = False)
+
+  clf.test_splicing(data_path = '/home/nicolas/Database/splicing/', 
+                    nb_images = 50,
+                    minibatch_size = 25,
+                    show_images = True,
+                    save_images = False)
