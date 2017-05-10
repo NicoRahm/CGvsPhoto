@@ -714,15 +714,20 @@ if __name__ == '__main__':
   #           nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
+    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, show_images = False, 
                         save_images = True)
 
-  clf.test_splicing(data_path = '/home/nicolas/Database/splicing/', 
+  if config == 'server':
+    splicing_data_path = '/work/smg/v-nicolas/splicing/'
+  else: 
+    splicing_data_path = '/home/nicolas/Database/splicing/'
+
+  clf.test_splicing(data_path = splicing_data_path, 
                     nb_images = 50,
                     minibatch_size = 25,
                     show_images = True,

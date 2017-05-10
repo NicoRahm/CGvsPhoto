@@ -439,19 +439,23 @@ class Database_loader :
 
                 shape_cgg = image_cgg.shape
                 shape_real = image_real.shape
+                adding = np.zeros(shape_real)
                 r = radius
-                a, b = random.randint(radius, shape_cgg[0] - radius), random.randint(radius, shape_cgg[1] - radius)
+                a_cgg, b_cgg = random.randint(radius, shape_cgg[0] - radius), random.randint(radius, shape_cgg[1] - radius)
                 
-                y,x = np.ogrid[-a:shape_cgg[0]-a, -b:shape_cgg[1]-b]
-                mask_cgg = x*x + y*y > r*r
-                image_cgg[mask_cgg] = 0
-                image_cgg = np.lib.pad(image_cgg, ((0,shape_real[0] - shape_cgg[0]), (0, shape_real[1] - shape_cgg[1])), 'constant', constant_values = (0,0))
+                y,x = np.ogrid[-a_cgg:shape_cgg[0]-a_cgg, -b_cgg:shape_cgg[1]-b_cgg]
+                mask_cgg = x*x + y*y <= r*r
 
-                y,x = np.ogrid[-a:shape_real[0]-a, -b:shape_real[1]-b]
+                a_real, b_real = random.randint(radius, shape_real[0] - radius), random.randint(radius, shape_real[1] - radius)                
+
+
+                y,x = np.ogrid[-a_real:shape_real[0]-a_real, -b_real:shape_real[1]-b_real]
                 mask_real = x*x + y*y <= r*r
                 image_real[mask_real] = 0
 
-                result = image_real + image_cgg
+                adding[mask_real] = image_cgg[mask_cgg]
+
+                result = image_real + adding
                 exp = Image.fromarray(result)
                 exp.save(export_path + str(i) + '.jpg')
                 i+=1
