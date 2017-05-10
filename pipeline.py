@@ -720,7 +720,7 @@ if __name__ == '__main__':
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, show_images = False, 
-                        save_images = True)
+                        save_images = False)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'
@@ -730,5 +730,5 @@ if __name__ == '__main__':
   clf.test_splicing(data_path = splicing_data_path, 
                     nb_images = 50,
                     minibatch_size = 25,
-                    show_images = True,
-                    save_images = False)
+                    show_images = False,
+                    save_images = True)
