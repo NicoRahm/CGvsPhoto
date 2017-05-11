@@ -187,7 +187,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
       y_pred = clf.predict(features)
 
-      test_accuracy += acc(y_pred, np.argmax(np.array([batch[1]]), 1))
+      test_accuracy += acc(y_pred, np.argmax(np.array([batch_test[1]]), 1))
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)

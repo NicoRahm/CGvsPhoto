@@ -650,7 +650,6 @@ class Model:
 
     else: 
       path_save = ''
-      path_save = ''
 
     print('   start session ...')
     with tf.Session(graph=self.graph) as sess:
@@ -714,13 +713,13 @@ if __name__ == '__main__':
   #           nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
+    test_data_path = '/home/nicolas/Database/Fun/'
 
-  clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, show_images = False, 
-                        save_images = False)
+  # clf.test_total_images(test_data_path = test_data_path,
+  #                       nb_images = 1, show_images = True, 
+  #                       save_images = False)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'

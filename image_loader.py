@@ -456,7 +456,10 @@ class Database_loader :
                 adding[mask_real] = image_cgg[mask_cgg]
 
                 result = image_real + adding
-                exp = Image.fromarray(result)
+
+                print(result.shape)
+
+                exp = Image.fromarray(result).convert('RGB')
                 exp.save(export_path + str(i) + '.jpg')
                 i+=1
 
@@ -625,9 +628,9 @@ class Test_loader:
 
         current_height = 0
         
-        while current_height + subimage_size < height: 
+        while current_height + subimage_size <= height: 
             current_width = 0
-            while current_width + subimage_size < width: 
+            while current_width + subimage_size <= width: 
                 box = (current_width, current_height, 
                        current_width + subimage_size, 
                        current_height + subimage_size)
