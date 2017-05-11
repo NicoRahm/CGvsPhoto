@@ -182,7 +182,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   for _ in range( nb_iterations ) :
       batch_test = data.get_next_train(crop = False)
       input_image = np.array([batch_test[0]])
-      shape = np.array(batch_test[0].shape[:1]).astype(np.float32)
+      shape = np.array(batch_test[0].shape[:2]).astype(np.float32)
       feed_dict = {x: input_image, x_shape : shape}
       h = hist.eval(feed_dict = feed_dict)
       features = extract_features_hist(h)

@@ -524,8 +524,13 @@ class Model:
 
 
   def test_total_images(self, test_data_path, nb_images, 
-                        minibatch_size = 25, show_images = False,
+                        minibatch_size = 25, decision_rule = 'majority_vote',
+                        show_images = False,
                         save_images = False): 
+
+    valid_decision_rule = ['majority_vote', 'weighted_vote']
+    if decision_rule not in valid_decision_rule:
+      raise NameError(decision_rule + ' is not a valid decision rule.')
     if(save_images):
       test_name = input("   Choose a name for the test : ")
       if not os.path.exists(visualization_dir + test_name):
@@ -558,13 +563,22 @@ class Model:
           d = np.max(pred, 1) - np.min(pred, 1)
           for k in range(d.shape[0]):
             diff.append(np.round(d[k], 1))
-          prediction += np.sum(label_image)
+          if decision_rule == 'majority_vote':
+            prediction += np.sum(label_image)
+          if decision_rule == 'weighted_vote':
+            prediction += np.sum(2*d*(label_image - 0.5))
+
           for l in label_image:
             labels.append(data_test.image_class[l])
           j+=minibatch_size
 
+         
+
         diff = np.array(diff)
-        prediction = data_test.image_class[int(np.round(prediction/batch_size))]
+        if decision_rule == 'majority_vote':
+          prediction = data_test.image_class[int(np.round(prediction/batch_size))]
+        if decision_rule == 'weighted_vote':
+          prediction = data_test.image_class[int(max(prediction,0)/abs(prediction))]
         if(label == prediction):
           accuracy+= 1
         print(prediction, label)
@@ -719,9 +733,10 @@ if __name__ == '__main__':
   else: 
     test_data_path = '/home/nicolas/Database/Fun/'
 
-  # clf.test_total_images(test_data_path = test_data_path,
-  #                       nb_images = 720, show_images = False, 
-  #                       save_images = False)
+  clf.test_total_images(test_data_path = test_data_path,
+                        nb_images = 720, decision_rule = 'weighted_vote',
+                        show_images = False, 
+                        save_images = False)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'
