@@ -634,7 +634,9 @@ class Model:
     if show_images:
       plt.show(img)
     if save_images:
-      plt.savefig(path_save + '/vis_' + file_name + '.png')
+      plt.savefig(path_save + '/vis_' + file_name + '.png', 
+                  bbox_inches='tight',
+                  pad_inches=0.0)
 
     plt.close()
 
@@ -717,9 +719,9 @@ if __name__ == '__main__':
   else: 
     test_data_path = '/home/nicolas/Database/Fun/'
 
-  clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, show_images = False, 
-                        save_images = False)
+  # clf.test_total_images(test_data_path = test_data_path,
+  #                       nb_images = 720, show_images = False, 
+  #                       save_images = False)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'

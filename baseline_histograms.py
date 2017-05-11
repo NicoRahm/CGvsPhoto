@@ -78,6 +78,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
     with tf.name_scope('Image_Visualization'):
       tf.summary.image('Input_Data', x)
 
+    x_shape = tf.placeholder(tf.float32, [2])
   # Filtering to obtain derivation 
   horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
   horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
@@ -132,10 +133,10 @@ def train_classifier(database_path, image_size, nb_train_batch,
   nbins = 11
 
   hist = []
-  function_to_map = lambda x: tf.histogram_fixed_width(x, 
+  function_to_map = lambda x: 1000.0 * tf.histogram_fixed_width(x, 
                                                        [-1.,1.], 
                                                        nbins = nbins, 
-                                                       dtype=tf.float32)
+                                                       dtype=tf.float32)/(x_shape[1]*x_shape[0])
 
   for x_filt in x_filtered:
   	hist.append(tf.map_fn(function_to_map, x_filt))
@@ -161,8 +162,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
     batch = data.get_next_train(crop = False)
     input_image = np.array([batch[0]])
-    
-    feed_dict = {x: input_image}
+    shape = np.array(batch[0].shape[:2]).astype(np.float32)
+    feed_dict = {x: input_image, x_shape: shape}
     h = hist.eval(feed_dict = feed_dict)
     features.append(extract_features_hist(h))
     labels.append(np.argmax(np.array([batch[1]]), 1))
@@ -181,7 +182,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
   for _ in range( nb_iterations ) :
       batch_test = data.get_next_train(crop = False)
       input_image = np.array([batch_test[0]])
-      feed_dict = {x: input_image}
+      shape = np.array(batch_test[0].shape[:1]).astype(np.float32)
+      feed_dict = {x: input_image, x_shape : shape}
       h = hist.eval(feed_dict = feed_dict)
       features = extract_features_hist(h)
 
