@@ -729,7 +729,7 @@ if __name__ == '__main__':
   #           nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
   else: 
     test_data_path = '/home/nicolas/Database/Fun/'
 
