@@ -718,7 +718,7 @@ if __name__ == '__main__':
     test_data_path = '/home/nicolas/Database/Fun/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 1, show_images = False, 
+                        nb_images = 720, show_images = False, 
                         save_images = False)
 
   if config == 'server':
