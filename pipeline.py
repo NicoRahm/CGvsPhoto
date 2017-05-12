@@ -242,6 +242,23 @@ class Model:
         tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
         tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
 
+      m_pool = max_pool_2x2(h_conv2)
+
+      nb_conv3 = 64
+
+      filter_size3 = 3
+      with tf.name_scope('Conv3'):
+        with tf.name_scope('Weights'):
+          W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
+        with tf.name_scope('Bias'):
+          b_conv3 = bias_variable([nb_conv3])
+
+        h_conv3 = tf.nn.relu(conv2d(m_pool, W_conv3) + b_conv3, 
+                             name = 'Activated_3')
+
+      
+
+
 
       nb_filters = nb_conv2
       if histograms:
@@ -250,12 +267,12 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.07
+        sigma = 0.05
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
-          hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
+          hist = classic_histogram_gaussian(h_conv3, k = nb_filters, 
                                             nbins = nbins, 
                                             values_range = range_hist, 
                                             sigma = sigma)
@@ -717,19 +734,19 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 10000
+  nb_train_batch = 15000
   nb_test_batch = 80
   nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = True)
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
     test_data_path = '/home/nicolas/Database/Fun/'
 
