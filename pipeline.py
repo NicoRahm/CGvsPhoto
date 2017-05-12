@@ -270,7 +270,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.07
+        sigma = 0.05
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -640,12 +640,12 @@ class Model:
                                    save_images = save_images)
 
         if (i%10 == 0):
-          print('\n' + str(i) + '/' + str(nb_images) + ' images treated.')
-          print('Accuracy : ' + str(100*accuracy/(i+1)) + '%')
+          print('\n' + str(i+1) + '/' + str(nb_images) + ' images treated.')
+          print('Accuracy : ' + str(round(100*accuracy/(i+1), 2)) + '%')
           if tp + fp != 0:
-            print('Precision : ' + str(100*tp/(tp + fp)) + '%')
+            print('Precision : ' + str(round(100*tp/(tp + fp), 2)) + '%')
           if nb_CGG != 0:
-            print('Recall : ' + str(100*tp/nb_CGG) + '% \n')
+            print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '% \n')
 
     if config != 'server':
       fpr, tpr, thresholds = roc_curve(y, scores)
@@ -791,9 +791,9 @@ if __name__ == '__main__':
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = True)
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/Fun/'
