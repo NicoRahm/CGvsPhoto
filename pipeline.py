@@ -16,6 +16,9 @@ import numpy as np
 config = ''
 config = 'server'
 
+if config != 'server':
+  from sklearn.metrics import roc_curve
+
 # computation time tick
 start_clock = time.clock()
 start_time = time.time()
@@ -242,19 +245,19 @@ class Model:
         tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
         tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
 
-      m_pool = max_pool_2x2(h_conv2)
+      # m_pool = max_pool_2x2(h_conv2)
 
-      nb_conv3 = 64
+      # nb_conv3 = 64
 
-      filter_size3 = 3
-      with tf.name_scope('Conv3'):
-        with tf.name_scope('Weights'):
-          W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
-        with tf.name_scope('Bias'):
-          b_conv3 = bias_variable([nb_conv3])
+      # filter_size3 = 3
+      # with tf.name_scope('Conv3'):
+      #   with tf.name_scope('Weights'):
+      #     W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
+      #   with tf.name_scope('Bias'):
+      #     b_conv3 = bias_variable([nb_conv3])
 
-        h_conv3 = tf.nn.relu(conv2d(m_pool, W_conv3) + b_conv3, 
-                             name = 'Activated_3')
+      #   h_conv3 = tf.nn.relu(conv2d(m_pool, W_conv3) + b_conv3, 
+      #                        name = 'Activated_3')
 
       
 
@@ -267,12 +270,12 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.05
+        sigma = 0.07
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
-          hist = classic_histogram_gaussian(h_conv3, k = nb_filters, 
+          hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
                                             nbins = nbins, 
                                             values_range = range_hist, 
                                             sigma = sigma)
@@ -565,6 +568,11 @@ class Model:
 
       data_test = il.Test_loader(test_data_path, subimage_size = self.image_size)
 
+      y = []
+      scores = []
+      tp = 0
+      fp = 0
+      nb_CGG = 0
       accuracy = 0
       for i in range(nb_images):
         batch, label, width, height = data_test.get_next_image()
@@ -573,7 +581,13 @@ class Model:
         prediction = 0
         labels = []
         diff = []
+        if (i%10 == 0):
+          print('\n' + str(i) + '/' + str(nb_images) + ' images treated.')
+          print('Accuracy : ' + str(100*accuracy/(i+1)) + '%')
+          print('Precision : ' + str(100*tp/(tp + fp)) + '%')
+          print('Recall : ' + str(100*tp/nb_CGG) + '% \n')
         while j < batch_size:
+
           feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
           pred = self.y_conv.eval(feed_dict)
           label_image = np.argmax(pred, 1)
@@ -590,14 +604,31 @@ class Model:
           j+=minibatch_size
 
          
+        if config == 'server':
+          if(label == 'Real'):
+            y.append(-1)
+          else:
+            y.append(1)
+
+          scores.append(prediction)
 
         diff = np.array(diff)
         if decision_rule == 'majority_vote':
           prediction = data_test.image_class[int(np.round(prediction/batch_size))]
         if decision_rule == 'weighted_vote':
           prediction = data_test.image_class[int(max(prediction,0)/abs(prediction))]
+        
+
+        if label == 'CGG':
+          nb_CGG += 1
+
         if(label == prediction):
           accuracy+= 1
+          if(prediction == 'CGG'):
+            tp += 1
+        else:
+          if prediction == 'CGG':
+            fp += 1
         print(prediction, label)
 
         if show_images and not save_images:
@@ -612,8 +643,23 @@ class Model:
                                    show_images = show_images,
                                    save_images = save_images)
 
-    accuracy /= nb_images
-    print('   Accuracy : ' + str(accuracy))
+    if config != 'server':
+      fpr, tpr, thresholds = roc_curve(y, scores)
+
+      plt.figure()
+      lw = 2
+      plt.plot(fpr, tpr, color='darkorange')
+      plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+      plt.xlim([0.0, 1.0])
+      plt.ylim([0.0, 1.05])
+      plt.xlabel('False Positive Rate')
+      plt.ylabel('True Positive Rate')
+      plt.title('Receiver operating characteristic curve')
+      plt.show()
+
+    print('    Final Accuracy : ' + str(100*accuracy/(nb_images)) + '%')
+    print('    Final Precision : ' + str(100*tp/(tp + fp)) + '%')
+    print('    Final Recall : ' + str(100*tp/nb_CGG) + '% \n')
 
 
   def image_visualization(self, path_save, file_name, images, labels_pred, 
@@ -741,12 +787,12 @@ if __name__ == '__main__':
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = True)
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
+    test_data_path = '/work/smg/v-nicolas/Fun/'
   else: 
     test_data_path = '/home/nicolas/Database/Fun/'
 
