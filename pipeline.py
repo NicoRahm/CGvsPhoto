@@ -639,7 +639,7 @@ class Model:
                                    show_images = show_images,
                                    save_images = save_images)
 
-    if (i%10 == 0):
+        if (i%10 == 0):
           print('\n' + str(i) + '/' + str(nb_images) + ' images treated.')
           print('Accuracy : ' + str(100*accuracy/(i+1)) + '%')
           if tp + fp != 0:
