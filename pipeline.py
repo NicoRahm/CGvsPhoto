@@ -581,11 +581,7 @@ class Model:
         prediction = 0
         labels = []
         diff = []
-        if (i%10 == 0):
-          print('\n' + str(i) + '/' + str(nb_images) + ' images treated.')
-          print('Accuracy : ' + str(100*accuracy/(i+1)) + '%')
-          print('Precision : ' + str(100*tp/(tp + fp)) + '%')
-          print('Recall : ' + str(100*tp/nb_CGG) + '% \n')
+        
         while j < batch_size:
 
           feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
@@ -642,6 +638,14 @@ class Model:
                                    height = height, diff = diff,
                                    show_images = show_images,
                                    save_images = save_images)
+
+    if (i%10 == 0):
+          print('\n' + str(i) + '/' + str(nb_images) + ' images treated.')
+          print('Accuracy : ' + str(100*accuracy/(i+1)) + '%')
+          if tp + fp != 0:
+            print('Precision : ' + str(100*tp/(tp + fp)) + '%')
+          if nb_CGG != 0:
+            print('Recall : ' + str(100*tp/nb_CGG) + '% \n')
 
     if config != 'server':
       fpr, tpr, thresholds = roc_curve(y, scores)
