@@ -801,7 +801,7 @@ if __name__ == '__main__':
     test_data_path = '/home/nicolas/Database/Fun/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, decision_rule = 'weighted_vote',
+                        nb_images = 18, decision_rule = 'weighted_vote',
                         show_images = False, 
                         save_images = False)
 
