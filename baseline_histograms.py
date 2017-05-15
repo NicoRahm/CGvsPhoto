@@ -180,6 +180,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
   nb_iterations = nb_test_batch
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
+      if (i%10 == 0):
+        print("Testing batch " + str(i))
       batch_test = data.get_next_train(crop = False)
       input_image = np.array([batch_test[0]])
       shape = np.array(batch_test[0].shape[:2]).astype(np.float32)
@@ -208,11 +210,11 @@ if __name__ == '__main__':
   if config == 'server':
     database_path = '/work/smg/v-nicolas/level-design_raise'
   else:
-    database_path = '/home/nicolas/Database/level-design_raise'
+    database_path = '/home/nicolas/Database/deadend_raise'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
                          nb_train_batch = 2520,
-                         nb_test_batch = 720,
+                         nb_test_batch = 614,
                          batch_size = 1)

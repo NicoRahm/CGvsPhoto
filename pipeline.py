@@ -18,6 +18,7 @@ config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
+  from sklearn.metrics import auc
 
 # computation time tick
 start_clock = time.clock()
@@ -214,7 +215,7 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 32
+      nb_conv1 = 16
       filter_size1 = 3
 
       with tf.name_scope('Conv1'):
@@ -230,7 +231,7 @@ class Model:
                              name = 'Activated_1')
 
       # second conv 
-      nb_conv2 = 64
+      nb_conv2 = 32
       filter_size2 = 3
       with tf.name_scope('Conv2'):
         with tf.name_scope('Weights'):
@@ -600,7 +601,7 @@ class Model:
           j+=minibatch_size
 
          
-        if config == 'server':
+        if config != 'server':
           if(label == 'Real'):
             y.append(-1)
           else:
@@ -639,16 +640,18 @@ class Model:
                                    show_images = show_images,
                                    save_images = save_images)
 
-        if (i%10 == 0):
-          print('\n' + str(i+1) + '/' + str(nb_images) + ' images treated.')
+        if ((i+1)%10 == 0):
+          print('\n_______________________________________________________')
+          print(str(i+1) + '/' + str(nb_images) + ' images treated.')
           print('Accuracy : ' + str(round(100*accuracy/(i+1), 2)) + '%')
           if tp + fp != 0:
             print('Precision : ' + str(round(100*tp/(tp + fp), 2)) + '%')
           if nb_CGG != 0:
-            print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '% \n')
+            print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
+          print('_______________________________________________________\n')
 
     if config != 'server':
-      fpr, tpr, thresholds = roc_curve(y, scores)
+      fpr, tpr, thresholds = roc_curve(np.array(y), np.array(scores))
 
       plt.figure()
       lw = 2
@@ -661,10 +664,12 @@ class Model:
       plt.title('Receiver operating characteristic curve')
       plt.show()
 
-    print('    Final Accuracy : ' + str(100*accuracy/(nb_images)) + '%')
-    print('    Final Precision : ' + str(100*tp/(tp + fp)) + '%')
-    print('    Final Recall : ' + str(100*tp/nb_CGG) + '% \n')
-
+    print('\n_______________________________________________________')
+    print('Final Accuracy : ' + str(round(100*accuracy/(nb_images), 3)) + '%')
+    print('Final Precision : ' + str(round(100*tp/(tp + fp), 3)) + '%')
+    print('Final Recall : ' + str(round(100*tp/nb_CGG, 3)) + '%')
+    print('Final AUC : ' + str(round(auc(fpr, tpr), 3)) + '%')
+    print('_______________________________________________________\n')
 
   def image_visualization(self, path_save, file_name, images, labels_pred, 
                           true_label, width, height, diff,
@@ -796,12 +801,12 @@ if __name__ == '__main__':
             nb_validation_batch = nb_validation_batch)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/Fun/'
+    test_data_path = '/work/smg/v-nicolas/deadend_raise/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/Fun/'
+    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 18, decision_rule = 'weighted_vote',
+                        nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
                         save_images = False)
 
