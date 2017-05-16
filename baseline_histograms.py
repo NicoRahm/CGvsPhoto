@@ -158,7 +158,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   labels = []
   for i in range(nb_train_batch):
     if (i%10 == 0):
-      print("Training batch " + str(i))
+      print("Computing features for training batch " + str(i) + '/' + str(nb_train_batch))
 
     batch = data.get_next_train(crop = False)
     input_image = np.array([batch[0]])
@@ -181,7 +181,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   data.test_iterator = 0
   for _ in range( nb_iterations ) :
       if (i%10 == 0):
-        print("Testing batch " + str(i))
+        print("Testing batch " + str(i) + '/' +str(nb_iterations))
       batch_test = data.get_next_train(crop = False)
       input_image = np.array([batch_test[0]])
       shape = np.array(batch_test[0].shape[:2]).astype(np.float32)

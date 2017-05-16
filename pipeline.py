@@ -19,6 +19,10 @@ config = 'server'
 if config != 'server':
   from sklearn.metrics import roc_curve
   from sklearn.metrics import auc
+  from sklearn.metrics import accuracy_score as acc
+  from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+  from sklearn.svm import SVC
+  from sklearn.ensemble import ExtraTreesClassifier
 
 # computation time tick
 start_clock = time.clock()
@@ -215,7 +219,7 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 16
+      nb_conv1 = 32
       filter_size1 = 3
 
       with tf.name_scope('Conv1'):
@@ -231,7 +235,7 @@ class Model:
                              name = 'Activated_1')
 
       # second conv 
-      nb_conv2 = 32
+      nb_conv2 = 64
       filter_size2 = 3
       with tf.name_scope('Conv2'):
         with tf.name_scope('Weights'):
@@ -284,6 +288,7 @@ class Model:
           # tf.summary.tensor_summary('hist', hist)
 
         flatten = tf.reshape(hist, [-1, size_flat], name = "Flatten_Hist")
+        self.flatten = flatten
 
       else: 
 
@@ -308,6 +313,8 @@ class Model:
         keep_prob = tf.placeholder(tf.float32)
         self.keep_prob = keep_prob
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+
+      self.h_fc1 = h_fc1
 
       # readout layer
       with tf.variable_scope('Readout'):
@@ -542,6 +549,115 @@ class Model:
     print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))
     print("   computation time (real):",time.strftime("%H:%M:%S", time.gmtime(time.time()-start_time)))
     print('   done.')
+
+
+  def lda_training(self, nb_train_batch, nb_test_batch):
+
+    self.lda_classifier = LinearDiscriminantAnalysis()
+
+    # start a session
+    print('   start session ...')
+    with tf.Session(graph=self.graph) as sess:
+      saver = tf.train.Saver()
+      print('   variable initialization ...')
+      tf.global_variables_initializer().run()
+      tf.local_variables_initializer().run()
+      file_to_restore = input("\nName of the file to restore (Directory : " + 
+                              folder_ckpt + ') : ')
+      saver.restore(sess, folder_ckpt + file_to_restore)
+
+      # training the LDA classifier
+      features = []
+      labels = []
+      for i in range(nb_train_batch):
+        if (i%10 == 0):
+          print("Computing features for training batch " + str(i) + '/' + str(nb_train_batch))
+
+        batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
+        feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
+        h = self.h_fc1.eval(feed_dict = feed_dict)
+        features.append(h)
+        labels.append(np.argmax(np.array(batch[1]), 1))
+      
+      features = np.reshape(np.array(features), (self.batch_size*nb_train_batch, features[0].shape[1])) 
+      labels = np.reshape(np.array(labels), (self.batch_size*nb_train_batch,)) 
+      print(features.shape)
+      print(labels.shape)
+      self.lda_classifier.fit(features, labels)
+
+
+      print('   Testing ...')
+      # test_auc = 0
+      features_test = []
+      labels_test = []
+      for _ in range(nb_test_batch) :
+        batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
+        feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
+        h = self.h_fc1.eval(feed_dict = feed_dict)
+        features_test.append(h)
+        labels_test.append(np.argmax(np.array(batch[1]), 1))
+
+      features_test = np.reshape(np.array(features_test), (self.batch_size*nb_test_batch, features_test[0].shape[1])) 
+      labels_test = np.reshape(np.array(labels_test), (self.batch_size*nb_test_batch,)) 
+
+      labels_pred = self.lda_classifier.predict(features_test)
+
+      test_accuracy = acc(labels_pred, labels_test)
+      print("   test accuracy %g"%test_accuracy)
+
+  def svm_training(self, nb_train_batch, nb_test_batch):
+
+    self.svm_classifier = ExtraTreesClassifier(n_estimators = 200, max_depth = 6)
+
+    # start a session
+    print('   start session ...')
+    with tf.Session(graph=self.graph) as sess:
+      saver = tf.train.Saver()
+      print('   variable initialization ...')
+      tf.global_variables_initializer().run()
+      tf.local_variables_initializer().run()
+      file_to_restore = input("\nName of the file to restore (Directory : " + 
+                              folder_ckpt + ') : ')
+      saver.restore(sess, folder_ckpt + file_to_restore)
+
+      # training the LDA classifier
+      features = []
+      labels = []
+      for i in range(nb_train_batch):
+        if (i%10 == 0):
+          print("Computing features for training batch " + str(i) + '/' + str(nb_train_batch))
+
+        batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
+        feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
+        h = self.h_fc1.eval(feed_dict = feed_dict)
+        features.append(h)
+        labels.append(np.argmax(np.array(batch[1]), 1))
+      
+      features = np.reshape(np.array(features), (self.batch_size*nb_train_batch, features[0].shape[1])) 
+      labels = np.reshape(np.array(labels), (self.batch_size*nb_train_batch,)) 
+      print(features.shape)
+      print(labels.shape)
+      self.svm_classifier.fit(features, labels)
+
+
+      print('   Testing ...')
+      # test_auc = 0
+      features_test = []
+      labels_test = []
+      for _ in range(nb_test_batch) :
+        batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
+        feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
+        h = self.h_fc1.eval(feed_dict = feed_dict)
+        features_test.append(h)
+        labels_test.append(np.argmax(np.array(batch[1]), 1))
+
+      features_test = np.reshape(np.array(features_test), (self.batch_size*nb_test_batch, features_test[0].shape[1])) 
+      labels_test = np.reshape(np.array(labels_test), (self.batch_size*nb_test_batch,)) 
+
+      labels_pred = self.svm_classifier.predict(features_test)
+
+      test_accuracy = acc(labels_pred, labels_test)
+      print("   test accuracy %g"%test_accuracy)
 
 
   def test_total_images(self, test_data_path, nb_images, 
@@ -789,7 +905,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
+  nb_train_batch = 5000
   nb_test_batch = 80
   nb_validation_batch = 40
 
@@ -800,15 +916,17 @@ if __name__ == '__main__':
             nb_test_batch = nb_test_batch, 
             nb_validation_batch = nb_validation_batch)
 
+  # clf.lda_training(nb_train_batch = 100, nb_test_batch = 20)
+
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/deadend_raise/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
+    test_data_path = '/home/nicolas/Database/Fun/'
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = False)
+                        save_images = True)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'

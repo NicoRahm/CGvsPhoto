@@ -52,7 +52,7 @@ class Database_loader :
 
         # file extension accepted as image data
         proportion = self.proportion
-        valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG"]
+        valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG", ".jpeg"]
 
         file_list = []
 
@@ -597,7 +597,7 @@ class Test_loader:
 
     def load_images_in_dir(self, dir_name, image_class) :
 
-        valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG"]
+        valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG", ".jpeg"]
 
         file_list = []
 
