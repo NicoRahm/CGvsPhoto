@@ -526,7 +526,7 @@ class Model:
           if i%10 == 0 :
               
               if i%100 == 0:
-                plot_histograms = True
+                plot_histograms = False
               else:
                 plot_histograms = False
 
