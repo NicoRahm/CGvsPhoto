@@ -10,6 +10,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as mcolors
+import csv
 
 import numpy as np
 
@@ -275,7 +276,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.05
+        sigma = 0.07
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -468,6 +469,8 @@ class Model:
     
     run_name = input("   Choose a name for the run : ")
     path_save = folder_ckpt + run_name
+    acc_name = dir_summaries + "validation_accuracy.csv"
+
 
     # start a session
     print('   start session ...')
@@ -498,6 +501,7 @@ class Model:
 
       # Train
       print('   train ...')
+      validation_accuracy = []
       for i in range(nb_train_batch):
         
           # evry 100 batches, test the accuracy
@@ -508,10 +512,11 @@ class Model:
               else:
                 plot_histograms = False
 
-              self.validation_testing(i, nb_iterations = nb_validation_batch, 
+              v = self.validation_testing(i, nb_iterations = nb_validation_batch, 
                                       batch_size = batch_size, 
                                       plot_histograms = plot_histograms,
                                       run_name = run_name)
+              validation_accuracy.append(v)
               
           # regular training
           batch = self.data.get_next_train_batch(batch_size, False, True, True)
@@ -525,7 +530,18 @@ class Model:
             print('   saving weights in file : ' + path_save_batch)
             saver.save(sess, path_save_batch)
             print('   OK')
+      print('   saving validation accuracy...')
+      file = open(acc_name, "wb")
 
+      try:
+          writer = csv.writer(file)
+       
+          for v in validation_accuracy:
+            writer.writerow(v)
+      finally:
+
+          file.close()
+          print('    done.')
     # final test
       print('   final test ...')
       test_accuracy = 0
@@ -595,7 +611,7 @@ class Model:
         feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
         h = self.h_fc1.eval(feed_dict = feed_dict)
         features_test.append(h)
-        labels_test.append(np.argmax(np.array(batch[1]), 1))
+        labels_test.append(np.argmax(np.array(batch_test[1]), 1))
 
       features_test = np.reshape(np.array(features_test), (self.batch_size*nb_test_batch, features_test[0].shape[1])) 
       labels_test = np.reshape(np.array(labels_test), (self.batch_size*nb_test_batch,)) 
@@ -649,7 +665,7 @@ class Model:
         feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
         h = self.h_fc1.eval(feed_dict = feed_dict)
         features_test.append(h)
-        labels_test.append(np.argmax(np.array(batch[1]), 1))
+        labels_test.append(np.argmax(np.array(batch_test[1]), 1))
 
       features_test = np.reshape(np.array(features_test), (self.batch_size*nb_test_batch, features_test[0].shape[1])) 
       labels_test = np.reshape(np.array(labels_test), (self.batch_size*nb_test_batch,)) 
@@ -912,16 +928,16 @@ if __name__ == '__main__':
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = True)
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 100, nb_test_batch = 20)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/deadend_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/Fun/'
+    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, decision_rule = 'weighted_vote',
