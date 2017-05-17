@@ -309,6 +309,7 @@ class Model:
           s = compute_stat(h_conv2, nb_filters)
           size_flat = nb_filters*4
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
+          self.hist = s
         else:
           m_pool = max_pool_2x2(h_conv2)
           size_flat = int(nb_filters*(image_size**2)/4)
