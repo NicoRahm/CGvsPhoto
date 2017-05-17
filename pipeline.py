@@ -166,11 +166,19 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
   res = tf.map_fn(function_to_map, x)
   return(res)
 
+def stat(x):
+  return(tf.stack([tf.reduce_mean(x), tf.reduce_min(x), tf.reduce_max(x), tf.reduce_mean((x - tf.reduce_mean(x))**2)]))
+
+def compute_stat(x, k):
+  function_to_map = lambda y: tf.stack([stat(y[:,:,i]) for i in range(k)])
+  res = tf.map_fn(function_to_map, x)
+  return(res)
 
 class Model:
 
   def __init__(self, database_path, image_size, nbins = 10, 
-               batch_size = 50, histograms = True, all_summaries = False):
+               batch_size = 50, histograms = True, stats = False, 
+               all_summaries = False):
 
     print('   tensorFlow version: ', tf.__version__)
 
@@ -180,10 +188,12 @@ class Model:
     self.all_summaries = all_summaries
     self.nbins = nbins
     self.histograms = histograms
+    self.stats = stats
     
     self.import_database()
     self.create_graph(nb_class = self.nb_class, 
                       histograms = self.histograms,
+                      stats = self.stats,
                       all_summaries = self.all_summaries)
 
 
@@ -195,7 +205,8 @@ class Model:
                                    proportion = 1, only_green=True)
     self.nb_class = self.data.nb_class
 
-  def create_graph(self, nb_class, histograms = True, all_summaries = False): 
+  def create_graph(self, nb_class, histograms = True, stats = False,
+                   all_summaries = False): 
 
     print('   create model ...')
     # input layer. One entry is a float size x size, 3-channels image. 
@@ -293,11 +304,17 @@ class Model:
 
       else: 
 
-        m_pool = max_pool_2x2(h_conv2)
-        size_flat = int(nb_filters*(image_size**2)/4)
-        flatten = tf.reshape(m_pool, [-1, size_flat], name = "Flatten_MPool")
+        if stats: 
 
+          s = compute_stat(h_conv2, nb_filters)
+          size_flat = nb_filters*4
+          flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
+        else:
+          m_pool = max_pool_2x2(h_conv2)
+          size_flat = int(nb_filters*(image_size**2)/4)
+          flatten = tf.reshape(m_pool, [-1, size_flat], name = "Flatten_MPool")
 
+        self.flatten = flatten
       # Densely Connected Layer
       # we add a fully-connected layer with 1024 neurons 
       with tf.variable_scope('Dense1'):
@@ -541,7 +558,7 @@ class Model:
       finally:
 
           file.close()
-          print('    done.')
+          print('   done.')
     # final test
       print('   final test ...')
       test_accuracy = 0
@@ -591,7 +608,7 @@ class Model:
 
         batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
         feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
-        h = self.h_fc1.eval(feed_dict = feed_dict)
+        h = self.flatten.eval(feed_dict = feed_dict)
         features.append(h)
         labels.append(np.argmax(np.array(batch[1]), 1))
       
@@ -609,7 +626,7 @@ class Model:
       for _ in range(nb_test_batch) :
         batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
         feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
-        h = self.h_fc1.eval(feed_dict = feed_dict)
+        h = self.flatten.eval(feed_dict = feed_dict)
         features_test.append(h)
         labels_test.append(np.argmax(np.array(batch_test[1]), 1))
 
@@ -623,8 +640,8 @@ class Model:
 
   def svm_training(self, nb_train_batch, nb_test_batch):
 
-    self.svm_classifier = ExtraTreesClassifier(n_estimators = 200, max_depth = 6)
-
+    # self.svm_classifier = ExtraTreesClassifier(n_estimators = 200, max_depth = 6)
+    self.svm_classifier = SVC()
     # start a session
     print('   start session ...')
     with tf.Session(graph=self.graph) as sess:
@@ -645,7 +662,7 @@ class Model:
 
         batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
         feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
-        h = self.h_fc1.eval(feed_dict = feed_dict)
+        h = self.flatten.eval(feed_dict = feed_dict)
         features.append(h)
         labels.append(np.argmax(np.array(batch[1]), 1))
       
@@ -663,7 +680,7 @@ class Model:
       for _ in range(nb_test_batch) :
         batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
         feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
-        h = self.h_fc1.eval(feed_dict = feed_dict)
+        h = self.flatten.eval(feed_dict = feed_dict)
         features_test.append(h)
         labels_test.append(np.argmax(np.array(batch_test[1]), 1))
 
@@ -921,18 +938,18 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 0
+  nb_train_batch = 15000
   nb_test_batch = 80
   nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 11,
-              batch_size = 50, histograms = True)
+              batch_size = 50, histograms = False, stats = True)
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
-  # clf.lda_training(nb_train_batch = 100, nb_test_batch = 20)
+  clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
