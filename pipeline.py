@@ -555,7 +555,7 @@ class Model:
           writer = csv.writer(file)
        
           for v in validation_accuracy:
-            writer.writerow(v)
+            writer.writerow([v])
       finally:
 
           file.close()
@@ -726,7 +726,7 @@ class Model:
       nb_CGG = 0
       accuracy = 0
       for i in range(nb_images):
-        batch, label, width, height = data_test.get_next_image()
+        batch, label, width, height, original = data_test.get_next_image()
         batch_size = batch.shape[0]
         j = 0
         prediction = 0
@@ -787,8 +787,11 @@ class Model:
                                    images = batch, labels_pred = labels, 
                                    true_label = label, width = width, 
                                    height = height, diff = diff,
+                                   original = original,
                                    show_images = show_images,
-                                   save_images = save_images)
+                                   save_images = save_images,
+                                   save_original = save_images,
+                                   prob_map = save_images)
 
         if ((i+1)%10 == 0):
           print('\n_______________________________________________________')
@@ -822,8 +825,10 @@ class Model:
     print('_______________________________________________________\n')
 
   def image_visualization(self, path_save, file_name, images, labels_pred, 
-                          true_label, width, height, diff,
-                          show_images = False, save_images = False):
+                          true_label, width, height, diff, original = None,
+                          show_images = False, save_images = False,
+                          prob_map = False, save_original = False):
+
     nb_width = int(width/self.image_size)
     nb_height = int(height/self.image_size)
 
@@ -833,32 +838,32 @@ class Model:
     
     
     for i in range(len(images)):
+
       cdict_green = {'red': ((0.0,0.0,0.0),
                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
                      'blue': ((0.0,0.0,0.0),
                               (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
                      'green': ((0.0,0.0,0.0),
                                (1.0,1.0,1.0))}
-      cmap_green = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
 
       cdict_red = {'red': ((0.0,0.0,0.0),
-                             (1.0,1.0,1.0)),
-                     'blue': ((0.0,0.0,0.0),
-                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
-                     'green': ((0.0,0.0,0.0),
-                               (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4))}
-      cmap_red = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
+                               (1.0,1.0,1.0)),
+                    'blue': ((0.0,0.0,0.0),
+                                (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                    'green': ((0.0,0.0,0.0),
+                                 (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4))}
+      
 
       ax1 = plt.subplot(gs1[i])
       ax1.axis('off')
       if labels_pred[i] == true_label:
         if diff[i] > 0.4:
-          cmap = cmap_green
+          cmap = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
         else:
           cmap = 'gray'
       else: 
         if diff[i] > 0.4:
-          cmap = cmap_red
+          cmap = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
         else:
           cmap = 'gray'
       plt.imshow(images[i,:,:,0], cmap = cmap)
@@ -875,6 +880,64 @@ class Model:
                   pad_inches=0.0)
 
     plt.close()
+
+    if save_images:
+      if save_original: 
+        plt.figure()
+        plt.axis('off')
+        plt.imshow(original, cmap = 'gray')
+        plt.savefig(path_save + '/vis_' + file_name + '_original' + '.png', 
+                  bbox_inches='tight',
+                  pad_inches=0.0)
+      if prob_map: 
+        img = plt.figure(figsize = (nb_width, nb_height))
+
+        
+      
+        gs1 = gridspec.GridSpec(nb_height, nb_width)
+        for i in range(len(images)):
+
+
+          cdict_green = {'red': ((0.0,0.0,0.0),
+                             (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                     'blue': ((0.0,0.0,0.0),
+                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                     'green': ((0.0,0.0,0.0),
+                               (1.0,1.0,1.0))}
+
+          cdict_red = {'red': ((0.0,0.0,0.0),
+                                   (1.0,1.0,1.0)),
+                        'blue': ((0.0,0.0,0.0),
+                                    (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                        'green': ((0.0,0.0,0.0),
+                                     (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4))}
+          
+          ax1 = plt.subplot(gs1[i])
+          ax1.axis('off')
+          if labels_pred[i] == true_label:
+            if diff[i] > 0.4:
+              cmap = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
+            else:
+              cmap = 'gray'
+          else: 
+            if diff[i] > 0.4:
+              cmap = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
+            else:
+              cmap = 'gray'
+
+          map_im = np.ones((self.image_size, self.image_size))
+          map_im[0,0] = 0
+          plt.imshow(map_im, cmap = cmap)
+          ax1.set_xticklabels([])
+          ax1.set_yticklabels([])
+
+        gs1.update(wspace=.0, hspace=.0)
+        if show_images:
+          plt.show(img)
+        if save_images:
+          plt.savefig(path_save + '/vis_' + file_name + '_probmap' + '.png', 
+                      bbox_inches='tight',
+                      pad_inches=0.0)
 
 
   def test_splicing(self, data_path, nb_images, save_images, show_images,
@@ -903,7 +966,7 @@ class Model:
                                  subimage_size = self.image_size)
 
       for i in range(nb_images):
-        batch, label, width, height = data_test.get_next_image()
+        batch, label, width, height, original = data_test.get_next_image()
         batch_size = batch.shape[0]
         j = 0
         labels = []
@@ -927,8 +990,11 @@ class Model:
                                  images = batch, labels_pred = labels, 
                                  true_label = label, width = width, 
                                  height = height, diff = diff,
+                                 original = original,
                                  show_images = show_images,
-                                 save_images = save_images)    
+                                 save_images = save_images,
+                                 prob_map = save_images, 
+                                 save_original= save_images)    
 
 
 if __name__ == '__main__':
@@ -939,7 +1005,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
+  nb_train_batch = 0
   nb_test_batch = 80
   nb_validation_batch = 40
 
@@ -950,7 +1016,7 @@ if __name__ == '__main__':
             nb_test_batch = nb_test_batch, 
             nb_validation_batch = nb_validation_batch)
 
-  clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
+  # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
