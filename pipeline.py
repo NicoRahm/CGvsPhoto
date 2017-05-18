@@ -557,7 +557,7 @@ class Model:
           writer = csv.writer(file)
        
           for v in validation_accuracy:
-            writer.writerow([v])
+            writer.writerow([str(v)])
       finally:
 
           file.close()
