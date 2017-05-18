@@ -1038,7 +1038,7 @@ if __name__ == '__main__':
   clf = Model(database_path, image_size, nbins = 11,
               batch_size = 50, histograms = True, stats = False)
 
-  clf.show_histogram()
+  # clf.show_histogram()
 
   clf.train(nb_train_batch = nb_train_batch,
             nb_test_batch = nb_test_batch, 
