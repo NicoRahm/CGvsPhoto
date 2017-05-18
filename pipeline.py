@@ -551,7 +551,7 @@ class Model:
             saver.save(sess, path_save_batch)
             print('   OK')
       print('   saving validation accuracy...')
-      file = open(acc_name, "wb")
+      file = open(acc_name, 'w', newline='')
 
       try:
           writer = csv.writer(file)
