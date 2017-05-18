@@ -256,7 +256,9 @@ class Model:
           b_conv2 = bias_variable([nb_conv2])
 
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')
+                             name = 'Activated_2')/5
+
+        self.h_conv2 = h_conv2
 
         tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
         tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
@@ -287,7 +289,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.07
+        sigma = 0.05
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -584,6 +586,30 @@ class Model:
     print("   computation time (real):",time.strftime("%H:%M:%S", time.gmtime(time.time()-start_time)))
     print('   done.')
 
+
+  def show_histogram(self):
+
+    with tf.Session(graph=self.graph) as sess:
+
+      tf.global_variables_initializer().run()
+      tf.local_variables_initializer().run()
+      saver = tf.train.Saver()
+      print('   variable initialization ...')
+
+      file_to_restore = input("\nName of the file to restore (Directory : " + 
+                                folder_ckpt + ') : ')
+      saver.restore(sess, folder_ckpt + file_to_restore)
+      print('\n   Model restored\n')
+
+      batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
+      feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
+      conv = self.h_conv2.eval(feed_dict = feed_dict)
+
+      for i in range(self.batch_size):
+        plt.figure()
+
+        plt.hist(np.reshape(conv[i,:,:,0], (self.image_size*self.image_size,)))
+        plt.show()
 
   def lda_training(self, nb_train_batch, nb_test_batch):
 
@@ -1005,12 +1031,14 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 0
+  nb_train_batch = 10
   nb_test_batch = 80
   nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 11,
-              batch_size = 50, histograms = False, stats = True)
+              batch_size = 50, histograms = True, stats = False)
+
+  clf.show_histogram()
 
   clf.train(nb_train_batch = nb_train_batch,
             nb_test_batch = nb_test_batch, 
