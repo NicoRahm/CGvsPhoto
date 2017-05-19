@@ -256,7 +256,7 @@ class Model:
           b_conv2 = bias_variable([nb_conv2])
 
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')/10
+                             name = 'Activated_2')/4
 
         self.h_conv2 = h_conv2
 
@@ -289,7 +289,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.08
+        sigma = 0.05
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -545,7 +545,7 @@ class Model:
               
           # regular training
           batch = self.data.get_next_train_batch(batch_size, False, True, True)
-          feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 0.85}
+          feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 0.65}
           summary, _ = sess.run([merged, self.train_step], feed_dict = feed_dict)
           train_writer.add_summary(summary, i)
 
@@ -557,11 +557,11 @@ class Model:
             saver.save(sess, path_save_batch)
             print('   OK')
             if batch_clock is not None: 
-              time_elapsed = time.gmtime(time.clock()-batch_clock)
-              print('   Time last 100 batchs : ', time.strftime("%H:%M:%S",time_elapsed))
+              time_elapsed = (time.time()-batch_clock)
+              print('   Time last 100 batchs : ', time.strftime("%H:%M:%S",time.gmtime(time_elapsed)))
               remaining_time = time_elapsed * int((nb_train_batch - i)/100)
-              print('   Reamining time : ')
-            batch_clock = time.clock(time.strftime("%H:%M:%S",remaining_time))
+              print('   Reamining time : ', time.strftime("%H:%M:%S",time.gmtime(remaining_time)))
+            batch_clock = time.time()
       print('   saving validation accuracy...')
       file = open(acc_name, 'w', newline='')
 
@@ -1047,16 +1047,16 @@ class Model:
 if __name__ == '__main__':
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
+    database_path = '/work/smg/v-nicolas/level-design_raise_64/'
   else:
-    database_path = '/home/nicolas/Database/level-design_raise_100/'
+    database_path = '/home/nicolas/Database/level-design_raise_64/'
 
-  image_size = 100
-  nb_train_batch = 15000
-  nb_test_batch = 80
-  nb_validation_batch = 40
+  image_size = 64
+  nb_train_batch = 30000
+  nb_test_batch = 200
+  nb_validation_batch = 100
 
-  clf = Model(database_path, image_size, nbins = 7,
+  clf = Model(database_path, image_size, nbins = 13,
               batch_size = 50, histograms = True, stats = False)
 
   # clf.show_histogram()
