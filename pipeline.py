@@ -23,7 +23,7 @@ if config != 'server':
   from sklearn.metrics import accuracy_score as acc
   from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
   from sklearn.svm import SVC
-  from sklearn.ensemble import ExtraTreesClassifier
+  # from sklearn.ensemble import ExtraTreesClassifier
 
 # computation time tick
 start_clock = time.clock()
@@ -256,7 +256,7 @@ class Model:
           b_conv2 = bias_variable([nb_conv2])
 
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')/5
+                             name = 'Activated_2')/10
 
         self.h_conv2 = h_conv2
 
@@ -289,7 +289,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.05
+        sigma = 0.08
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -492,6 +492,11 @@ class Model:
     acc_name = dir_summaries + "validation_accuracy.csv"
 
 
+    # computation time tick
+    start_clock = time.clock()
+    start_time = time.time()
+    batch_clock = None
+
     # start a session
     print('   start session ...')
     with tf.Session(graph=self.graph) as sess:
@@ -546,10 +551,17 @@ class Model:
 
           # Saving weights every 100 batches
           if i%100 == 0:
+
             path_save_batch = path_save + str(i) + ".ckpt"
             print('   saving weights in file : ' + path_save_batch)
             saver.save(sess, path_save_batch)
             print('   OK')
+            if batch_clock is not None: 
+              time_elapsed = time.gmtime(time.clock()-batch_clock)
+              print('   Time last 100 batchs : ', time.strftime("%H:%M:%S",time_elapsed))
+              remaining_time = time_elapsed * int((nb_train_batch - i)/100)
+              print('   Reamining time : ')
+            batch_clock = time.clock(time.strftime("%H:%M:%S",remaining_time))
       print('   saving validation accuracy...')
       file = open(acc_name, 'w', newline='')
 
@@ -723,7 +735,8 @@ class Model:
   def test_total_images(self, test_data_path, nb_images, 
                         minibatch_size = 25, decision_rule = 'majority_vote',
                         show_images = False,
-                        save_images = False): 
+                        save_images = False,
+                        only_green = True): 
 
     valid_decision_rule = ['majority_vote', 'weighted_vote']
     if decision_rule not in valid_decision_rule:
@@ -733,6 +746,10 @@ class Model:
       if not os.path.exists(visualization_dir + test_name):
         os.mkdir(visualization_dir + test_name)
 
+    if not only_green:
+      print('   No visualization when testing all channels...')
+      show_images = False
+      save_images = False
     print('   start session ...')
     with tf.Session(graph=self.graph) as sess:
       saver = tf.train.Saver()
@@ -743,7 +760,7 @@ class Model:
                               folder_ckpt + ') : ')
       saver.restore(sess, folder_ckpt + file_to_restore)
 
-      data_test = il.Test_loader(test_data_path, subimage_size = self.image_size)
+      data_test = il.Test_loader(test_data_path, subimage_size = self.image_size, only_green = only_green)
 
       y = []
       scores = []
@@ -753,6 +770,8 @@ class Model:
       accuracy = 0
       for i in range(nb_images):
         batch, label, width, height, original = data_test.get_next_image()
+        if not only_green: 
+          batch = np.reshape(batch, (batch.shape[0]*3, batch.shape[1], batch.shape[2],1))
         batch_size = batch.shape[0]
         j = 0
         prediction = 0
@@ -765,8 +784,10 @@ class Model:
           pred = self.y_conv.eval(feed_dict)
           label_image = np.argmax(pred, 1)
           d = np.max(pred, 1) - np.min(pred, 1)
+
           for k in range(d.shape[0]):
             diff.append(np.round(d[k], 1))
+
           if decision_rule == 'majority_vote':
             prediction += np.sum(label_image)
           if decision_rule == 'weighted_vote':
@@ -1035,7 +1056,7 @@ if __name__ == '__main__':
   nb_test_batch = 80
   nb_validation_batch = 40
 
-  clf = Model(database_path, image_size, nbins = 11,
+  clf = Model(database_path, image_size, nbins = 7,
               batch_size = 50, histograms = True, stats = False)
 
   # clf.show_histogram()
@@ -1047,14 +1068,15 @@ if __name__ == '__main__':
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
+    test_data_path = '/home/nicolas/Database/DET_Dresden/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, decision_rule = 'weighted_vote',
+                        nb_images = 752, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = False)
+                        save_images = False,
+                        only_green = True)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'

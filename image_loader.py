@@ -498,7 +498,7 @@ class Database_loader :
 
             for j in range(batch_size):
                 save = True
-                exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+
                 if batch[1][j][0] == 0.:
                     name_class = self.image_class[1]
                     n_class0 += 1
@@ -510,6 +510,10 @@ class Database_loader :
                     if(n_class1 > int(nb_train/2)):
                         save = False
                 if save :
+                    if self.nb_channels == 1:
+                        exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    else:
+                        exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size, self.nb_channels))
                     exp.save(export_path + '/train/' + name_class + '/' + 'train' + str(i) + '.jpg')
                     i+=1
 
@@ -536,7 +540,10 @@ class Database_loader :
                     if(n_class1 > int(nb_test/2)):
                         save = False
                 if save:
-                    exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    if self.nb_channels == 1:
+                        exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    else:
+                        exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size, self.nb_channels))
                     exp.save(export_path + '/test/' + name_class + '/' + 'test' + str(i) + '.jpg')
                     i+=1
             print(str(i) + " images exported")
@@ -563,7 +570,10 @@ class Database_loader :
                         save = False
 
                 if save:
-                    exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    if self.nb_channels == 1:
+                        exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size))
+                    else:
+                        exp = Image.fromarray((batch[0][j]*255).astype(np.uint8).reshape(self.size, self.size, self.nb_channels))
                     exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i) + '.jpg')
                     i+=1
             print(str(i) + " images exported")
@@ -636,7 +646,10 @@ class Test_loader:
                        current_height + subimage_size)
                 sub = np.asarray(image.crop(box))
                 if len(sub.shape) > 2: 
-                    subimages.append(sub[:,:,1].astype(np.float32)/255)
+                    if self.nb_channels == 1:
+                        subimages.append(sub[:,:,1].astype(np.float32)/255)
+                    else:
+                        subimages.append(sub.astype(np.float32)/255)
                 else: 
                     subimages.append(sub.astype(np.float32)/255)
                 current_width += subimage_size
@@ -647,7 +660,7 @@ class Test_loader:
         print('Image of size ' + str(width) + 'x' + str(height) + 
               ' cropped at ' + str(subimage_size) + 'x' + str (subimage_size) + 
               ' : ' + str(nb_subimages) + ' outputed subimages.')
-        return((np.reshape(np.array(subimages), (nb_subimages, subimage_size, subimage_size, 1)), width, height))
+        return((np.reshape(np.array(subimages), (nb_subimages, subimage_size, subimage_size, self.nb_channels)), width, height))
 
     def get_next_image(self):
 
@@ -663,7 +676,7 @@ class Test_loader:
           
 def get_image_filename_from_dir(directory_path) :
     # file extension accepted as image data
-    valid_image_extension = [".jpg",".gif",".png",".tga",".tif"]
+    valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG"]
 #    random_prefix = ''.join(random.choice('0123456789ABCDEF') for i in range(7))
 
     image_list = []
@@ -725,17 +738,18 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 if __name__ == "__main__":    
 
     source_db = '/home/nicolas/Database/level-design_raise/'
-    image_size = 100
-    target_db = '/home/nicolas/Database/level-design_raise_100/'
+    image_size = 64
+    target_db = '/home/nicolas/Database/level-design_raise_64/'
 
-    a = Database_loader(source_db, image_size, only_green=True, rand_crop = False)
+    a = Database_loader(source_db, image_size, 
+                        only_green=True, rand_crop = True)
     
-    # a.export_database(target_db, 
-    #                   nb_train = 40000, 
-    #                   nb_test = 4000, 
-    #                   nb_validation = 2000)
-    target_splicing = '/home/nicolas/Database/splicing/'
-    a.export_splicing(target_splicing, 50)
+    a.export_database(target_db, 
+                      nb_train = 150000, 
+                      nb_test = 10000, 
+                      nb_validation = 5000)
+    # target_splicing = '/home/nicolas/Database/splicing/'
+    # a.export_splicing(target_splicing, 50)
     # f = Database_loader(target_db, image_size, only_green=True)
 
     # g = f.get_batch_validation(50, crop = False)
