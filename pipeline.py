@@ -14,6 +14,8 @@ import csv
 
 import numpy as np
 
+GPU = '/gpu:3'
+
 config = ''
 config = 'server'
 
@@ -178,7 +180,7 @@ class Model:
 
   def __init__(self, database_path, image_size, nbins = 10, 
                batch_size = 50, histograms = True, stats = False, 
-               all_summaries = False):
+               all_summaries = False, using_GPU = False):
 
     print('   tensorFlow version: ', tf.__version__)
 
@@ -189,12 +191,21 @@ class Model:
     self.nbins = nbins
     self.histograms = histograms
     self.stats = stats
-    
+    self.using_GPU = using_GPU
+
     self.import_database()
-    self.create_graph(nb_class = self.nb_class, 
-                      histograms = self.histograms,
-                      stats = self.stats,
-                      all_summaries = self.all_summaries)
+    if using_GPU:
+      with tf.device(GPU):
+        self.create_graph(nb_class = self.nb_class, 
+                          histograms = self.histograms,
+                          stats = self.stats,
+                          all_summaries = self.all_summaries)
+    else: 
+      self.create_graph(nb_class = self.nb_class, 
+                          histograms = self.histograms,
+                          stats = self.stats,
+                          all_summaries = self.all_summaries)
+
 
 
   def import_database(self): 
@@ -232,12 +243,14 @@ class Model:
 
       # first conv net layer
       nb_conv1 = 32
+      self.nb_conv1 = nb_conv1
       filter_size1 = 3
 
       with tf.name_scope('Conv1'):
 
         with tf.name_scope('Weights'):
           W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
+          self.W_conv1 = W_conv1
         with tf.name_scope('Bias'):
           b_conv1 = bias_variable([nb_conv1])
 
@@ -248,15 +261,17 @@ class Model:
 
       # second conv 
       nb_conv2 = 64
+      self.nb_conv2 = nb_conv2
       filter_size2 = 3
       with tf.name_scope('Conv2'):
         with tf.name_scope('Weights'):
           W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+          self.W_conv2 = W_conv2
         with tf.name_scope('Bias'):
           b_conv2 = bias_variable([nb_conv2])
 
         h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')/4
+                             name = 'Activated_2')
 
         self.h_conv2 = h_conv2
 
@@ -408,7 +423,29 @@ class Model:
 
   def validation_testing(self, it, nb_iterations = 20, batch_size = 50,
                          plot_histograms = False, range_hist = [0.,1.], 
-                         selected_hist_nb = 8, run_name = ''):
+                         selected_hist_nb = 8, run_name = '',
+                         save_filters = True):
+
+    if save_filters: 
+      
+      nb_height = 8
+      nb_width = int(self.nb_conv1/nb_height)
+
+      img, axes = plt.subplots(nrows = nb_width, ncols = nb_height)
+      gs1 = gridspec.GridSpec(nb_height, nb_width)
+      for i in range(self.nb_conv1):
+        ax1 = plt.subplot(gs1[i])
+        ax1.axis('off')
+        im = plt.imshow(self.W_conv1[:,:,0,i].eval())
+        ax1.set_xticklabels([])
+        ax1.set_yticklabels([])     
+
+      img.subplots_adjust(right=0.8)
+      cbar_ax = img.add_axes([0.85, 0.15, 0.05, 0.7])
+      cbar = img.colorbar(im, ticks=[-0.5, 0, 0.5], cax=cbar_ax)
+      cbar.ax.set_yticklabels(['< -0.5', '0', '> 0.5'])
+      plt.show(img)
+      plt.close()     
 
     validation_batch_size = batch_size 
     validation_accuracy = 0
@@ -478,9 +515,10 @@ class Model:
       plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + '_real_'+ str(it) + '.png')
       plt.close()
 
+
+
     validation_accuracy /= nb_iterations
     print("     step %d, training accuracy %g (%d validations tests)"%(it, validation_accuracy, validation_batch_size*nb_iterations))
-
     return(validation_accuracy)
 
 
@@ -499,7 +537,7 @@ class Model:
 
     # start a session
     print('   start session ...')
-    with tf.Session(graph=self.graph) as sess:
+    with tf.Session(graph=self.graph, config=tf.ConfigProto(log_device_placement=self.using_GPU)) as sess:
 
       merged = tf.summary.merge_all()
       
@@ -943,8 +981,8 @@ class Model:
       
         gs1 = gridspec.GridSpec(nb_height, nb_width)
         for i in range(len(images)):
-
-
+          map_im = np.ones((self.image_size, self.image_size))
+          map_im[0,0] = 0
           cdict_green = {'red': ((0.0,0.0,0.0),
                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
                      'blue': ((0.0,0.0,0.0),
@@ -966,14 +1004,14 @@ class Model:
               cmap = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
             else:
               cmap = 'gray'
+              map_im = map_im*0.5
           else: 
             if diff[i] > 0.4:
               cmap = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
             else:
               cmap = 'gray'
+              map_im = map_im*0.5
 
-          map_im = np.ones((self.image_size, self.image_size))
-          map_im[0,0] = 0
           plt.imshow(map_im, cmap = cmap)
           ax1.set_xticklabels([])
           ax1.set_yticklabels([])
@@ -985,6 +1023,8 @@ class Model:
           plt.savefig(path_save + '/vis_' + file_name + '_probmap' + '.png', 
                       bbox_inches='tight',
                       pad_inches=0.0)
+
+        plt.close()
 
 
   def test_splicing(self, data_path, nb_images, save_images, show_images,
@@ -1046,18 +1086,21 @@ class Model:
 
 if __name__ == '__main__':
 
+  using_GPU = True
+
   if config == 'server':
     database_path = '/work/smg/v-nicolas/level-design_raise_64/'
   else:
-    database_path = '/home/nicolas/Database/level-design_raise_64/'
+    database_path = '/home/nicolas/Database/level-design_raise_100/'
 
-  image_size = 64
-  nb_train_batch = 30000
-  nb_test_batch = 200
-  nb_validation_batch = 100
+  image_size = 100
+  nb_train_batch = 15000
+  nb_test_batch = 80
+  nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 13,
-              batch_size = 50, histograms = True, stats = False)
+              batch_size = 50, histograms = False, stats = True, 
+              using_GPU = True)
 
   # clf.show_histogram()
 
@@ -1075,7 +1118,7 @@ if __name__ == '__main__':
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 752, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = False,
+                        save_images = True,
                         only_green = True)
 
   if config == 'server':
