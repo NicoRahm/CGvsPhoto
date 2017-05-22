@@ -523,7 +523,8 @@ class Model:
 
 
   def train(self, nb_train_batch, nb_test_batch, 
-            nb_validation_batch, batch_size = 50):
+            nb_validation_batch, batch_size = 50,
+            save_filters = False):
     
     run_name = input("   Choose a name for the run : ")
     path_save = folder_ckpt + run_name
@@ -578,7 +579,8 @@ class Model:
               v = self.validation_testing(i, nb_iterations = nb_validation_batch, 
                                       batch_size = batch_size, 
                                       plot_histograms = plot_histograms,
-                                      run_name = run_name)
+                                      run_name = run_name,
+                                      save_filters = save_filters)
               validation_accuracy.append(v)
               
           # regular training
