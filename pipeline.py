@@ -1089,7 +1089,7 @@ if __name__ == '__main__':
   using_GPU = True
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_raise_64/'
+    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
