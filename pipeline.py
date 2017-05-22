@@ -1097,7 +1097,7 @@ if __name__ == '__main__':
   using_GPU = False
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
+    database_path = '/work/smg/v-nicolas/level-design_dresden_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
@@ -1112,9 +1112,9 @@ if __name__ == '__main__':
 
   # clf.show_histogram()
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
