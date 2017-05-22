@@ -737,17 +737,17 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 
 if __name__ == "__main__":    
 
-    source_db = '/home/nicolas/Database/level-design_raise/'
+    source_db = '/home/nicolas/Database/level-design_dresden/'
     image_size = 64
-    target_db = '/home/nicolas/Database/level-design_raise_64/'
+    target_db = '/home/nicolas/Database/level-design_dresden_100/'
 
     a = Database_loader(source_db, image_size, 
                         only_green=True, rand_crop = True)
     
     a.export_database(target_db, 
-                      nb_train = 150000, 
-                      nb_test = 10000, 
-                      nb_validation = 5000)
+                      nb_train = 40000, 
+                      nb_test = 4000, 
+                      nb_validation = 2000)
     # target_splicing = '/home/nicolas/Database/splicing/'
     # a.export_splicing(target_splicing, 50)
     # f = Database_loader(target_db, image_size, only_green=True)

@@ -14,7 +14,7 @@ import csv
 
 import numpy as np
 
-GPU = '/gpu:3'
+GPU = '/gpu:0'
 
 config = ''
 config = 'server'
@@ -600,7 +600,7 @@ class Model:
               time_elapsed = (time.time()-batch_clock)
               print('   Time last 100 batchs : ', time.strftime("%H:%M:%S",time.gmtime(time_elapsed)))
               remaining_time = time_elapsed * int((nb_train_batch - i)/100)
-              print('   Reamining time : ', time.strftime("%H:%M:%S",time.gmtime(remaining_time)))
+              print('   Remaining time : ', time.strftime("%H:%M:%S",time.gmtime(remaining_time)))
             batch_clock = time.time()
       print('   saving validation accuracy...')
       file = open(acc_name, 'w', newline='')
@@ -614,6 +614,12 @@ class Model:
 
           file.close()
           print('   done.')
+
+      plt.figure()
+      plt.plot(np.linspace(0,nb_train_batch,10), validation_accuracy)
+      plt.title("Validation accuracy during training")
+      plt.xlabel("Training batch")
+      plt.ylabel("Validation accuracy")
     # final test
       print('   final test ...')
       test_accuracy = 0
@@ -908,7 +914,7 @@ class Model:
     print('Final Accuracy : ' + str(round(100*accuracy/(nb_images), 3)) + '%')
     print('Final Precision : ' + str(round(100*tp/(tp + fp), 3)) + '%')
     print('Final Recall : ' + str(round(100*tp/nb_CGG, 3)) + '%')
-    print('Final AUC : ' + str(round(auc(fpr, tpr), 3)) + '%')
+    print('Final AUC : ' + str(round(100*auc(fpr, tpr), 3)) + '%')
     print('_______________________________________________________\n')
 
   def image_visualization(self, path_save, file_name, images, labels_pred, 
@@ -1088,7 +1094,7 @@ class Model:
 
 if __name__ == '__main__':
 
-  using_GPU = True
+  using_GPU = False
 
   if config == 'server':
     database_path = '/work/smg/v-nicolas/level-design_raise_100/'
@@ -1102,25 +1108,25 @@ if __name__ == '__main__':
 
   clf = Model(database_path, image_size, nbins = 13,
               batch_size = 50, histograms = False, stats = True, 
-              using_GPU = True)
+              using_GPU = using_GPU)
 
   # clf.show_histogram()
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/DET_Dresden/test/'
+    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 752, decision_rule = 'weighted_vote',
+                        nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = True,
+                        save_images = False,
                         only_green = True)
 
   if config == 'server':
