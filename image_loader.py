@@ -738,7 +738,7 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 if __name__ == "__main__":    
 
     source_db = '/home/nicolas/Database/level-design_dresden/'
-    image_size = 64
+    image_size = 100
     target_db = '/home/nicolas/Database/level-design_dresden_100/'
 
     a = Database_loader(source_db, image_size, 
