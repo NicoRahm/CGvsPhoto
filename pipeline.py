@@ -169,7 +169,10 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
   return(res)
 
 def stat(x):
-  return(tf.stack([tf.reduce_mean(x), tf.reduce_min(x), tf.reduce_max(x), tf.reduce_mean((x - tf.reduce_mean(x))**2)]))
+  sigma = tf.reduce_mean((x - tf.reduce_mean(x))**2)
+  return(tf.stack([tf.reduce_mean(x), tf.reduce_min(x), tf.reduce_max(x), sigma, 
+                   tf.reduce_mean(((x - tf.reduce_mean(x))/sigma)**3),
+                   tf.reduce_mean(((x - tf.reduce_mean(x))/sigma)**4)]))
 
 def compute_stat(x, k):
   function_to_map = lambda y: tf.stack([stat(y[:,:,i]) for i in range(k)])
@@ -322,9 +325,11 @@ class Model:
       else: 
 
         if stats: 
+          nb_stats = 6
+          size_flat = nb_filters*nb_stats
 
           s = compute_stat(h_conv2, nb_filters)
-          size_flat = nb_filters*4
+          
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
         else:
@@ -1115,9 +1120,9 @@ if __name__ == '__main__':
 
   # clf.show_histogram()
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
