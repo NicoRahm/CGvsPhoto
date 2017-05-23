@@ -702,7 +702,7 @@ class Model:
         hist_values_Real = np.zeros((nbins,))
 
         for i in range(self.batch_size):
-          if batch[1][0] == 1:
+          if batch[1][i][0] == 1:
             hist_values_Real += np.histogram(conv, bins = nbins)[0]
             nreal += 1
 
