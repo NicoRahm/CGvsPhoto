@@ -1097,17 +1097,17 @@ if __name__ == '__main__':
   using_GPU = False
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_dresden_100/'
+    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
+  nb_train_batch = 0
   nb_test_batch = 80
   nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 13,
-              batch_size = 50, histograms = False, stats = True, 
+              batch_size = 50, histograms = False, stats = False, 
               using_GPU = using_GPU)
 
   # clf.show_histogram()
@@ -1121,7 +1121,7 @@ if __name__ == '__main__':
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
+    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, decision_rule = 'weighted_vote',
