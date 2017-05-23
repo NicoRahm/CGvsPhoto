@@ -615,11 +615,14 @@ class Model:
           file.close()
           print('   done.')
 
-      plt.figure()
-      plt.plot(np.linspace(0,nb_train_batch,10), validation_accuracy)
-      plt.title("Validation accuracy during training")
-      plt.xlabel("Training batch")
-      plt.ylabel("Validation accuracy")
+      if nb_train_batch > 10:
+        plt.figure()
+        plt.plot(np.linspace(0,nb_train_batch,int(nb_train_batch/10)), validation_accuracy)
+        plt.title("Validation accuracy during training")
+        plt.xlabel("Training batch")
+        plt.ylabel("Validation accuracy")
+        plt.show()
+        plt.close()
     # final test
       print('   final test ...')
       test_accuracy = 0
