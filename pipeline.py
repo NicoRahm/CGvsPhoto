@@ -675,53 +675,53 @@ class Model:
         plt.hist(np.reshape(conv[i,:,:,0], (self.image_size*self.image_size,)))
         plt.show()
 
-    def mean_histogram(self, nb_images = 1000):
+  def mean_histogram(self, nb_images = 1000):
 
-      with tf.Session(graph=self.graph) as sess:
+    with tf.Session(graph=self.graph) as sess:
 
-        tf.global_variables_initializer().run()
-        tf.local_variables_initializer().run()
-        saver = tf.train.Saver()
-        print('   variable initialization ...')
+      tf.global_variables_initializer().run()
+      tf.local_variables_initializer().run()
+      saver = tf.train.Saver()
+      print('   variable initialization ...')
 
-        file_to_restore = input("\nName of the file to restore (Directory : " + 
+      file_to_restore = input("\nName of the file to restore (Directory : " + 
                                   folder_ckpt + ') : ')
-        saver.restore(sess, folder_ckpt + file_to_restore)
-        print('\n   Model restored\n')
-        j = 0
-        nreal = 0
-        ncgg = 0
-        while j < nb_images:
+      saver.restore(sess, folder_ckpt + file_to_restore)
+      print('\n   Model restored\n')
+      j = 0
+      nreal = 0
+      ncgg = 0
+      while j < nb_images:
 
-          batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
-          feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
-          conv = self.h_conv2.eval(feed_dict = feed_dict)
+        batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
+        feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
+        conv = self.h_conv2.eval(feed_dict = feed_dict)
 
-          nbins = 50
-          hist_values_CGG = np.zeros((nbins,))
-          hist_values_Real = np.zeros((nbins,))
+        nbins = 50
+        hist_values_CGG = np.zeros((nbins,))
+        hist_values_Real = np.zeros((nbins,))
 
-          for i in range(self.batch_size):
-            if batch[1][0] == 1:
-              hist_values_Real += np.histogram(conv, bins = nbins)[0]
-              nreal += 1
+        for i in range(self.batch_size):
+          if batch[1][0] == 1:
+            hist_values_Real += np.histogram(conv, bins = nbins)[0]
+            nreal += 1
 
-            else:
-              hist_values_CGG += np.histogram(conv, bins = nbins)[0]
-              ncgg += 1
+          else:
+            hist_values_CGG += np.histogram(conv, bins = nbins)[0]
+            ncgg += 1
 
-          j+= self.batch_size
+        j+= self.batch_size
 
-        hist_values_CGG /= ncgg
-        hist_values_Real /= nreal
+      hist_values_CGG /= ncgg
+      hist_values_Real /= nreal
 
-        plt.figure()
-        plt.plot(np.linspace(0,nbins, nbins), hist_values_Real, color = 'b', 
+      plt.figure()
+      plt.plot(np.linspace(0,nbins, nbins), hist_values_Real, color = 'b', 
                  label = 'Real')
-        plt.plot(np.linspace(0,nbins, nbins), hist_values_CGG, color = 'r', 
+      plt.plot(np.linspace(0,nbins, nbins), hist_values_CGG, color = 'r', 
                  label = 'CGG')
-        plt.legend()
-        plt.show()
+      plt.legend()
+      plt.show()
 
   def lda_training(self, nb_train_batch, nb_test_batch):
 
