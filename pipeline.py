@@ -1097,11 +1097,11 @@ if __name__ == '__main__':
   using_GPU = False
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_dresden_64/'
+    database_path = '/work/smg/v-nicolas/level-design_dresden_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
-  image_size = 64
+  image_size = 100
   nb_train_batch = 15000
   nb_test_batch = 80
   nb_validation_batch = 40
