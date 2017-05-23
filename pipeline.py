@@ -952,7 +952,7 @@ class Model:
 
       ax1 = plt.subplot(gs1[i])
       ax1.axis('off')
-      if labels_pred[i] == true_label:
+      if labels_pred[i] == 'Real':
         if diff[i] > 0.4:
           cmap = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
         else:
@@ -1110,26 +1110,26 @@ if __name__ == '__main__':
   nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 13,
-              batch_size = 50, histograms = False, stats = False, 
+              batch_size = 50, histograms = False, stats = True, 
               using_GPU = using_GPU)
 
   # clf.show_histogram()
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
+    test_data_path = '/work/smg/v-nicolas/Fun/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = False,
+                        save_images = True,
                         only_green = True)
 
   if config == 'server':
