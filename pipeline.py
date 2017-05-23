@@ -169,10 +169,8 @@ def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0
   return(res)
 
 def stat(x):
-  sigma = tf.reduce_mean((x - tf.reduce_mean(x))**2)
-  return(tf.stack([tf.reduce_mean(x), tf.reduce_min(x), tf.reduce_max(x), sigma, 
-                   tf.reduce_mean(((x - tf.reduce_mean(x))/sigma)**3),
-                   tf.reduce_mean(((x - tf.reduce_mean(x))/sigma)**4)]))
+  # sigma = tf.reduce_mean((x - tf.reduce_mean(x))**2)
+  return(tf.stack([tf.reduce_mean(x), tf.reduce_min(x), tf.reduce_max(x), tf.reduce_mean((x - tf.reduce_mean(x))**2)]))
 
 def compute_stat(x, k):
   function_to_map = lambda y: tf.stack([stat(y[:,:,i]) for i in range(k)])
@@ -325,7 +323,7 @@ class Model:
       else: 
 
         if stats: 
-          nb_stats = 6
+          nb_stats = 4
           size_flat = nb_filters*nb_stats
 
           s = compute_stat(h_conv2, nb_filters)
@@ -675,6 +673,54 @@ class Model:
         plt.figure()
 
         plt.hist(np.reshape(conv[i,:,:,0], (self.image_size*self.image_size,)))
+        plt.show()
+
+    def mean_histogram(self, nb_images = 1000):
+
+      with tf.Session(graph=self.graph) as sess:
+
+        tf.global_variables_initializer().run()
+        tf.local_variables_initializer().run()
+        saver = tf.train.Saver()
+        print('   variable initialization ...')
+
+        file_to_restore = input("\nName of the file to restore (Directory : " + 
+                                  folder_ckpt + ') : ')
+        saver.restore(sess, folder_ckpt + file_to_restore)
+        print('\n   Model restored\n')
+        j = 0
+        nreal = 0
+        ncgg = 0
+        while j < nb_images:
+
+          batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
+          feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
+          conv = self.h_conv2.eval(feed_dict = feed_dict)
+
+          nbins = 50
+          hist_values_CGG = np.zeros((nbins,))
+          hist_values_Real = np.zeros((nbins,))
+
+          for i in range(self.batch_size):
+            if batch[1][0] == 1:
+              hist_values_Real += np.histogram(conv, bins = nbins)[0]
+              nreal += 1
+
+            else:
+              hist_values_CGG += np.histogram(conv, bins = nbins)[0]
+              ncgg += 1
+
+          j+= self.batch_size
+
+        hist_values_CGG /= ncgg
+        hist_values_Real /= nreal
+
+        plt.figure()
+        plt.plot(np.linspace(0,nbins, nbins), hist_values_Real, color = 'b', 
+                 label = 'Real')
+        plt.plot(np.linspace(0,nbins, nbins), hist_values_CGG, color = 'r', 
+                 label = 'CGG')
+        plt.legend()
         plt.show()
 
   def lda_training(self, nb_train_batch, nb_test_batch):
@@ -1118,7 +1164,7 @@ if __name__ == '__main__':
               batch_size = 50, histograms = False, stats = True, 
               using_GPU = using_GPU)
 
-  # clf.show_histogram()
+  clf.mean_histogram()
 
   clf.train(nb_train_batch = nb_train_batch,
             nb_test_batch = nb_test_batch, 
