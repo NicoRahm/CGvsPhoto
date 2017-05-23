@@ -1105,7 +1105,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 0
+  nb_train_batch = 15000
   nb_test_batch = 80
   nb_validation_batch = 40
 
