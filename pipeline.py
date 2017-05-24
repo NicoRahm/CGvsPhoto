@@ -305,7 +305,7 @@ class Model:
         size_flat = (nbins + 1)*nb_filters
 
         range_hist = [0,1]
-        sigma = 0.05
+        sigma = 0.07
 
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
@@ -527,7 +527,7 @@ class Model:
 
   def train(self, nb_train_batch, nb_test_batch, 
             nb_validation_batch, batch_size = 50,
-            save_filters = True):
+            save_filters = False):
     
     run_name = input("   Choose a name for the run : ")
     path_save = folder_ckpt + run_name
