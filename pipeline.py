@@ -1153,24 +1153,24 @@ if __name__ == '__main__':
   using_GPU = False
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
+    database_path = '/work/smg/v-nicolas/level-design_dresden_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 0
+  nb_train_batch = 15000
   nb_test_batch = 80
   nb_validation_batch = 40
 
-  clf = Model(database_path, image_size, nbins = 13,
-              batch_size = 50, histograms = False, stats = True, 
+  clf = Model(database_path, image_size, nbins = 11,
+              batch_size = 50, histograms = True, stats = False, 
               using_GPU = using_GPU)
 
   # clf.mean_histogram()
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
