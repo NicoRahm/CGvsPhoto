@@ -259,7 +259,7 @@ class Model:
         # relu on the conv layer
         h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, 
                              name = 'Activated_1')
-
+        self.h_conv1 = h_conv1
       # second conv 
       nb_conv2 = 64
       self.nb_conv2 = nb_conv2
@@ -527,7 +527,7 @@ class Model:
 
   def train(self, nb_train_batch, nb_test_batch, 
             nb_validation_batch, batch_size = 50,
-            save_filters = False):
+            save_filters = True):
     
     run_name = input("   Choose a name for the run : ")
     path_save = folder_ckpt + run_name
@@ -675,8 +675,8 @@ class Model:
         plt.hist(np.reshape(conv[i,:,:,0], (self.image_size*self.image_size,)))
         plt.show()
 
-  def mean_histogram(self, nb_images = 1000):
-
+  def mean_histogram(self, nb_images = 5000):
+    print("   Showing the histograms of filtered images...")
     with tf.Session(graph=self.graph) as sess:
 
       tf.global_variables_initializer().run()
@@ -695,19 +695,21 @@ class Model:
 
         batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
         feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 1.0}
-        conv = self.h_conv2.eval(feed_dict = feed_dict)
+        conv = self.h_conv1.eval(feed_dict = feed_dict)
 
-        nbins = 50
+        nbins = 150
         hist_values_CGG = np.zeros((nbins,))
         hist_values_Real = np.zeros((nbins,))
 
         for i in range(self.batch_size):
           if batch[1][i][0] == 1:
-            hist_values_Real += np.histogram(conv, bins = nbins)[0]
+            # print(conv[i,:,:,15])
+            hist_values_Real += np.histogram(conv[i,:,:,1], bins = nbins, range = (0., 1.))[0]
             nreal += 1
 
           else:
-            hist_values_CGG += np.histogram(conv, bins = nbins)[0]
+            # print(conv[i,:,:,15])
+            hist_values_CGG += np.histogram(conv[i,:,:,1], bins = nbins, range = (0., 1.))[0]
             ncgg += 1
 
         j+= self.batch_size
@@ -716,9 +718,9 @@ class Model:
       hist_values_Real /= nreal
 
       plt.figure()
-      plt.plot(np.linspace(0,nbins, nbins), hist_values_Real, color = 'b', 
+      plt.plot(np.linspace(0,1, nbins), hist_values_Real, color = 'b', 
                  label = 'Real')
-      plt.plot(np.linspace(0,nbins, nbins), hist_values_CGG, color = 'r', 
+      plt.plot(np.linspace(0,1, nbins), hist_values_CGG, color = 'r', 
                  label = 'CGG')
       plt.legend()
       plt.show()
@@ -1156,7 +1158,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
+  nb_train_batch = 0
   nb_test_batch = 80
   nb_validation_batch = 40
 
@@ -1164,16 +1166,16 @@ if __name__ == '__main__':
               batch_size = 50, histograms = False, stats = True, 
               using_GPU = using_GPU)
 
-  clf.mean_histogram()
+  # clf.mean_histogram()
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/Fun/'
+    test_data_path = '/work/smg/v-nicolas/level-design_dresden/test/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
