@@ -1163,19 +1163,19 @@ if __name__ == '__main__':
   nb_validation_batch = 40
 
   clf = Model(database_path, image_size, nbins = 11,
-              batch_size = 50, histograms = True, stats = False, 
+              batch_size = 50, histograms = False, stats = True, 
               using_GPU = using_GPU)
 
   # clf.mean_histogram()
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/DET_Dresden/test/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 

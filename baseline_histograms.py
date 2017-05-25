@@ -182,7 +182,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   for _ in range( nb_iterations ) :
       if (i%10 == 0):
         print("Testing batch " + str(i) + '/' +str(nb_iterations))
-      batch_test = data.get_next_train(crop = False)
+      batch_test = data.get_next_test(crop = False)
       input_image = np.array([batch_test[0]])
       shape = np.array(batch_test[0].shape[:2]).astype(np.float32)
       feed_dict = {x: input_image, x_shape : shape}
@@ -210,7 +210,7 @@ if __name__ == '__main__':
   if config == 'server':
     database_path = '/work/smg/v-nicolas/level-design_raise'
   else:
-    database_path = '/home/nicolas/Database/level-design_dresden'
+    database_path = '/home/nicolas/Database/level-design_train_dresden_test_raise'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
