@@ -1181,7 +1181,7 @@ if __name__ == '__main__':
     test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, decision_rule = 'weighted_vote',
+                        nb_images = 86, decision_rule = 'weighted_vote',
                         show_images = False, 
                         save_images = False,
                         only_green = True)
