@@ -210,7 +210,7 @@ if __name__ == '__main__':
   if config == 'server':
     database_path = '/work/smg/v-nicolas/level-design_raise'
   else:
-    database_path = '/home/nicolas/Database/level-design_dresden'
+    database_path = '/home/nicolas/Database/level-design_raise'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 

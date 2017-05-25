@@ -852,6 +852,7 @@ class Model:
       print('   No visualization when testing all channels...')
       show_images = False
       save_images = False
+    print('   Testing for the database : ' + test_data_path)
     print('   start session ...')
     with tf.Session(graph=self.graph) as sess:
       saver = tf.train.Saver()
@@ -1175,7 +1176,7 @@ if __name__ == '__main__':
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+    test_data_path = '/work/smg/v-nicolas/faces/Dataset1/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
