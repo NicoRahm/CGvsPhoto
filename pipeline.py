@@ -1016,6 +1016,9 @@ class Model:
           cmap = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
         else:
           cmap = 'gray'
+
+      images[i,0,0,0] = 0
+      images[i,0,0,1] = 1
       plt.imshow(images[i,:,:,0], cmap = cmap)
       ax1.set_xticklabels([])
       ax1.set_yticklabels([])
@@ -1176,7 +1179,7 @@ if __name__ == '__main__':
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
   if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/faces/Dataset1/'
+    test_data_path = '/work/smg/v-nicolas/Fun/'
   else: 
     test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
