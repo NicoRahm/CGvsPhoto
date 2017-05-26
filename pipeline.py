@@ -17,7 +17,7 @@ import numpy as np
 GPU = '/gpu:0'
 
 config = ''
-# config = 'server'
+config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
@@ -1172,7 +1172,7 @@ if __name__ == '__main__':
   using_GPU = False
 
   if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_dresden_100/'
+    database_path = '/work/smg/v-nicolas/level-design_raise_100/'
   else:
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
@@ -1187,9 +1187,9 @@ if __name__ == '__main__':
 
   # clf.mean_histogram()
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
