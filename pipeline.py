@@ -17,7 +17,7 @@ import numpy as np
 GPU = '/gpu:0'
 
 config = ''
-config = 'server'
+# config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
@@ -531,7 +531,7 @@ class Model:
     
     run_name = input("   Choose a name for the run : ")
     path_save = folder_ckpt + run_name
-    acc_name = dir_summaries + "validation_accuracy.csv"
+    acc_name = dir_summaries + run_name + "/validation_accuracy_" + run_name + ".csv"
 
 
     # computation time tick
@@ -843,8 +843,8 @@ class Model:
     valid_decision_rule = ['majority_vote', 'weighted_vote']
     if decision_rule not in valid_decision_rule:
       raise NameError(decision_rule + ' is not a valid decision rule.')
+    test_name = input("   Choose a name for the test : ")
     if(save_images):
-      test_name = input("   Choose a name for the test : ")
       if not os.path.exists(visualization_dir + test_name):
         os.mkdir(visualization_dir + test_name)
 
@@ -880,14 +880,14 @@ class Model:
         prediction = 0
         labels = []
         diff = []
-        
+        nb_im = 0
         while j < batch_size:
 
           feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
           pred = self.y_conv.eval(feed_dict)
+          nb_im += pred.shape[0]
           label_image = np.argmax(pred, 1)
-          d = np.max(pred, 1) - np.min(pred, 1)
-
+          d =  np.max(pred, 1) - np.min(pred, 1)
           for k in range(d.shape[0]):
             diff.append(np.round(d[k], 1))
 
@@ -906,8 +906,8 @@ class Model:
             y.append(-1)
           else:
             y.append(1)
-
-          scores.append(prediction)
+          print(prediction/nb_im)
+          scores.append(prediction/nb_im)
 
         diff = np.array(diff)
         if decision_rule == 'majority_vote':
@@ -954,7 +954,22 @@ class Model:
           print('_______________________________________________________\n')
 
     if config != 'server':
-      fpr, tpr, thresholds = roc_curve(np.array(y), np.array(scores))
+      fpr, tpr, thresholds = roc_curve(np.array(y), 0.5 + np.array(scores)/10)
+
+      print(0.5 + np.array(scores)/np.max(np.array(scores)))
+      print(thresholds)
+
+      filename = '/home/nicolas/Documents/ROC/' + test_name + '.csv'
+      print('Saving tpr and fpr in file : ' + filename)
+      with open(filename, 'w') as file:
+        try:
+          writer = csv.writer(file)
+       
+          for i in range(fpr.shape[0]):
+            writer.writerow([str(fpr[i]), str(tpr[i])])
+          print('   done.')
+        finally:
+          file.close()
 
       plt.figure()
       lw = 2
@@ -1181,10 +1196,10 @@ if __name__ == '__main__':
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
+    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, decision_rule = 'weighted_vote',
+                        nb_images = 100, decision_rule = 'weighted_vote',
                         show_images = False, 
                         save_images = False,
                         only_green = True)

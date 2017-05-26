@@ -12,6 +12,11 @@ import tensorflow as tf
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.metrics import accuracy_score as acc
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
+
+
+import matplotlib.pyplot as plt
 
 config = ''
 # config = 'server'
@@ -179,6 +184,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
   test_accuracy = 0
   nb_iterations = nb_test_batch
   data.test_iterator = 0
+  scores = []
+  y_test = []
   for _ in range( nb_iterations ) :
       if (i%10 == 0):
         print("Testing batch " + str(i) + '/' +str(nb_iterations))
@@ -190,11 +197,32 @@ def train_classifier(database_path, image_size, nb_train_batch,
       features = extract_features_hist(h)
 
       y_pred = clf.predict(features)
-
+      scores.append(clf.predict_proba(features)[:,1])
+      y_test.append(np.argmax(np.array([batch_test[1]]), 1))
       test_accuracy += acc(y_pred, np.argmax(np.array([batch_test[1]]), 1))
             
   test_accuracy /= nb_iterations
   print("   test accuracy %g"%test_accuracy)
+
+  y_test = np.reshape(np.array(y_test), (nb_test_batch*batch_size,))
+  scores = np.reshape(np.array(scores), (nb_test_batch*batch_size,))
+
+  fpr, tpr, _ = roc_curve(y_test, scores)
+  roc_auc = auc(fpr, tpr)
+
+  plt.figure()
+  lw = 2
+  plt.plot(fpr, tpr, color='darkorange',
+           lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
+  plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+  plt.xlim([0.0, 1.0])
+  plt.ylim([0.0, 1.05])
+  plt.xlabel('False Positive Rate')
+  plt.ylabel('True Positive Rate')
+  plt.title('Receiver operating characteristic')
+  plt.legend(loc="lower right")
+  plt.show()
+  plt.close()
 
   # done
   print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))
@@ -215,6 +243,6 @@ if __name__ == '__main__':
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 2520,
-                         nb_test_batch = 720,
+                         nb_train_batch = 10,
+                         nb_test_batch = 10,
                          batch_size = 1)
