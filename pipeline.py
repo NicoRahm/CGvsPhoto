@@ -261,20 +261,20 @@ class Model:
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
       # second conv 
-      nb_conv2 = 64
-      self.nb_conv2 = nb_conv2
-      filter_size2 = 3
-      with tf.name_scope('Conv2'):
-        with tf.name_scope('Weights'):
-          W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-          self.W_conv2 = W_conv2
-        with tf.name_scope('Bias'):
-          b_conv2 = bias_variable([nb_conv2])
+      # nb_conv2 = 64
+      # self.nb_conv2 = nb_conv2
+      # filter_size2 = 3
+      # with tf.name_scope('Conv2'):
+      #   with tf.name_scope('Weights'):
+      #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+      #     self.W_conv2 = W_conv2
+      #   with tf.name_scope('Bias'):
+      #     b_conv2 = bias_variable([nb_conv2])
 
-        h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')
+      #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+      #                        name = 'Activated_2')
 
-        self.h_conv2 = h_conv2
+      #   self.h_conv2 = h_conv2
 
         tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
         tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
@@ -298,7 +298,7 @@ class Model:
 
 
 
-      nb_filters = nb_conv2
+      nb_filters = nb_conv1
       if histograms:
         # Histograms
         nbins = self.nbins
@@ -326,7 +326,7 @@ class Model:
           nb_stats = 4
           size_flat = nb_filters*nb_stats
 
-          s = compute_stat(h_conv2, nb_filters)
+          s = compute_stat(h_conv1, nb_filters)
           
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
