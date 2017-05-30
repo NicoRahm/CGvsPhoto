@@ -291,7 +291,7 @@ class Model:
         with tf.name_scope('Bias'):
           b_conv3 = bias_variable([nb_conv3])
 
-        h_conv3 = tf.nn.relu(conv2d(m_pool, W_conv3) + b_conv3, 
+        h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
                              name = 'Activated_3')
 
       
