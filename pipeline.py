@@ -17,7 +17,7 @@ import numpy as np
 GPU = '/gpu:0'
 
 config = ''
-config = 'server'
+# config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
@@ -261,20 +261,20 @@ class Model:
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
       # second conv 
-      # nb_conv2 = 64
-      # self.nb_conv2 = nb_conv2
-      # filter_size2 = 3
-      # with tf.name_scope('Conv2'):
-      #   with tf.name_scope('Weights'):
-      #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-      #     self.W_conv2 = W_conv2
-      #   with tf.name_scope('Bias'):
-      #     b_conv2 = bias_variable([nb_conv2])
+      nb_conv2 = 64
+      self.nb_conv2 = nb_conv2
+      filter_size2 = 3
+      with tf.name_scope('Conv2'):
+        with tf.name_scope('Weights'):
+          W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+          self.W_conv2 = W_conv2
+        with tf.name_scope('Bias'):
+          b_conv2 = bias_variable([nb_conv2])
 
-      #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-      #                        name = 'Activated_2')
+        h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+                             name = 'Activated_2')
 
-      #   self.h_conv2 = h_conv2
+        self.h_conv2 = h_conv2
 
         tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
         tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
@@ -282,23 +282,23 @@ class Model:
 
       # m_pool = max_pool_2x2(h_conv2)
 
-      # nb_conv3 = 64
+      nb_conv3 = 64
 
-      # filter_size3 = 3
-      # with tf.name_scope('Conv3'):
-      #   with tf.name_scope('Weights'):
-      #     W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
-      #   with tf.name_scope('Bias'):
-      #     b_conv3 = bias_variable([nb_conv3])
+      filter_size3 = 3
+      with tf.name_scope('Conv3'):
+        with tf.name_scope('Weights'):
+          W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
+        with tf.name_scope('Bias'):
+          b_conv3 = bias_variable([nb_conv3])
 
-      #   h_conv3 = tf.nn.relu(conv2d(m_pool, W_conv3) + b_conv3, 
-      #                        name = 'Activated_3')
+        h_conv3 = tf.nn.relu(conv2d(m_pool, W_conv3) + b_conv3, 
+                             name = 'Activated_3')
 
       
 
 
 
-      nb_filters = nb_conv1
+      nb_filters = nb_conv2
       if histograms:
         # Histograms
         nbins = self.nbins
@@ -326,7 +326,7 @@ class Model:
           nb_stats = 4
           size_flat = nb_filters*nb_stats
 
-          s = compute_stat(h_conv1, nb_filters)
+          s = compute_stat(h_conv3, nb_filters)
           
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
@@ -1196,10 +1196,10 @@ if __name__ == '__main__':
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
   else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
+    test_data_path = '/home/nicolas/Database/level-design_raise/test/'
 
   clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 100, decision_rule = 'weighted_vote',
+                        nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
                         save_images = False,
                         only_green = True)
