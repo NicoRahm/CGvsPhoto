@@ -19,7 +19,7 @@ from PIL import Image
 GPU = '/gpu:0'
 
 config = ''
-# config = 'server'
+config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
@@ -245,7 +245,7 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 32
+      nb_conv1 = 16
       self.nb_conv1 = nb_conv1
       filter_size1 = 3
 
@@ -263,7 +263,7 @@ class Model:
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
       # second conv 
-      nb_conv2 = 64
+      nb_conv2 = 32
       self.nb_conv2 = nb_conv2
       filter_size2 = 3
       with tf.name_scope('Conv2'):
@@ -1213,11 +1213,11 @@ if __name__ == '__main__':
 
   # clf.mean_histogram()
 
-  clf.show_filtered('/home/nicolas/Database/level-design_dresden_100/train/CGG/train153.jpg')
+  # clf.show_filtered('/home/nicolas/Database/level-design_dresden_100/train/CGG/train153.jpg')
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 
