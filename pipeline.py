@@ -14,10 +14,12 @@ import csv
 
 import numpy as np
 
+from PIL import Image
+
 GPU = '/gpu:0'
 
 config = ''
-config = 'server'
+# config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
@@ -282,17 +284,17 @@ class Model:
 
       # m_pool = max_pool_2x2(h_conv2)
 
-      nb_conv3 = 64
+      # nb_conv3 = 64
 
-      filter_size3 = 3
-      with tf.name_scope('Conv3'):
-        with tf.name_scope('Weights'):
-          W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
-        with tf.name_scope('Bias'):
-          b_conv3 = bias_variable([nb_conv3])
+      # filter_size3 = 3
+      # with tf.name_scope('Conv3'):
+      #   with tf.name_scope('Weights'):
+      #     W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
+      #   with tf.name_scope('Bias'):
+      #     b_conv3 = bias_variable([nb_conv3])
 
-        h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
-                             name = 'Activated_3')
+      #   h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
+      #                        name = 'Activated_3')
 
       
 
@@ -326,7 +328,7 @@ class Model:
           nb_stats = 4
           size_flat = nb_filters*nb_stats
 
-          s = compute_stat(h_conv3, nb_filters)
+          s = compute_stat(h_conv2, nb_filters)
           
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
@@ -1109,6 +1111,30 @@ class Model:
 
         plt.close()
 
+  def show_filtered(self, image_file):
+    print('   Loading image from file : ' + image_file)
+    im = Image.open(image_file)
+    im = np.reshape(np.array([np.asarray(im)]), (1,self.image_size, self.image_size, 1))
+
+    print('   start session ...') 
+    with tf.Session(graph=self.graph) as sess:
+      saver = tf.train.Saver()
+      print('   variable initialization ...')
+      tf.global_variables_initializer().run()
+      tf.local_variables_initializer().run()
+      file_to_restore = input("\nName of the file to restore (Directory : " + 
+                              folder_ckpt + ') : ')
+      saver.restore(sess, folder_ckpt + file_to_restore)
+
+      feed_dict = {self.x: im, self.keep_prob: 1.0}
+      filtered = self.h_conv1.eval(feed_dict = feed_dict)
+
+      for i in range(filtered.shape[3]):
+        plt.figure()
+        plt.imshow(filtered[0,:,:,i], cmap = 'gray')
+        plt.show()
+
+
 
   def test_splicing(self, data_path, nb_images, save_images, show_images,
                     minibatch_size = 25):
@@ -1187,9 +1213,11 @@ if __name__ == '__main__':
 
   # clf.mean_histogram()
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+  clf.show_filtered('/home/nicolas/Database/level-design_dresden_100/train/CGG/train153.jpg')
+
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch)
 
   # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
 

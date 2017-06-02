@@ -1,5 +1,6 @@
 print("   reset python interpreter ...")
 import os
+import csv
 clear = lambda: os.system('clear')
 clear()
 import time
@@ -47,7 +48,8 @@ def extract_features_hist(h):
 
 def train_classifier(database_path, image_size, nb_train_batch,
                      nb_test_batch, batch_size = 50, clf = None):
-
+  
+  test_name = input("   Choose a name for the test : ")
   # computation time tick
   start_clock = time.clock()
   start_time = time.time()
@@ -135,7 +137,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   x_filtered.append(x_image_da)
 
 
-  nbins = 11
+  nbins = 15
 
   hist = []
   function_to_map = lambda x: 1000.0 * tf.histogram_fixed_width(x, 
@@ -224,6 +226,18 @@ def train_classifier(database_path, image_size, nb_train_batch,
   plt.show()
   plt.close()
 
+  filename = '/home/nicolas/Documents/ROC/' + test_name + '.csv'
+  print('Saving tpr and fpr in file : ' + filename)
+  with open(filename, 'w') as file:
+    try:
+      writer = csv.writer(file)
+       
+      for i in range(fpr.shape[0]):
+        writer.writerow([str(fpr[i]), str(tpr[i])])
+      print('   done.')
+    finally:
+      file.close()
+
   # done
   print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))
   print("   computation time (real):",time.strftime("%H:%M:%S", time.gmtime(time.time()-start_time)))
@@ -243,6 +257,6 @@ if __name__ == '__main__':
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 10,
-                         nb_test_batch = 10,
+                         nb_train_batch = 2520,
+                         nb_test_batch = 720,
                          batch_size = 1)
