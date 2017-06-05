@@ -1246,7 +1246,7 @@ if __name__ == '__main__':
                         show_images = False, 
                         save_images = False,
                         only_green = True,
-                        other_clf = True)
+                        other_clf = False)
 
 
   if config == 'server':
@@ -1257,7 +1257,7 @@ if __name__ == '__main__':
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = True,
+                        save_images = False,
                         only_green = True,
                         other_clf = False)
 
