@@ -423,7 +423,7 @@ class Database_loader :
                     self.test_iterator = 0
 
                 file_name = self.dir + '/test/' + data[1] + '/' + data[0]
-                image = self.extract_channel(np.array(Image.open(file_name)), 1)
+                image = np.array(Image.open(file_name))
                 # print(data[1])
                 if data[1] == 'Real' and k1 < batch_size:
                     batch[0].append(image)
@@ -459,7 +459,7 @@ class Database_loader :
 
                 print(result.shape)
 
-                exp = Image.fromarray(result).convert('RGB')
+                exp = Image.fromarray(result.astype(np.uint8)).convert('RGB')
                 exp.save(export_path + str(i) + '.jpg')
                 i+=1
 
@@ -737,19 +737,19 @@ def compute_useless_images(directory_path, image_size, nb_images = 100, treshold
 
 if __name__ == "__main__":    
 
-    source_db = '/home/nicolas/Database/level-design_dresden/'
+    source_db = '/home/nicolas/Database/level-design_raise/'
     image_size = 100
     target_db = '/home/nicolas/Database/level-design_dresden_100/'
 
     a = Database_loader(source_db, image_size, 
-                        only_green=True, rand_crop = True)
+                        only_green=False, rand_crop = True)
     
-    a.export_database(target_db, 
-                      nb_train = 40000, 
-                      nb_test = 4000, 
-                      nb_validation = 2000)
-    # target_splicing = '/home/nicolas/Database/splicing/'
-    # a.export_splicing(target_splicing, 50)
+    # a.export_database(target_db, 
+    #                   nb_train = 40000, 
+    #                   nb_test = 4000, 
+    #                   nb_validation = 2000)
+    target_splicing = '/home/nicolas/Database/splicing2/'
+    a.export_splicing(target_splicing, 50)
     # f = Database_loader(target_db, image_size, only_green=True)
 
     # g = f.get_batch_validation(50, crop = False)

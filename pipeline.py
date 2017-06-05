@@ -245,7 +245,7 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 32
+      nb_conv1 = 16
       self.nb_conv1 = nb_conv1
       filter_size1 = 3
 
@@ -263,7 +263,7 @@ class Model:
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
       # second conv 
-      nb_conv2 = 64
+      nb_conv2 = 32
       self.nb_conv2 = nb_conv2
       filter_size2 = 3
       with tf.name_scope('Conv2'):
@@ -1216,7 +1216,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 15000
+  nb_train_batch = 0
   nb_test_batch = 80
   nb_validation_batch = 40
 
@@ -1228,10 +1228,10 @@ if __name__ == '__main__':
 
   # clf.show_filtered('/home/nicolas/Database/level-design_dresden_100/train/CGG/train153.jpg')
 
-  # clf.train(nb_train_batch = nb_train_batch,
-  #           nb_test_batch = nb_test_batch, 
-  #           nb_validation_batch = nb_validation_batch,
-  #           save_filters = False)
+  clf.train(nb_train_batch = nb_train_batch,
+            nb_test_batch = nb_test_batch, 
+            nb_validation_batch = nb_validation_batch,
+            save_filters = False)
 
   # clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
 
