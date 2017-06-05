@@ -1228,25 +1228,25 @@ if __name__ == '__main__':
 
   # clf.show_filtered('/home/nicolas/Database/level-design_dresden_100/train/CGG/train153.jpg')
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch,
-            save_filters = False)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch,
+  #           save_filters = False)
 
-  clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
+  # clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
 
 
-  if config == 'server':
-    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
-  else: 
-    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
+  # if config == 'server':
+  #   test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
+  # else: 
+  #   test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
 
-  clf.test_total_images(test_data_path = test_data_path,
-                        nb_images = 720, decision_rule = 'weighted_vote',
-                        show_images = False, 
-                        save_images = False,
-                        only_green = True,
-                        other_clf = True)
+  # clf.test_total_images(test_data_path = test_data_path,
+  #                       nb_images = 720, decision_rule = 'weighted_vote',
+  #                       show_images = False, 
+  #                       save_images = False,
+  #                       only_green = True,
+  #                       other_clf = True)
 
 
   if config == 'server':
@@ -1257,9 +1257,9 @@ if __name__ == '__main__':
   clf.test_total_images(test_data_path = test_data_path,
                         nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
-                        save_images = False,
+                        save_images = True,
                         only_green = True,
-                        other_clf = True)
+                        other_clf = False)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'
