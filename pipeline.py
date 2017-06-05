@@ -1048,7 +1048,7 @@ class Model:
           cmap = 'gray'
 
       images[i,0,0,0] = 0
-      images[i,0,0,1] = 1
+      images[i,0,1,0] = 1
       plt.imshow(images[i,:,:,0], cmap = cmap)
       ax1.set_xticklabels([])
       ax1.set_yticklabels([])
