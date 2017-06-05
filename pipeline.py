@@ -19,7 +19,7 @@ from PIL import Image
 GPU = '/gpu:0'
 
 config = ''
-config = 'server'
+# config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
@@ -245,7 +245,7 @@ class Model:
         
 
       # first conv net layer
-      nb_conv1 = 16
+      nb_conv1 = 32
       self.nb_conv1 = nb_conv1
       filter_size1 = 3
 
@@ -263,7 +263,7 @@ class Model:
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
       # second conv 
-      nb_conv2 = 32
+      nb_conv2 = 64
       self.nb_conv2 = nb_conv2
       filter_size2 = 3
       with tf.name_scope('Conv2'):
@@ -433,7 +433,7 @@ class Model:
 
     if save_filters: 
       
-      nb_height = 8
+      nb_height = 4
       nb_width = int(self.nb_conv1/nb_height)
 
       img, axes = plt.subplots(nrows = nb_width, ncols = nb_height)
@@ -441,12 +441,16 @@ class Model:
       for i in range(self.nb_conv1):
         ax1 = plt.subplot(gs1[i])
         ax1.axis('off')
-        im = plt.imshow(self.W_conv1[:,:,0,i].eval())
+        im = plt.imshow(self.W_conv1[:,:,0,i].eval(), cmap = 'jet')
         ax1.set_xticklabels([])
-        ax1.set_yticklabels([])     
+        ax1.set_yticklabels([]) 
+        # axes.get_yaxis().set_ticks([])
+        # plt.ylabel('Kernel ' + str(i), fontsize = 5.0)
+        # ax1.set_ylabel('Kernel ' + str(i), fontsize = 5.0)
+        ax1.set_title("Filter " + str(i + 1), fontsize = 12.0)    
 
-      img.subplots_adjust(right=0.8)
-      cbar_ax = img.add_axes([0.85, 0.15, 0.05, 0.7])
+      img.subplots_adjust(wspace = 0.1, hspace = 0.6, right = 0.7)
+      cbar_ax = img.add_axes([0.75, 0.15, 0.03, 0.7])
       cbar = img.colorbar(im, ticks=[-0.5, 0, 0.5], cax=cbar_ax)
       cbar.ax.set_yticklabels(['< -0.5', '0', '> 0.5'])
       plt.show(img)
@@ -780,11 +784,12 @@ class Model:
 
       test_accuracy = acc(labels_pred, labels_test)
       print("   test accuracy %g"%test_accuracy)
+      self.clf = self.lda_classifier
 
   def svm_training(self, nb_train_batch, nb_test_batch):
 
     # self.svm_classifier = ExtraTreesClassifier(n_estimators = 200, max_depth = 6)
-    self.svm_classifier = SVC()
+    self.svm_classifier = SVC(probability = True)
     # start a session
     print('   start session ...')
     with tf.Session(graph=self.graph) as sess:
@@ -834,13 +839,14 @@ class Model:
 
       test_accuracy = acc(labels_pred, labels_test)
       print("   test accuracy %g"%test_accuracy)
+      self.clf = self.svm_classifier
 
 
   def test_total_images(self, test_data_path, nb_images, 
                         minibatch_size = 25, decision_rule = 'majority_vote',
                         show_images = False,
                         save_images = False,
-                        only_green = True): 
+                        only_green = True, other_clf = False): 
 
     valid_decision_rule = ['majority_vote', 'weighted_vote']
     if decision_rule not in valid_decision_rule:
@@ -884,9 +890,16 @@ class Model:
         diff = []
         nb_im = 0
         while j < batch_size:
+          if other_clf:
+            feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
+            features = self.flatten.eval(feed_dict = feed_dict)
+            pred = np.log(self.clf.predict_proba(features) + 0.00001)
 
-          feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
-          pred = self.y_conv.eval(feed_dict)
+
+          else:
+            feed_dict = {self.x: batch[j:j+minibatch_size], self.keep_prob: 1.0}
+            pred = self.y_conv.eval(feed_dict)
+          
           nb_im += pred.shape[0]
           label_image = np.argmax(pred, 1)
           d =  np.max(pred, 1) - np.min(pred, 1)
@@ -1217,9 +1230,24 @@ if __name__ == '__main__':
 
   clf.train(nb_train_batch = nb_train_batch,
             nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch)
+            nb_validation_batch = nb_validation_batch,
+            save_filters = False)
 
-  # clf.lda_training(nb_train_batch = 800, nb_test_batch = 80)
+  clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
+
+
+  if config == 'server':
+    test_data_path = '/work/smg/v-nicolas/level-design_raise_650/test/'
+  else: 
+    test_data_path = '/home/nicolas/Database/level-design_raise_650/test/'
+
+  clf.test_total_images(test_data_path = test_data_path,
+                        nb_images = 720, decision_rule = 'weighted_vote',
+                        show_images = False, 
+                        save_images = False,
+                        only_green = True,
+                        other_clf = True)
+
 
   if config == 'server':
     test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
@@ -1230,7 +1258,8 @@ if __name__ == '__main__':
                         nb_images = 720, decision_rule = 'weighted_vote',
                         show_images = False, 
                         save_images = False,
-                        only_green = True)
+                        only_green = True,
+                        other_clf = True)
 
   if config == 'server':
     splicing_data_path = '/work/smg/v-nicolas/splicing/'
