@@ -284,17 +284,17 @@ class Model:
 
       # m_pool = max_pool_2x2(h_conv2)
 
-      # nb_conv3 = 64
+      nb_conv3 = 64
 
-      # filter_size3 = 3
-      # with tf.name_scope('Conv3'):
-      #   with tf.name_scope('Weights'):
-      #     W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
-      #   with tf.name_scope('Bias'):
-      #     b_conv3 = bias_variable([nb_conv3])
+      filter_size3 = 3
+      with tf.name_scope('Conv3'):
+        with tf.name_scope('Weights'):
+          W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
+        with tf.name_scope('Bias'):
+          b_conv3 = bias_variable([nb_conv3])
 
-      #   h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
-      #                        name = 'Activated_3')
+        h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
+                             name = 'Activated_3')
 
       
 
@@ -328,7 +328,7 @@ class Model:
           nb_stats = 4
           size_flat = nb_filters*nb_stats
 
-          s = compute_stat(h_conv2, nb_filters)
+          s = compute_stat(h_conv3, nb_filters)
           
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
