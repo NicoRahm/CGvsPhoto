@@ -19,7 +19,7 @@ from PIL import Image
 GPU = '/gpu:0'
 
 config = ''
-# config = 'server'
+config = 'server'
 
 if config != 'server':
   from sklearn.metrics import roc_curve
