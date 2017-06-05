@@ -1228,10 +1228,10 @@ if __name__ == '__main__':
 
   # clf.show_filtered('/home/nicolas/Database/level-design_dresden_100/train/CGG/train153.jpg')
 
-  clf.train(nb_train_batch = nb_train_batch,
-            nb_test_batch = nb_test_batch, 
-            nb_validation_batch = nb_validation_batch,
-            save_filters = False)
+  # clf.train(nb_train_batch = nb_train_batch,
+  #           nb_test_batch = nb_test_batch, 
+  #           nb_validation_batch = nb_validation_batch,
+  #           save_filters = False)
 
   # clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
 
