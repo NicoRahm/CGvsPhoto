@@ -263,38 +263,38 @@ class Model:
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
       # second conv 
-      nb_conv2 = 64
-      self.nb_conv2 = nb_conv2
-      filter_size2 = 3
-      with tf.name_scope('Conv2'):
-        with tf.name_scope('Weights'):
-          W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-          self.W_conv2 = W_conv2
-        with tf.name_scope('Bias'):
-          b_conv2 = bias_variable([nb_conv2])
+      # nb_conv2 = 64
+      # self.nb_conv2 = nb_conv2
+      # filter_size2 = 3
+      # with tf.name_scope('Conv2'):
+      #   with tf.name_scope('Weights'):
+      #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
+      #     self.W_conv2 = W_conv2
+      #   with tf.name_scope('Bias'):
+      #     b_conv2 = bias_variable([nb_conv2])
 
-        h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-                             name = 'Activated_2')
+      #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+      #                        name = 'Activated_2')
 
-        self.h_conv2 = h_conv2
+      #   self.h_conv2 = h_conv2
 
-        tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
-        tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
-        tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
+      #   tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
+      #   tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
+      #   tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
 
       # m_pool = max_pool_2x2(h_conv2)
 
-      nb_conv3 = 64
+      # nb_conv3 = 64
 
-      filter_size3 = 3
-      with tf.name_scope('Conv3'):
-        with tf.name_scope('Weights'):
-          W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
-        with tf.name_scope('Bias'):
-          b_conv3 = bias_variable([nb_conv3])
+      # filter_size3 = 3
+      # with tf.name_scope('Conv3'):
+      #   with tf.name_scope('Weights'):
+      #     W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
+      #   with tf.name_scope('Bias'):
+      #     b_conv3 = bias_variable([nb_conv3])
 
-        h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
-                             name = 'Activated_3')
+      #   h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
+      #                        name = 'Activated_3')
 
       
 
