@@ -300,7 +300,7 @@ class Model:
 
 
 
-      nb_filters = nb_conv2
+      nb_filters = nb_conv1
       if histograms:
         # Histograms
         nbins = self.nbins
