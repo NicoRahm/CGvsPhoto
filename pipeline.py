@@ -312,7 +312,7 @@ class Model:
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
-          hist = classic_histogram_gaussian(h_conv2, k = nb_filters, 
+          hist = classic_histogram_gaussian(h_conv3, k = nb_filters, 
                                             nbins = nbins, 
                                             values_range = range_hist, 
                                             sigma = sigma)
@@ -1216,7 +1216,7 @@ if __name__ == '__main__':
     database_path = '/home/nicolas/Database/level-design_raise_100/'
 
   image_size = 100
-  nb_train_batch = 0
+  nb_train_batch = 5000
   nb_test_batch = 80
   nb_validation_batch = 40
 
