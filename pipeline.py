@@ -328,7 +328,7 @@ class Model:
           nb_stats = 4
           size_flat = nb_filters*nb_stats
 
-          s = compute_stat(h_conv3, nb_filters)
+          s = compute_stat(h_conv1, nb_filters)
           
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
