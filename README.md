@@ -82,6 +82,7 @@ Give an example
 ## Authors
 
 **Nicolas Rahmouni**  - [NicoRahm](https://github.com/NicoRahm)
+
 **Vincent Nozick**
 
 ## Acknowledgments
