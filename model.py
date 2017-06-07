@@ -192,7 +192,7 @@ class Model:
     # print(conf.sections())
 
     if config not in conf:
-      raise ValueError('Configuration is not in the config.ini file... Please create the corresponding section')
+      raise ValueError(config + ' is not in the config.ini file... Please create the corresponding section')
     
     self.dir_ckpt = conf[config]['dir_ckpt']
     self.dir_summaries = conf[config]['dir_summaries']

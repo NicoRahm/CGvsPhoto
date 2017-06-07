@@ -1,4 +1,7 @@
-from pipeline import Model
+import sys
+sys.path.append('../')
+
+from model import Model
 
 database_path = '/home/nicolas/Database/level-design_raise_100/'
 
