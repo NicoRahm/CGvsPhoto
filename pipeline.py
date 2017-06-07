@@ -1,4 +1,3 @@
-
 print("   reset python interpreter ...")
 import os
 clear = lambda: os.system('clear')
@@ -11,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as mcolors
 import csv
+import configparser
 
 import numpy as np
 
@@ -39,14 +39,14 @@ random_seed = int(time.time() % 10000 )
 random.seed(random_seed)  # for reproducibility
 print('   random seed =', random_seed)
 
-if config == 'server':
-  folder_ckpt = '/work/smg/v-nicolas/weights/'
-  dir_summaries = '/home/smg/v-nicolas/summaries/'
-  visualization_dir = '/home/smg/v-nicolas/visualization/'
-else:
-  folder_ckpt = '/home/nicolas/Documents/weights/'
-  dir_summaries = '/home/nicolas/Documents/summaries/'
-  visualization_dir = '/home/nicolas/Documents/visualization/'
+# if config == 'server':
+#   folder_ckpt = '/work/smg/v-nicolas/weights/'
+#   dir_summaries = '/home/smg/v-nicolas/summaries/'
+#   visualization_dir = '/home/smg/v-nicolas/visualization/'
+# else:
+#   folder_ckpt = '/home/nicolas/Documents/weights/'
+#   dir_summaries = '/home/nicolas/Documents/summaries/'
+#   visualization_dir = '/home/nicolas/Documents/visualization/'
 
 
 # tool functions
@@ -181,33 +181,54 @@ def compute_stat(x, k):
 
 class Model:
 
-  def __init__(self, database_path, image_size, nbins = 10, 
-               batch_size = 50, histograms = True, stats = False, 
+  def __init__(self, database_path, image_size, config = 'Personal', filters = [32, 64],
+               batch_size = 50, feature_extractor = 'Stats', nbins = 10, 
                all_summaries = False, using_GPU = False):
 
     print('   tensorFlow version: ', tf.__version__)
+
+    conf = configparser.ConfigParser()
+    conf.read('config.ini')
+    # print(conf.sections())
+
+    if config not in conf:
+      raise ValueError('Configuration is not in the config.ini file... Please create the corresponding section')
+    
+    self.dir_ckpt = conf[config]['dir_ckpt']
+    self.dir_summaries = conf[config]['dir_summaries']
+    self.dir_visualization = conf[config]['dir_visualization']
+
+    print('   Check-points directory : ' + self.dir_ckpt)
+    print('   Summaries directory : ' + self.dir_summaries)
+    print('   Visualizations directory : ' + self.dir_visualization)
+    self.nf = filters
+    self.nl = len(self.nf)
+    self.filter_size = 3
+
+    self.feature_extractor = 'Stats'
+
+    if self.feature_extractor != 'Stats' and self.feature_extractor != 'Hist':
+      raise ValueError('''Feature extractor must be 'Stats' or 'Hist' ''')
 
     self.database_path = database_path
     self.image_size = image_size
     self.batch_size = batch_size
     self.all_summaries = all_summaries
     self.nbins = nbins
-    self.histograms = histograms
-    self.stats = stats
     self.using_GPU = using_GPU
 
     self.import_database()
     if using_GPU:
       with tf.device(GPU):
         self.create_graph(nb_class = self.nb_class, 
-                          histograms = self.histograms,
-                          stats = self.stats,
+                          feature_extractor = self.feature_extractor,
+                          nl = self.nl, nf = self.nf, filter_size = self.filter_size,
                           all_summaries = self.all_summaries)
     else: 
       self.create_graph(nb_class = self.nb_class, 
-                          histograms = self.histograms,
-                          stats = self.stats,
-                          all_summaries = self.all_summaries)
+                        feature_extractor = self.feature_extractor,
+                        nl = self.nl, nf = self.nf, filter_size = self.filter_size,
+                        all_summaries = self.all_summaries)
 
 
 
@@ -215,93 +236,78 @@ class Model:
     # load data
     print('   import data : image_size = ' + 
         str(self.image_size) + 'x' + str(self.image_size) + '...')
-    self.data = il.Database_loader(database_path, image_size, 
+    self.data = il.Database_loader(self.database_path, self.image_size, 
                                    proportion = 1, only_green=True)
     self.nb_class = self.data.nb_class
 
-  def create_graph(self, nb_class, histograms = True, stats = False,
-                   all_summaries = False): 
+  def create_graph(self, nb_class, nl = 2, nf = [32, 64], filter_size = 3,
+                   feature_extractor = 'Stats', all_summaries = False): 
 
     print('   create model ...')
     # input layer. One entry is a float size x size, 3-channels image. 
     # None means that the number of such vector can be of any lenght.
 
-    if (histograms): 
-      print('    Model with histograms.')
+    if feature_extractor == 'Hist': 
+      print('   Model with histograms.')
 
     else: 
-      print('    Model without histograms.')
+      print('   Model with statistics.')
+
     graph = tf.Graph()
 
     with graph.as_default():
 
       with tf.name_scope('Input_Data'):
-        x = tf.placeholder(tf.float32, [None, image_size, image_size, 1])
+        x = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 1])
         self.x = x
         # reshape the input data:
-        x_image = tf.reshape(x, [-1,image_size, image_size, 1])
+        x_image = tf.reshape(x, [-1,self.image_size, self.image_size, 1])
         with tf.name_scope('Image_Visualization'):
           tf.summary.image('Input_Data', x_image)
         
 
       # first conv net layer
-      nb_conv1 = 32
-      self.nb_conv1 = nb_conv1
-      filter_size1 = 3
+      print('   Creating layer 1 - Shape : ' + str(self.filter_size) + 'x' + 
+            str(self.filter_size) + 'x1x' + str(nf[0]))
 
       with tf.name_scope('Conv1'):
 
         with tf.name_scope('Weights'):
-          W_conv1 = weight_variable([filter_size1, filter_size1, 1, nb_conv1], seed = random_seed)
+          W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], seed = random_seed)
           self.W_conv1 = W_conv1
         with tf.name_scope('Bias'):
-          b_conv1 = bias_variable([nb_conv1])
+          b_conv1 = bias_variable([nf[0]])
 
 
         # relu on the conv layer
         h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, 
                              name = 'Activated_1')
         self.h_conv1 = h_conv1
-      # second conv 
-      # nb_conv2 = 64
-      # self.nb_conv2 = nb_conv2
-      # filter_size2 = 3
-      # with tf.name_scope('Conv2'):
-      #   with tf.name_scope('Weights'):
-      #     W_conv2 = weight_variable([filter_size2, filter_size2, nb_conv1, nb_conv2])
-      #     self.W_conv2 = W_conv2
-      #   with tf.name_scope('Bias'):
-      #     b_conv2 = bias_variable([nb_conv2])
 
-      #   h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
-      #                        name = 'Activated_2')
+      self.W_convs = [W_conv1]
+      self.b_convs = [b_conv1]
+      self.h_convs = [h_conv1]
+      for i in range(1, nl):
+        print('   Creating layer ' + str(i+1) + ' - Shape : ' + str(self.filter_size) + 'x' + 
+            str(self.filter_size) + 'x' + str(nf[i-1]) + 'x' + str(nf[i]))
+        # other conv 
+        with tf.name_scope('Conv2'):
+          with tf.name_scope('Weights'):
+            W_conv2 = weight_variable([self.filter_size, self.filter_size, nf[i-1], nf[i]])
+            self.W_convs.append(W_conv2)
+          with tf.name_scope('Bias'):
+            b_conv2 = bias_variable([nf[i]])
+            self.b_convs.append(b_conv2)
 
-      #   self.h_conv2 = h_conv2
+          h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+                               name = 'Activated_2')
 
-      #   tf.summary.image('Filtered_image_1', h_conv1[:,:,:,0:1])
-      #   tf.summary.image('Filtered_image_2', h_conv1[:,:,:,1:2])
-      #   tf.summary.image('Filtered_image_3', h_conv1[:,:,:,2:3])
-
-      # m_pool = max_pool_2x2(h_conv2)
-
-      # nb_conv3 = 64
-
-      # filter_size3 = 3
-      # with tf.name_scope('Conv3'):
-      #   with tf.name_scope('Weights'):
-      #     W_conv3 = weight_variable([filter_size3, filter_size3, nb_conv2, nb_conv3])
-      #   with tf.name_scope('Bias'):
-      #     b_conv3 = bias_variable([nb_conv3])
-
-      #   h_conv3 = tf.nn.relu(conv2d(h_conv2, W_conv3) + b_conv3, 
-      #                        name = 'Activated_3')
-
-      
+          self.h_convs.append(h_conv2)    
 
 
-
-      nb_filters = nb_conv1
-      if histograms:
+      print('   Creating feature extraction layer')
+      nb_filters = nf[nl-1]
+      if self.feature_extractor == 'Hist':
         # Histograms
         nbins = self.nbins
         size_flat = (nbins + 1)*nb_filters
@@ -312,7 +318,7 @@ class Model:
         # plot_gaussian_kernel(nbins = nbins, values_range = range_hist, sigma = sigma)
 
         with tf.name_scope('Gaussian_Histogram'): 
-          hist = classic_histogram_gaussian(h_conv3, k = nb_filters, 
+          hist = classic_histogram_gaussian(self.h_convs[nl-1], k = nb_filters, 
                                             nbins = nbins, 
                                             values_range = range_hist, 
                                             sigma = sigma)
@@ -324,20 +330,23 @@ class Model:
 
       else: 
 
-        if stats: 
+        if self.feature_extractor == 'Stats': 
           nb_stats = 4
           size_flat = nb_filters*nb_stats
 
-          s = compute_stat(h_conv1, nb_filters)
+          s = compute_stat(self.h_convs[nl-1], nb_filters)
           
           flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
           self.hist = s
         else:
-          m_pool = max_pool_2x2(h_conv2)
+          m_pool = max_pool_2x2(self.h_convs[nl-1])
           size_flat = int(nb_filters*(image_size**2)/4)
           flatten = tf.reshape(m_pool, [-1, size_flat], name = "Flatten_MPool")
 
         self.flatten = flatten
+
+
+      print('   Creating MLP ')
       # Densely Connected Layer
       # we add a fully-connected layer with 1024 neurons 
       with tf.variable_scope('Dense1'):
@@ -425,13 +434,14 @@ class Model:
         tf.summary.histogram('Activated_Fully_Connected', h_fc1)
 
     self.graph = graph
+    print('   model created.')
 
   def validation_testing(self, it, nb_iterations = 20, batch_size = 50,
                          plot_histograms = False, range_hist = [0.,1.], 
                          selected_hist_nb = 8, run_name = '',
-                         save_filters = True):
+                         show_filters = True):
 
-    if save_filters: 
+    if show_filters: 
       
       nb_height = 4
       nb_width = int(self.nb_conv1/nb_height)
@@ -532,12 +542,11 @@ class Model:
 
 
   def train(self, nb_train_batch, nb_test_batch, 
-            nb_validation_batch, batch_size = 50,
-            save_filters = False):
+            nb_validation_batch, show_filters = False):
     
     run_name = input("   Choose a name for the run : ")
-    path_save = folder_ckpt + run_name
-    acc_name = dir_summaries + run_name + "/validation_accuracy_" + run_name + ".csv"
+    path_save = self.dir_ckpt + run_name
+    acc_name = self.dir_summaries + run_name + "/validation_accuracy_" + run_name + ".csv"
 
 
     # computation time tick
@@ -551,11 +560,11 @@ class Model:
 
       merged = tf.summary.merge_all()
       
-      if not os.path.exists(dir_summaries + run_name):
-        os.mkdir(dir_summaries + run_name)
+      if not os.path.exists(self.dir_summaries + run_name):
+        os.mkdir(self.dir_summaries + run_name)
 
 
-      train_writer = tf.summary.FileWriter(dir_summaries + run_name,
+      train_writer = tf.summary.FileWriter(self.dir_summaries + run_name,
                                            sess.graph)
 
       tf.global_variables_initializer().run()
@@ -567,8 +576,8 @@ class Model:
 
       if restore_weigths == 'y':
         file_to_restore = input("\nName of the file to restore (Directory : " + 
-                                folder_ckpt + ') : ')
-        saver.restore(sess, folder_ckpt + file_to_restore)
+                                self.folder_ckpt + ') : ')
+        saver.restore(sess, self.folder_ckpt + file_to_restore)
         print('\n   Model restored\n')
         
 
@@ -586,14 +595,14 @@ class Model:
                 plot_histograms = False
 
               v = self.validation_testing(i, nb_iterations = nb_validation_batch, 
-                                      batch_size = batch_size, 
+                                      batch_size = self.batch_size, 
                                       plot_histograms = plot_histograms,
                                       run_name = run_name,
-                                      save_filters = save_filters)
+                                      show_filters = show_filters)
               validation_accuracy.append(v)
               
           # regular training
-          batch = self.data.get_next_train_batch(batch_size, False, True, True)
+          batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
           feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 0.65}
           summary, _ = sess.run([merged, self.train_step], feed_dict = feed_dict)
           train_writer.add_summary(summary, i)
@@ -639,7 +648,7 @@ class Model:
       nb_iterations = 20
       self.data.test_iterator = 0
       for _ in range( nb_iterations ) :
-          batch_test = self.data.get_batch_test(batch_size, False, True, True)
+          batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
           feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
           test_accuracy += self.accuracy.eval(feed_dict)
           # test_auc += sess.run(auc, feed_dict)[0]
@@ -667,8 +676,8 @@ class Model:
       print('   variable initialization ...')
 
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                                folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                                self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
       print('\n   Model restored\n')
 
       batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
@@ -691,8 +700,8 @@ class Model:
       print('   variable initialization ...')
 
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                                  folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                                  self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
       print('\n   Model restored\n')
       j = 0
       nreal = 0
@@ -743,8 +752,8 @@ class Model:
       tf.global_variables_initializer().run()
       tf.local_variables_initializer().run()
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                              folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                              self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
 
       # training the LDA classifier
       features = []
@@ -798,8 +807,8 @@ class Model:
       tf.global_variables_initializer().run()
       tf.local_variables_initializer().run()
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                              folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                              self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
 
       # training the LDA classifier
       features = []
@@ -853,8 +862,8 @@ class Model:
       raise NameError(decision_rule + ' is not a valid decision rule.')
     test_name = input("   Choose a name for the test : ")
     if(save_images):
-      if not os.path.exists(visualization_dir + test_name):
-        os.mkdir(visualization_dir + test_name)
+      if not os.path.exists(self.dir_visualization + test_name):
+        os.mkdir(self.dir_visualization + test_name)
 
     if not only_green:
       print('   No visualization when testing all channels...')
@@ -868,8 +877,8 @@ class Model:
       tf.global_variables_initializer().run()
       tf.local_variables_initializer().run()
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                              folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                              self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
 
       data_test = il.Test_loader(test_data_path, subimage_size = self.image_size, only_green = only_green)
 
@@ -947,7 +956,7 @@ class Model:
           test_name = ''
 
         if save_images or show_images:
-          self.image_visualization(path_save = visualization_dir + test_name, 
+          self.image_visualization(path_save = self.dir_visualization + test_name, 
                                    file_name = str(i), 
                                    images = batch, labels_pred = labels, 
                                    true_label = label, width = width, 
@@ -1136,8 +1145,8 @@ class Model:
       tf.global_variables_initializer().run()
       tf.local_variables_initializer().run()
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                              folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                              self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
 
       feed_dict = {self.x: im, self.keep_prob: 1.0}
       filtered = self.h_conv1.eval(feed_dict = feed_dict)
@@ -1154,9 +1163,9 @@ class Model:
 
     if(save_images):
       test_name = input("   Choose a name for the test : ")
-      path_save = visualization_dir + test_name
-      if not os.path.exists(visualization_dir + test_name):
-        os.mkdir(visualization_dir + test_name)
+      path_save = self.dir_visualization + test_name
+      if not os.path.exists(self.dir_visualization + test_name):
+        os.mkdir(self.dir_visualization + test_name)
 
     else: 
       path_save = ''
@@ -1168,8 +1177,8 @@ class Model:
       tf.global_variables_initializer().run()
       tf.local_variables_initializer().run()
       file_to_restore = input("\nName of the file to restore (Directory : " + 
-                              folder_ckpt + ') : ')
-      saver.restore(sess, folder_ckpt + file_to_restore)
+                              self.dir_ckpt + ') : ')
+      saver.restore(sess, self.dir_ckpt + file_to_restore)
 
       data_test = il.Test_loader(data_path, 
                                  subimage_size = self.image_size)
