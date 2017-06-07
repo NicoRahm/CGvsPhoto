@@ -1,4 +1,4 @@
-# Computer Graphics vs Real Photographic Images : A deep-learning approach
+# Computer Graphics vs Real Photographic Images : A Deep-learning approach
 
 **CGvsPhoto** implements a method for computer graphics detection using Convolutional Neural Networks with TensorFlow back-end.
 
