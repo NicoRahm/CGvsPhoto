@@ -24,12 +24,12 @@ git clone https://github.com/NicoRahm/CGvsPhoto
 ```
 
 To run this code from a distant directory, you have to set up two things : 
-* Adding the path to the CGvsPhoto directory.
+* Add the path to the CGvsPhoto directory.
 ```python
 >>> import sys
 >>> sys.path.append('../path/to/CGvsPhoto')
 ```
-* Create a file named config.ini in your execution directory to store the different configuration of your environment. The format is the following :
+* Create a file named config.ini in your execution directory to store the different configurations of your environment. The format is the following :
 ```
 [Name of the configuration]
 dir_ckpt = /path/to/save/trained/weights/
