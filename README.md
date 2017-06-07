@@ -17,17 +17,49 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Installing
 
-Simply clone the repository into your favorite code directory.
+Simply clone the repository into your favorite directory.
 
 ```
 git clone https://github.com/NicoRahm/CGvsPhoto
 ```
 
+To run this code from a distant directory, you have to set up two things : 
+* Adding the path to the CGvsPhoto directory.
+```python
+>>> import sys
+>>> sys.path.append('../path/to/CGvsPhoto')
+```
+* Create a file named config.ini in your execution directory to store the different configuration of your environment. The format is the following :
+```
+[Name of the configuration]
+dir_ckpt = /path/to/save/trained/weights/
+dir_summaries = /path/to/save/summaries
+dir_visualization = /path/to/save visualizations
+```
+
+### Database format 
+
+Your database must follow this organization : 
+```
+Database/
+    training/
+        CGG/
+        Real/
+    validation/ 
+        CGG/
+        Real/
+    testing/
+        CGG/
+        Real/
+```
 
 
-### Setting up the database 
+### Some simple examples
 
+To get started, you can run simple scripts from the examples directory. Do not forget to set up the config.ini file correctly as described above.
 
+* test_pipeline.py trains a neural network to classify image patches.
+* 
 
 ## How to use
 
@@ -47,9 +79,10 @@ Give an example
 Give an example
 ```
 
-## Author
+## Authors
 
 **Nicolas Rahmouni**  - [NicoRahm](https://github.com/NicoRahm)
+**Vincent Nozick**
 
 ## Acknowledgments
 
