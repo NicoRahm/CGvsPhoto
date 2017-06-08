@@ -1,3 +1,10 @@
+"""
+    The ``model`` module
+    ======================
+ 
+    Contains the class Model which implements the core model for CG detection.
+"""
+
 import os
 
 import time
@@ -15,29 +22,19 @@ import numpy as np
 from PIL import Image
 
 GPU = '/gpu:0'
+config = 'server'
 
 from sklearn.metrics import roc_curve
 from sklearn.metrics import auc
 from sklearn.metrics import accuracy_score as acc
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import SVC
-# from sklearn.ensemble import ExtraTreesClassifier
 
 # seed initialisation
 print("\n   random initialisation ...")
 random_seed = int(time.time() % 10000 ) 
 random.seed(random_seed)  # for reproducibility
 print('   random seed =', random_seed)
-
-# if config == 'server':
-#   folder_ckpt = '/work/smg/v-nicolas/weights/'
-#   dir_summaries = '/home/smg/v-nicolas/summaries/'
-#   visualization_dir = '/home/smg/v-nicolas/visualization/'
-# else:
-#   folder_ckpt = '/home/nicolas/Documents/weights/'
-#   dir_summaries = '/home/nicolas/Documents/summaries/'
-#   visualization_dir = '/home/nicolas/Documents/visualization/'
-
 
 # tool functions
 
@@ -54,39 +51,57 @@ def variable_summaries(var):
     tf.summary.histogram('histogram', var)
 
 def weight_variable(shape, seed = None):
+  """Creates and initializes (truncated normal distribution) a variable weight Tensor with a defined shape"""
   initial = tf.truncated_normal(shape, stddev=0.5, seed = random_seed)
   return tf.Variable(initial)
 
 def bias_variable(shape):
+  """Creates and initializes (truncated normal distribution with 0.5 mean) a variable bias Tensor with a defined shape"""
   initial = tf.truncated_normal(shape, mean = 0.5, stddev=0.1, seed = random_seed)
   return tf.Variable(initial)
   
 def conv2d(x, W):
+  """Returns the 2D convolution between input x and the kernel W"""  
   return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
  
 def max_pool_2x2(x):
+  """Returns the result of max-pooling on input x with a 2x2 window""" 
   return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
                            strides=[1, 2, 2, 1], padding='SAME')
 
 def avg_pool_2x2(x):
+  """Returns the result of average-pooling on input x with a 2x2 window""" 
   return tf.nn.avg_pool(x, ksize=[1, 2, 2, 1],
                            strides=[1, 2, 2, 1], padding='SAME')
 
 def max_pool_10x10(x):
+  """Returns the result of max-pooling on input x with a 10x10 window""" 
   return tf.nn.max_pool(x, ksize=[1, 10, 10, 1],
                            strides=[1, 10, 10, 1], padding='SAME')
 
 def avg_pool_10x10(x):
+  """Returns the result of average-pooling on input x with a 10x10 window""" 
   return tf.nn.avg_pool(x, ksize=[1, 10, 10, 1],
                            strides=[1, 10, 10, 1], padding='SAME')
 
 def histogram(x, nbins):
+  """Returns the Tensor containing the nbins values of the normalized histogram of x""" 
   h = tf.histogram_fixed_width(x, value_range = [-1.0,1.0], 
                                nbins = nbins, dtype = tf.float32)
   return(h)
 
-def gaussian_func(mu, x, n, sigma, xmax = 1):
-  xmax = np.float32(xmax)
+def gaussian_func(mu, x, n, sigma):
+  """Returns the average of x composed with a gaussian function
+
+    :param mu: The mean of the gaussian function
+    :param x: Input values 
+    :param n: Number of input values
+    :param sigma: Variance of the gaussian function
+    :type mu: float
+    :type x: Tensor
+    :type n: int 
+    :type sigma: float
+  """ 
   gauss = tf.contrib.distributions.Normal(mu=mu, sigma=sigma)
   # return(tf.reduce_sum(gauss.pdf(xmax - tf.nn.relu(xmax - x))/n))
   return(tf.reduce_sum(gauss.pdf(x)/n))
@@ -94,12 +109,26 @@ def gaussian_func(mu, x, n, sigma, xmax = 1):
 
 
 def gaussian_kernel(x, nbins = 8, values_range = [0, 1], sigma = 0.1,image_size = 100):
+  """Returns the values of x's nbins gaussian histogram 
+
+    :param x: Input values (supposed to be images)
+    :param nbins: Number of bins (different gaussian kernels)
+    :param values_range: The range of the x values
+    :param sigma: Variance of the gaussian functions
+    :param image_size: The size of the images x (for normalization)
+    :type x: Tensor
+    :type nbins: int 
+    :type values_range: table
+    :type sigma: float
+    :type image_size: int
+  """ 
   mu_list = np.float32(np.linspace(values_range[0], values_range[1], nbins + 1))
   n = np.float32(image_size**2)
   function_to_map = lambda m : gaussian_func(m, x, n, sigma)
   return(tf.map_fn(function_to_map, mu_list))
 
 def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
+  """Plots the gaussian kernels used for estimating the histogram"""
 
   r = values_range[1] - values_range[0]
   mu_list = []
@@ -114,72 +143,67 @@ def plot_gaussian_kernel(nbins = 8, values_range = [0, 1], sigma = 0.1):
   plt.title("Gaussian kernels used for estimating the histograms")
   plt.show()
 
-def learnable_histogram(x, nbins, k, image_size): 
-
-  l = []
-  for i in range(nbins):
-    b = bias_variable([k])
-    l.append(x - b)
-
-  conv1 = tf.abs(tf.transpose(tf.stack(l), perm = [1,2,3,0,4]))
-
-  W = weight_variable([1, 1, 1, k, k], seed = random_seed)
-
-  relu = tf.nn.relu(tf.constant(1.0, shape=[k]) - tf.nn.conv3d(conv1, W, strides=[1, 1, 1, 1, 1], padding='SAME'))
-
-  avg_pool = tf.reshape(tf.nn.pool(relu, window_shape=[image_size, image_size, 1], 
-                        pooling_type = 'AVG', strides=[image_size, image_size, 1], 
-                        padding='SAME'), [-1, nbins, k])
-  return(avg_pool)
-
-def classic_histogram(x, nbins, k, image_size):
-
-  l = []
-  for i in range(nbins):
-    b = float(i)/float(nbins)
-    l.append(b)
-
-  b = tf.constant(l, shape = [k,nbins])
-  x_3d = tf.reshape(x, [-1,image_size, image_size, k, 1])
-  W1 = tf.constant(1.0, shape=[1,1,k,1,nbins])
-  conv1 = tf.abs(tf.nn.conv3d(x_3d, W1,strides=[1, 1, 1, 1, 1], padding='SAME') - b)
-  conv1 = tf.transpose(conv1, [0,1,2,4,3])
-
-  W = tf.constant(1.0/float(nbins), shape=[1,1,nbins,k,k])
-
-  relu = tf.nn.relu(tf.constant(1.0, shape=[k]) - tf.nn.conv3d(conv1, W, strides=[1, 1, 1, 1, 1], padding='SAME'))
-
-  avg_pool = tf.reshape(tf.nn.pool(relu, window_shape=[image_size, image_size, 1], 
-                        pooling_type = 'AVG', strides=[image_size, image_size, 1], 
-                        padding='SAME'), [-1, nbins, k])
-  return(avg_pool)  
 
 def classic_histogram_gaussian(x, k, nbins = 8, values_range = [0, 1], sigma = 0.6):
+  """Computes gaussian histogram values for k input images"""
   function_to_map = lambda y: tf.stack([gaussian_kernel(y[:,:,i], nbins, values_range, sigma) for i in range(k)])
   res = tf.map_fn(function_to_map, x)
   return(res)
 
 def stat(x):
+  """Computes statistical features for an image x : mean, min, max and variance"""
   # sigma = tf.reduce_mean((x - tf.reduce_mean(x))**2)
   return(tf.stack([tf.reduce_mean(x), tf.reduce_min(x), tf.reduce_max(x), tf.reduce_mean((x - tf.reduce_mean(x))**2)]))
 
 def compute_stat(x, k):
+  """Computes statistical features for k images"""
   function_to_map = lambda y: tf.stack([stat(y[:,:,i]) for i in range(k)])
   res = tf.map_fn(function_to_map, x)
   return(res)
 
 class Model:
 
+  """
+    Class Model
+    ======================
+ 
+    Defines a model for single-image CG detection and numerous methods to : 
+    - Create the TensorFlow graph of the model
+    - Train the model on a specific database
+    - Reload past weights 
+    - Test the model (simple classification, full-size images with boosting and splicing)
+    - Visualize some images and probability maps
+"""
+
   def __init__(self, database_path, image_size, config = 'Personal', filters = [32, 64],
-               batch_size = 50, feature_extractor = 'Stats', nbins = 10, 
-               all_summaries = False, using_GPU = False):
+              feature_extractor = 'Stats', nbins = 10, batch_size = 50,  
+              using_GPU = False):
+    """Defines a model for single-image classification
+
+    :param database_path: Absolute path to the default patch database (training, validation and testings are performed on this database)
+    :param image_size: Size of the patches supposed squared
+    :param config: Name of the section to use in the config.ini file for configuring directory paths (weights, training summaries and visualization dumping)
+    :param filters: Table with the number of output filters of each layer
+    :param feature_extractor: Two choices 'Stats' or 'Hist' for the feature extractor
+    :param nbins: Number of bins on the histograms. Used only if the feature_extractor parameter is 'Hist'
+    :param batch_size: The size of the batch for training
+    :param using_GPU: Whether to use GPU for computation or not 
+    :type database_path: str
+    :type image_size: int
+    :type config: str
+    :type filters: table
+    :type feature_extractor: str
+    :type nbins: int
+    :type batch_size: int
+    :type using_GPU: bool
+  """ 
     clear = lambda: os.system('clear')
     clear()
     print('   tensorFlow version: ', tf.__version__)
     
+    # read the configuration file
     conf = configparser.ConfigParser()
     conf.read('config.ini')
-    # print(conf.sections())
 
     if config not in conf:
       raise ValueError(config + ' is not in the config.ini file... Please create the corresponding section')
@@ -187,10 +211,11 @@ class Model:
     self.dir_ckpt = conf[config]['dir_ckpt']
     self.dir_summaries = conf[config]['dir_summaries']
     self.dir_visualization = conf[config]['dir_visualization']
-
     print('   Check-points directory : ' + self.dir_ckpt)
     print('   Summaries directory : ' + self.dir_summaries)
     print('   Visualizations directory : ' + self.dir_visualization)
+
+    # setting the parameters of the model
     self.nf = filters
     self.nl = len(self.nf)
     self.filter_size = 3
@@ -203,26 +228,28 @@ class Model:
     self.database_path = database_path
     self.image_size = image_size
     self.batch_size = batch_size
-    self.all_summaries = all_summaries
     self.nbins = nbins
     self.using_GPU = using_GPU
 
+    # getting the database
     self.import_database()
+
+    # create the TensorFlow graph
     if using_GPU:
       with tf.device(GPU):
         self.create_graph(nb_class = self.nb_class, 
                           feature_extractor = self.feature_extractor,
-                          nl = self.nl, nf = self.nf, filter_size = self.filter_size,
-                          all_summaries = self.all_summaries)
+                          nl = self.nl, nf = self.nf, filter_size = self.filter_size)
     else: 
       self.create_graph(nb_class = self.nb_class, 
                         feature_extractor = self.feature_extractor,
-                        nl = self.nl, nf = self.nf, filter_size = self.filter_size,
-                        all_summaries = self.all_summaries)
+                        nl = self.nl, nf = self.nf, filter_size = self.filter_size)
 
 
 
   def import_database(self): 
+    """Creates a Database_loader to load images from the distant database"""
+
     # load data
     print('   import data : image_size = ' + 
         str(self.image_size) + 'x' + str(self.image_size) + '...')
@@ -231,7 +258,8 @@ class Model:
     self.nb_class = self.data.nb_class
 
   def create_graph(self, nb_class, nl = 2, nf = [32, 64], filter_size = 3,
-                   feature_extractor = 'Stats', all_summaries = False): 
+                   feature_extractor = 'Stats'): 
+    """Creates the TensorFlow graph"""
 
     print('   create model ...')
     # input layer. One entry is a float size x size, 3-channels image. 
@@ -313,26 +341,18 @@ class Model:
                                             values_range = range_hist, 
                                             sigma = sigma)
           self.hist = hist
-          # tf.summary.tensor_summary('hist', hist)
 
         flatten = tf.reshape(hist, [-1, size_flat], name = "Flatten_Hist")
         self.flatten = flatten
 
       else: 
-
-        if self.feature_extractor == 'Stats': 
-          nb_stats = 4
-          size_flat = nb_filters*nb_stats
-
+        nb_stats = 4
+        size_flat = nb_filters*nb_stats
+        with tf.name_scope('Simple_statistics'): 
           s = compute_stat(self.h_convs[nl-1], nb_filters)
+          self.stat = s
           
-          flatten = tf.reshape(s, [-1, size_flat], name = "Flattend_Stat")
-          self.hist = s
-        else:
-          m_pool = max_pool_2x2(self.h_convs[nl-1])
-          size_flat = int(nb_filters*(image_size**2)/4)
-          flatten = tf.reshape(m_pool, [-1, size_flat], name = "Flatten_MPool")
-
+        flatten = tf.reshape(s, [-1, size_flat], name = "Flattened_Stat")
         self.flatten = flatten
 
 
@@ -399,30 +419,6 @@ class Model:
 
       self.accuracy = accuracy
 
-      # with tf.name_scope('AUC'):
-      #   auc = tf.metrics.auc(tf.argmax(y_,1), tf.argmax(y_conv,1))
-      #   tf.summary.scalar('AUC', auc)
-
-      if all_summaries:
-        # with tf.name_scope('Image_Visualization'):
-          # tf.summary.image('Input_Data', x_image)
-        with tf.name_scope('Weights'):
-          variable_summaries(W_conv1)
-          variable_summaries(W_conv2)
-          variable_summaries(W_fc1)
-          variable_summaries(W_fc3)
-        with tf.name_scope('Bias'):
-          variable_summaries(b_conv1)
-          variable_summaries(b_conv2)
-          variable_summaries(b_fc1)  
-          variable_summaries(b_fc3)  
-        with tf.variable_scope('Conv_visualization'):
-          tf.summary.image('conv1/filters', W_conv1[:,:,:,0:1])
-          tf.summary.image('conv2/filters', W_conv2[:,:,:,0:1])
-        tf.summary.histogram('Activated_Conv_1', h_conv1)
-        tf.summary.histogram('Activated_Conv_2', h_conv2)
-        tf.summary.histogram('Activated_Fully_Connected', h_fc1)
-
     self.graph = graph
     print('   model created.')
 
@@ -430,7 +426,28 @@ class Model:
                          plot_histograms = False, range_hist = [0.,1.], 
                          selected_hist_nb = 8, run_name = '',
                          show_filters = True):
+    """Computes validation accuracy during training and plots some visualization.
+      
+    Returns the accuracy on the validation data. Can also plot some histograms of the filtered images 
+    (if the Hist layer is selected) and the first layer's filters.
 
+    :param it: The number of the iteration in the training process
+    :param nb_iterations: The number of batches to process on the validation set
+    :param batch_size: Batch size when loading the validation images
+    :param plot_hitograms: Whether to plot the histograms or not
+    :param range_hist: The value range for plotting the histograms
+    :param selected_hist_nb: The number of histograms to plot
+    :param run_name: The name of the training run
+    :param show_filters: Whether to show the first layer's filters
+    :type it: int
+    :type nb_iterations: int
+    :type batch_size: int
+    :type plot_hitograms: bool
+    :type range_hist: table
+    :type selected_hist_nb: int
+    :type run_name: str
+    :type show_filters: bool
+    """
     if show_filters: 
       
       nb_height = 4
@@ -456,6 +473,9 @@ class Model:
       plt.show(img)
       plt.close()     
 
+    if plot_histograms and self.feature_extractor != 'Hist':
+      print("Can't plot the histograms, feature extractor is 'Stats'...")
+
     validation_batch_size = batch_size 
     validation_accuracy = 0
     # validation_auc = 0
@@ -478,7 +498,7 @@ class Model:
       validation_accuracy += self.accuracy.eval(feed_dict)
 
       
-      if plot_histograms:
+      if plot_histograms and self.feature_extractor == 'Hist':
         # Computing the mean histogram for each class
         hist_plot = self.hist.eval(feed_dict)
         for k in range(validation_batch_size): 
@@ -499,7 +519,7 @@ class Model:
           hist_CGG[p] /= nb_CGG
           hist_real[p] /= nb_real
 
-    if plot_histograms:
+    if plot_histograms and self.feature_extractor == 'Hist':
       # Plotting mean histogram for CGG
       fig = plt.figure(1)
       for k in range(selected_hist_nb):
@@ -509,7 +529,7 @@ class Model:
         plt.plot(np.linspace(range_hist[0], range_hist[1], self.nbins+1), 
                              hist_CGG[k], 'r')
         fig.suptitle("Mean histogram for CGG", fontsize=14)
-      plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + '_cgg_'+ str(it) + '.png')
+      plt.show()
       plt.close()
 
       # Plotting mean histogram for Real
@@ -521,7 +541,7 @@ class Model:
         plt.plot(np.linspace(range_hist[0], range_hist[1],self.nbins+1), 
                              hist_real[k], 'r')
         fig.suptitle("Mean histogram for Real", fontsize=14)
-      plt.savefig('/home/smg/v-nicolas/visualization/histograms/' + run_name + '_real_'+ str(it) + '.png')
+      plt.show()
       plt.close()
 
 
@@ -532,8 +552,25 @@ class Model:
 
 
   def train(self, nb_train_batch, nb_test_batch, 
-            nb_validation_batch, show_filters = False):
-    
+            nb_validation_batch, validation_frequency = 10, show_filters = False):
+    """Trains the model on the selected database training set.
+      
+    Trains a blank single-image classifer (or initialized with some pre-trained weights). 
+    The weights are saved in the corresponding file along training, validation is computed, 
+    showed and saved at the end. Finnaly, summaries are generated. 
+    Testing is also performed for single-images.
+
+    :param nb_train_batch: The number of batches to train (can be on multiple epochs)
+    :param nb_test_batch: The number of batches to test
+    :param nb_validation_batch: The number of batch for validation
+    :param validation_frequency: Performs validation testing every validation_frequency batches
+    :param show_filters: Whether to show the first layer's filters at each validation step
+    :type nb_train_batch: int
+    :type nb_test_batch: int
+    :type nb_validation_batch: int
+    :type validation_frequency: int
+    :type show_filters: bool
+    """
     run_name = input("   Choose a name for the run : ")
     path_save = self.dir_ckpt + run_name
     acc_name = self.dir_summaries + run_name + "/validation_accuracy_" + run_name + ".csv"
@@ -578,8 +615,8 @@ class Model:
       validation_accuracy = []
       for i in range(nb_train_batch):
         
-          # evry 100 batches, test the accuracy
-          if i%10 == 0 :
+          # evry validation_frequency batches, test the accuracy
+          if i%validation_frequency == 0 :
               
               if i%100 == 0:
                 plot_histograms = False
@@ -612,6 +649,7 @@ class Model:
               remaining_time = time_elapsed * int((nb_train_batch - i)/100)
               print('   Remaining time : ', time.strftime("%H:%M:%S",time.gmtime(remaining_time)))
             batch_clock = time.time()
+      
       print('   saving validation accuracy...')
       file = open(acc_name, 'w', newline='')
 
@@ -625,7 +663,7 @@ class Model:
           file.close()
           print('   done.')
 
-      if nb_train_batch > 10:
+      if nb_train_batch > validation_frequency:
         plt.figure()
         plt.plot(np.linspace(0,nb_train_batch,int(nb_train_batch/10)), validation_accuracy)
         plt.title("Validation accuracy during training")
@@ -659,6 +697,7 @@ class Model:
 
 
   def show_histogram(self):
+    """Plots histograms of the last layer outputs for some images"""
 
     with tf.Session(graph=self.graph) as sess:
 
@@ -733,7 +772,16 @@ class Model:
       plt.show()
 
   def lda_training(self, nb_train_batch, nb_test_batch):
+    """Trains a LDA classifier on top of the feature extractor.
+      
+    Restores the weights of the feature extractor and trains a new LDA classifier. The trained LDA can then be reused.
+    Finally tests the pipeline on the test dataset. 
 
+    :param nb_train_batch: The number of batches to train (can be on multiple epochs)
+    :param nb_test_batch: The number of batches to test
+    :type nb_train_batch: int
+    :type nb_test_batch: int
+    """
     self.lda_classifier = LinearDiscriminantAnalysis()
 
     # start a session
@@ -788,8 +836,17 @@ class Model:
       self.clf = self.lda_classifier
 
   def svm_training(self, nb_train_batch, nb_test_batch):
+    """Trains a SVM classifier (RBF kernel) on top of the feature extractor.
+      
+    Restores the weights of the feature extractor and trains a new SVM classifier with RBF kernel. The trained SVM can then be reused.
+    Finally tests the pipeline on the test dataset. 
 
-    # self.svm_classifier = ExtraTreesClassifier(n_estimators = 200, max_depth = 6)
+    :param nb_train_batch: The number of batches to train (can be on multiple epochs)
+    :param nb_test_batch: The number of batches to test
+    :type nb_train_batch: int
+    :type nb_test_batch: int
+    """
+
     self.svm_classifier = SVC(probability = True)
     # start a session
     print('   start session ...')
@@ -848,7 +905,30 @@ class Model:
                         show_images = False,
                         save_images = False,
                         only_green = True, other_clf = False): 
+    """Performs boosting for classifying full-size images.
 
+    Decomposes each image into patches (with size = self.image_size), computes the posterior probability of each class
+    and uses a decision rule to classify the full-size image.
+    Optionnaly plots or save the probability map and the original image in the visualization directory.
+
+    :param test_data_path: The absolute path to the test dataset. Must contain two directories : CGG/ and Real/
+    :param nb_images: The number of images to test
+    :param minibatch_size: The size of the batch to process the patches
+    :param decision_rule: The decision rule to use to aggregate patches prediction
+    :param show_images: Whether to show images or not 
+    :param save_images: Whether to save images or not
+    :param only_green: Whether to take only the green channel of the image
+    :param other_clf: Whether to use aother classifier (LDA or SVM). If True, takes the lastly trained
+
+    :type test_data_path: str
+    :type nb_images: int
+    :type minibatch_size: int
+    :type decision_rule: str
+    :type show_images: bool
+    :type save_images: bool
+    :type only_green: bool
+    :type other_clf:bool
+    """
     valid_decision_rule = ['majority_vote', 'weighted_vote']
     if decision_rule not in valid_decision_rule:
       raise NameError(decision_rule + ' is not a valid decision rule.')
@@ -1009,10 +1089,38 @@ class Model:
                           true_label, width, height, diff, original = None,
                           show_images = False, save_images = False,
                           prob_map = False, save_original = False):
+    """Computes image visualization and save/show it
 
+    Permits to visualize the probability map of the image. Green color represents correctly classified patches
+    and red wrongly classified ones. The intensity depends on the level of certainty.
+
+    :param path_save: The absolute path where images should be saved
+    :param file_name: The name of input image file
+    :param images: An array containing patches extracted from the full-size image
+    :param width: The width of the full-size image
+    :param height: The height of the full-size image
+    :param diff: Differences between log posterior probabilities for each patch
+    :param original: The original image
+    :param show_images: Whether to show images or not 
+    :param save_images: Whether to save images or not
+    :param prob_map: Whether to save the probability map
+    :param save_original: Whether to save the original image
+
+    :type path_save: str
+    :type file_name: str
+    :type images: numpy array
+    :type width: int
+    :type height: int
+    :type diff: numpy array
+    :type original: numpy array
+    :type show_images: bool
+    :type save_images: bool
+    :type prob_map: bool
+    :type save_original: bool
+    """
     nb_width = int(width/self.image_size)
     nb_height = int(height/self.image_size)
-
+    m = 10
     img = plt.figure(figsize = (nb_width, nb_height))
     
     gs1 = gridspec.GridSpec(nb_height, nb_width)
@@ -1021,18 +1129,18 @@ class Model:
     for i in range(len(images)):
 
       cdict_green = {'red': ((0.0,0.0,0.0),
-                             (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                             (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
                      'blue': ((0.0,0.0,0.0),
-                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                              (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
                      'green': ((0.0,0.0,0.0),
                                (1.0,1.0,1.0))}
 
       cdict_red = {'red': ((0.0,0.0,0.0),
                                (1.0,1.0,1.0)),
                     'blue': ((0.0,0.0,0.0),
-                                (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                                (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
                     'green': ((0.0,0.0,0.0),
-                                 (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4))}
+                                 (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m))}
       
 
       ax1 = plt.subplot(gs1[i])
@@ -1083,18 +1191,18 @@ class Model:
           map_im = np.ones((self.image_size, self.image_size))
           map_im[0,0] = 0
           cdict_green = {'red': ((0.0,0.0,0.0),
-                             (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                             (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
                      'blue': ((0.0,0.0,0.0),
-                              (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                              (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
                      'green': ((0.0,0.0,0.0),
                                (1.0,1.0,1.0))}
 
           cdict_red = {'red': ((0.0,0.0,0.0),
                                    (1.0,1.0,1.0)),
                         'blue': ((0.0,0.0,0.0),
-                                    (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4)),
+                                    (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
                         'green': ((0.0,0.0,0.0),
-                                     (1.0,1.0 - diff[i]/4,1.0 - diff[i]/4))}
+                                     (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m))}
           
           ax1 = plt.subplot(gs1[i])
           ax1.axis('off')
@@ -1103,13 +1211,13 @@ class Model:
               cmap = mcolors.LinearSegmentedColormap('my_green', cdict_green, 100)
             else:
               cmap = 'gray'
-              map_im = map_im*0.5
+              map_im = map_im*0.7
           else: 
             if diff[i] > 0.4:
               cmap = mcolors.LinearSegmentedColormap('my_red', cdict_red, 100)
             else:
               cmap = 'gray'
-              map_im = map_im*0.5
+              map_im = map_im*0.7
 
           plt.imshow(map_im, cmap = cmap)
           ax1.set_xticklabels([])
@@ -1150,9 +1258,26 @@ class Model:
 
 
 
-  def test_splicing(self, data_path, nb_images, save_images, show_images,
+  def test_splicing(self, data_path, nb_images, save_images = True, show_images = False,
                     minibatch_size = 25):
+    """Computes image visualization for spliced images
 
+    Decomposes each image into patches (with size = self.image_size), computes the posterior probability of each class
+    and show the probability map.
+
+    :param data_path: Path to the spliced images. Should contain two directories : CGG/ and Real/
+    :param nb_images: Number of spliced images to process
+    :param show_images: Whether to show images or not 
+    :param save_images: Whether to save images or not
+    :param minibatch_size: The size of the batch to process the patches
+
+
+    :type data_path: str
+    :type nb_images: int
+    :type show_images: bool
+    :type save_images: bool
+    :type minibatch_size: int
+    """
     if(save_images):
       test_name = input("   Choose a name for the test : ")
       path_save = self.dir_visualization + test_name
