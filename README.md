@@ -27,7 +27,7 @@ $ git clone https://github.com/NicoRahm/CGvsPhoto
 Then, move to the directory and install the package using : 
 ```
 $ cd CGvsPhoto/
-$ pip install .
+$ pip3 install .
 ```
 
 To run the first test, there is one more thing to set up : 
