@@ -1,4 +1,5 @@
 from setuptools import setup
+from setuptools import find_packages
 
 setup(name='CGvsPhoto',
       version='0.1',
@@ -6,5 +7,6 @@ setup(name='CGvsPhoto',
       url='https://github.com/NicoRahm/CGvsPhoto',
       author='Nicolas Rahmouni',
       author_email='nicolas.rahmouni@polytechnique.edu',
-      packages=['CGvsPhoto'],
+      packages=find_packages(exclude = ['examples']),
+      license='MIT',
       zip_safe=False)

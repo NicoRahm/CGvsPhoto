@@ -1,10 +1,8 @@
-print("   reset python interpreter ...")
 import os
-clear = lambda: os.system('clear')
-clear()
+
 import time
 import random
-import image_loader as il
+from . import image_loader as il
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -18,20 +16,12 @@ from PIL import Image
 
 GPU = '/gpu:0'
 
-config = ''
-config = 'server'
-
-if config != 'server':
-  from sklearn.metrics import roc_curve
-  from sklearn.metrics import auc
-  from sklearn.metrics import accuracy_score as acc
-  from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-  from sklearn.svm import SVC
-  # from sklearn.ensemble import ExtraTreesClassifier
-
-# computation time tick
-start_clock = time.clock()
-start_time = time.time()
+from sklearn.metrics import roc_curve
+from sklearn.metrics import auc
+from sklearn.metrics import accuracy_score as acc
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.svm import SVC
+# from sklearn.ensemble import ExtraTreesClassifier
 
 # seed initialisation
 print("\n   random initialisation ...")
@@ -50,7 +40,6 @@ print('   random seed =', random_seed)
 
 
 # tool functions
-print('   python function setup')
 
 def variable_summaries(var):
   """Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""
@@ -184,9 +173,10 @@ class Model:
   def __init__(self, database_path, image_size, config = 'Personal', filters = [32, 64],
                batch_size = 50, feature_extractor = 'Stats', nbins = 10, 
                all_summaries = False, using_GPU = False):
-
+    clear = lambda: os.system('clear')
+    clear()
     print('   tensorFlow version: ', tf.__version__)
-
+    
     conf = configparser.ConfigParser()
     conf.read('config.ini')
     # print(conf.sections())
@@ -583,6 +573,8 @@ class Model:
 
       # Train
       print('   train ...')
+      start_clock = time.clock()
+      start_time = time.time()
       validation_accuracy = []
       for i in range(nb_train_batch):
         

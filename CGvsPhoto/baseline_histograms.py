@@ -6,7 +6,7 @@ clear()
 import time
 import random
 # import plot_history as ph
-import image_loader as il
+from . import image_loader as il
 import tensorflow as tf
 # import matplotlib.pyplot as plt
 
