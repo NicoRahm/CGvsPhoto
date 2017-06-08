@@ -1,12 +1,4 @@
-# get the path to the CGvsPhoto directory
-import sys
-sys.path.append('../')
-
-from model import Model
-
-
-
-
+from CGvsPhoto import Model
 # to change to your favorite database
 database_path = '/home/nicolas/Database/level-design_raise_100/'
 
