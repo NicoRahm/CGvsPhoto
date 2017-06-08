@@ -22,15 +22,16 @@ These instructions will get you a copy of the project up and running on your loc
 Simply clone the repository into your favorite directory.
 
 ```
-git clone https://github.com/NicoRahm/CGvsPhoto
+$ git clone https://github.com/NicoRahm/CGvsPhoto
 ```
-Then, when you are on the directory, you can install the package using : 
+Then, move to the directory and install the package using : 
 ```
-pip install .
+$ cd CGvsPhoto/
+$ pip install .
 ```
 
 To run the first test, there is one more thing to set up : 
-* Create a file named config.ini in your execution directory to store the different configurations of your environment. The format is the following :
+* Create a file named config.ini in your execution directory (the directory containing the scripts) to store the different configurations of your environment. The format is the following :
 ```
 [Name of the configuration]
 dir_ckpt = /path/to/save/trained/weights/
