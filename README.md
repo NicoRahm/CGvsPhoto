@@ -70,7 +70,7 @@ This section explains basic uses of this code.
 
 ### Creating a model
 
-To create your own model, you just have to call the the Model function. For example : 
+To create your own model, you just have to call the Model class. For example : 
 ```python
 from CGvsPhoto import Model
 
