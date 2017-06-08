@@ -2,7 +2,7 @@
 
 **CGvsPhoto** implements a method for computer graphics detection using Convolutional Neural Networks with TensorFlow back-end.
 
-![splicing](https://user-images.githubusercontent.com/17125992/26874001-e4716e50-4bb6-11e7-929d-a7f2e7192a9f.png)
+![splicing](https://user-images.githubusercontent.com/17125992/26917538-9d918318-4c69-11e7-8c6f-f865b3c5f063.png)
 
 ## Getting Started
 
