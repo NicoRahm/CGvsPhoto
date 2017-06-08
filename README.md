@@ -1,10 +1,12 @@
-# Computer Graphics vs Real Photographic Images : A deep-learning approach
+# Computer Graphics vs Real Photographic Images : A Deep-learning approach
 
 **CGvsPhoto** implements a method for computer graphics detection using Convolutional Neural Networks with TensorFlow back-end.
 
+![splicing](https://user-images.githubusercontent.com/17125992/26874001-e4716e50-4bb6-11e7-929d-a7f2e7192a9f.png)
+
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
+These instructions will get you a copy of the project up and running on your local machine for testing purposes. 
 
 ### Prerequisites
 * Python 3.6+
@@ -82,7 +84,6 @@ Give an example
 ## Authors
 
 **Nicolas Rahmouni**  - [NicoRahm](https://github.com/NicoRahm)
-**Vincent Nozick**
 
-## Acknowledgments
+**Vincent Nozick**
 
