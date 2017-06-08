@@ -60,8 +60,8 @@ You can create it manually or using the function construct
 
 To get started, you can run simple scripts from the examples directory. Do not forget to set up the config.ini file correctly as described above.
 
-* create_DB.py will create a formated database for future tests.
-* test_pipeline.py trains a neural network to classify image patches and then evaluate it.
+* [create_DB.py](examples/create_DB.py) will create a formated database for future tests.
+* [test_pipeline.py](examples/test_pipeline.py) trains a neural network to classify image patches and then evaluate it.
 * ...
 
 ## How to use
