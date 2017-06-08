@@ -74,9 +74,9 @@ To create your own model, you just have to call the the Model function. For exam
 ```python
 from CGvsPhoto import Model
 
-model = Model(database_path, 
-
-
+model = Model(database_path 'Database/My_Data', image_size = 100,
+              config = 'Config1', filters = [32, 64], 
+              feature_extractor = 'Stats', batch_size = 50)
 ```
 
 
