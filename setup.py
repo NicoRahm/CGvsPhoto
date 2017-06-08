@@ -9,4 +9,7 @@ setup(name='CGvsPhoto',
       author_email='nicolas.rahmouni@polytechnique.edu',
       packages=find_packages(exclude = ['examples']),
       license='MIT',
+      install_requires=['tensorflow','numpy',
+      					'sklearn', 'PIL', 
+      					'matplotlib'],
       zip_safe=False)
