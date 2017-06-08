@@ -27,7 +27,7 @@ def load_images_from_dir(dir_name, shuffle = False) :
     return file_list
 
 
-def construct(source_real, source_CG, target_dir, nb_total = 1800, 
+def construct_DB(source_real, source_CG, target_dir, nb_total = 1800, 
 			  validation_proportion = 0.1, test_proportion = 0.2): 
 
 
@@ -81,7 +81,7 @@ if __name__ == '__main__':
 	source_CG_directory = "/home/nicolas/Database/GameCG/"
 	target_dir_test = '/home/nicolas/Database/level-design_dresden/'
 
-	construct(source_real = source_real_directory, 
+	construct_DB(source_real = source_real_directory, 
 			  source_CG = source_CG_directory,
 			  target_dir = target_dir_test, 
 			  nb_total = 1800,
