@@ -31,23 +31,27 @@ Prerequisites
 Installing
 ~~~~~~~~~~
 
-Simply clone the repository into your favorite directory.
+Simply install this package with pip3 : 
+::
+
+    $ pip3 install CGvsPhoto
+
+You can also clone the repository into your favorite directory.
 
 ::
 
     $ git clone https://github.com/NicoRahm/CGvsPhoto
 
-Then, move to the directory and install the package using :
+Then, install the package using :
 
 ::
 
     $ cd CGvsPhoto/
     $ pip3 install .
 
-To run the first test, there is one more thing to set up : \* Create a
-file named config.ini in your execution directory (the directory
-containing the scripts) to store the different configurations of your
-environment. The format is the following :
+To run your first test, there is one more thing to set up:
+
+- Create a file named config.ini in your execution directory (the directory containing your scripts) to store the different configurations of your environment. The format is the following :
 
 ::
 
