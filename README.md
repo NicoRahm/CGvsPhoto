@@ -1,6 +1,6 @@
 # Computer Graphics vs Real Photographic Images : A Deep-learning approach
 
-**CGvsPhoto** implements a method for computer graphics detection using Convolutional Neural Networks with TensorFlow back-end. The package contains methods for extracting patches from computer graphics and real images, training a CNN with a custom statistical layer, testing this model, compare with a [state of the art method](http://ieeexplore.ieee.org/abstract/document/6115849/), visualizing probability maps, etc.
+**CGvsPhoto** implements a method for computer graphics detection using Convolutional Neural Networks with TensorFlow back-end. The package contains methods for extracting patches from computer graphics and real images, training a CNN with a custom statistical layer, testing this model, comparing with a [state of the art method](http://ieeexplore.ieee.org/abstract/document/6115849/), visualizing probability maps, etc.
 
 ![splicing](https://user-images.githubusercontent.com/17125992/26917538-9d918318-4c69-11e7-8c6f-f865b3c5f063.png)
 
