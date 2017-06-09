@@ -1,7 +1,9 @@
 Computer Graphics vs Real Photographic Images : A Deep-learning approach
 ========================================================================
+
 .. image:: https://badge.fury.io/py/CGvsPhoto.svg
     :target: https://badge.fury.io/py/CGvsPhoto
+    
 **CGvsPhoto** implements a method for computer graphics detection using
 Convolutional Neural Networks with TensorFlow back-end. The package
 contains methods for extracting patches from computer graphics and real
