@@ -2,11 +2,11 @@ from setuptools import setup
 from setuptools import find_packages
 
 def readme():
-    with open('README.md') as f:
+    with open('README.rst') as f:
         return f.read()
 
 setup(name='CGvsPhoto',
-      version='0.2.0',
+      version='0.1.0',
       description='A deep-learning method for distinguishing computer graphics from real photogrphic images',
       long_description=readme(),
       url='https://github.com/NicoRahm/CGvsPhoto',
