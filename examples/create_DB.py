@@ -12,6 +12,6 @@ target_dir = '/home/nicolas/Database/test_DB/'
 construct_DB(source_real = source_real, 
 			  source_CG = source_CG,
 			  target_dir = target_dir, 
-			  nb_total = 100,
+			  nb_per_class = 100,
 			  validation_proportion = 0.1, 
 			  test_proportion = 0.2)
