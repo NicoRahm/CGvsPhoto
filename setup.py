@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 setup(name='CGvsPhoto',
-      version='0.1.0',
+      version='0.0.1',
       description='A deep-learning method for distinguishing computer graphics from real photogrphic images',
       long_description=readme(),
       url='https://github.com/NicoRahm/CGvsPhoto',
