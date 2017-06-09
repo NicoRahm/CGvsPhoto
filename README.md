@@ -54,7 +54,7 @@ Database/
         CGG/
         Real/
 ```
-You can create it manually or using the function construct
+You can create it manually or using the function construct_DB. 
 
 ### Some simple examples
 
@@ -67,6 +67,19 @@ To get started, you can run simple scripts from the examples directory. Do not f
 ## How to use
 
 This section explains basic uses of this code. 
+
+### Creating a model
+
+To create your own model, you just have to call the Model class. For example : 
+```python
+from CGvsPhoto import Model
+
+model = Model(database_path 'Database/My_Data', image_size = 100,
+              config = 'Config1', filters = [32, 64], 
+              feature_extractor = 'Stats', batch_size = 50)
+```
+
+
 
 ### Training a classifier
 
