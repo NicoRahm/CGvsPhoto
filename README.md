@@ -44,13 +44,13 @@ dir_visualization = /path/to/save visualizations
 Your database must follow this organization : 
 ```
 Database/
-    training/
+    test/
+        CGG/
+        Real/
+    train/
         CGG/
         Real/
     validation/ 
-        CGG/
-        Real/
-    testing/
         CGG/
         Real/
 ```
@@ -153,7 +153,7 @@ test_data_path = '/Database/My_Data/test/'
 clf.test_total_images(test_data_path = test_data_path,
                       nb_images = 720, decision_rule = 'weighted_vote')
 ```
-
+Your test directory must contain two sub-directories : CGG and Real. 
 You can specify the number of images you want to process and the aggregation scheme between 'weighted_vote' and 'majority_vote' (even if 'weighted_vote' is in general more efficient).
 
 ## Authors
