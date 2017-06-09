@@ -154,6 +154,7 @@ clf.test_total_images(test_data_path = test_data_path,
                       nb_images = 720, decision_rule = 'weighted_vote')
 ```
 Your test directory must contain two sub-directories : CGG and Real. 
+Before testing, the console will ask you the name of the weight file to load. It must be in the default checkpoint directory and you should inidcate the .ckpt file.
 You can specify the number of images you want to process and the aggregation scheme between 'weighted_vote' and 'majority_vote' (even if 'weighted_vote' is in general more efficient).
 
 ## Authors
