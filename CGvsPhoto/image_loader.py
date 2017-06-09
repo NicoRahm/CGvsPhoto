@@ -1,3 +1,11 @@
+"""
+    The ``image_loader`` module
+    ======================
+ 
+    Contains methods for loading images, cropping, exporting, generating splicing, etc.
+"""
+
+
 from PIL import Image
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
@@ -8,9 +16,14 @@ import random
 
 
 class Database_loader :
+    """
+    Class Database_loader
+    ======================
+ 
+    Defines a loading scheme for database
+    """
 
     def __init__(self, directory, size, proportion = 1.0, seed=42, only_green=True, rand_crop = True) :
-
         # data init
         self.dir = directory          # directory with the train / test / validation sudirectories
         self.size = size              # size of the sub image that should be croped

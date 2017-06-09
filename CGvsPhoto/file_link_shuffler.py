@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 14 14:37:34 2016
-
-@author: nozick
-"""
-
 import os, os.path
 import random
 

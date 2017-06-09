@@ -2,7 +2,8 @@
     The ``model`` module
     ======================
  
-    Contains the class Model which implements the core model for CG detection.
+    Contains the class Model which implements the core model for CG detection, 
+    training, testing and visualization functions.
 """
 
 import os
@@ -188,6 +189,7 @@ class Model:
     :param nbins: Number of bins on the histograms. Used only if the feature_extractor parameter is 'Hist'
     :param batch_size: The size of the batch for training
     :param using_GPU: Whether to use GPU for computation or not 
+    
     :type database_path: str
     :type image_size: int
     :type config: str

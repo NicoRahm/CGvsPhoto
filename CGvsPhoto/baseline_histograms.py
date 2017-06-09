@@ -1,8 +1,13 @@
-print("   reset python interpreter ...")
+"""
+    The ``baseline_histograms`` module
+    ======================
+ 
+    Implements an older method for CG detection for comparison purposes.
+"""
+
 import os
 import csv
-clear = lambda: os.system('clear')
-clear()
+
 import time
 import random
 # import plot_history as ph
@@ -19,17 +24,16 @@ from sklearn.metrics import auc
 
 import matplotlib.pyplot as plt
 
-config = ''
-# config = 'server'
-
 # tool functions
-print('   python function setup')
-
 def conv2d(x, W):
+  """Returns the 2D convolution between input x and the kernel W"""  
   return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
 def extract_features_hist(h): 
-
+  """Computes features from the histogram values 
+      
+  Gets the features for each histogram with the formula : F(k) = (h[k] - h[-k])/2 and F(0) = h[0]
+  """  
   nbins = h.shape[2]
   nb_filters = h.shape[0]
   batch_size = h.shape[1]
@@ -41,14 +45,31 @@ def extract_features_hist(h):
 
   features[:, :, int(nbins/2)] = h[:, :, int(nbins/2)]
   features = np.reshape(features, (-1, feat_size))
-  # print(features.shape)
-  # print(features[1:10])
-  # print('Rank : ' + str(np.linalg.matrix_rank(features)))
+
   return(features)
 
 def train_classifier(database_path, image_size, nb_train_batch,
                      nb_test_batch, batch_size = 50, clf = None):
   
+  """Trains a LDA classifier with the histogram features
+
+    :param database_path: Path to the database containing training and testing datasets
+    :param image_size: Size of the input images (if None, can be any size) 
+    :param nb_train_batch: Number of batch to train (Do not make it more than one epoch)
+    :param nb_test_batch: Number of batch to test
+    :param batch_size: Size of the batches to process
+    :param clf: Permits to load a pre-trained classifier (if None, a new classifier is trained)
+
+    :type database_path: str
+    :type image_size: int
+    :type nb_train_batch: int
+    :type nb_test_batch: int
+    :type batch_size: int
+    :type clf: class implementing a predict_proba and a fit function (e.g. SVC or LDA from sklearn package)
+  """  
+
+  clear = lambda: os.system('clear')
+  clear()
   test_name = input("   Choose a name for the test : ")
   # computation time tick
   start_clock = time.clock()
@@ -86,7 +107,8 @@ def train_classifier(database_path, image_size, nb_train_batch,
       tf.summary.image('Input_Data', x)
 
     x_shape = tf.placeholder(tf.float32, [2])
-  # Filtering to obtain derivation 
+
+  # Filters to obtain difference images
   horizontal = tf.constant([[1,-1],[0,0]], tf.float32)
   horizontal_filter = tf.reshape(horizontal, [2, 2, 1, 1])
 
@@ -139,6 +161,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
   nbins = 15
 
+  # compute the histogram of the images
   hist = []
   function_to_map = lambda x: 1000.0 * tf.histogram_fixed_width(x, 
                                                        [-1.,1.], 
@@ -150,6 +173,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
   hist = tf.stack(hist)
 
+
   # start a session
   print('   start session ...')
   tf.InteractiveSession()
@@ -157,12 +181,15 @@ def train_classifier(database_path, image_size, nb_train_batch,
   print('   variable initialization ...')
   tf.global_variables_initializer().run()
 
-  # training the LDA classifier
+  # if no classifier, initialize a LDA classifier
   if clf == None:
     clf = LinearDiscriminantAnalysis()
-
+  
+  # training the classifier
   features = []
   labels = []
+
+  # computing feature vectors
   for i in range(nb_train_batch):
     if (i%10 == 0):
       print("Computing features for training batch " + str(i) + '/' + str(nb_train_batch))
@@ -179,9 +206,12 @@ def train_classifier(database_path, image_size, nb_train_batch,
   labels = np.reshape(np.array(labels), (batch_size*nb_train_batch,)) 
   print(features.shape)
   print(labels.shape)
+
+  # fitting the classifier 
   clf.fit(features, labels)
     
 
+  # testing on the test set
   print('   final test ...')
   test_accuracy = 0
   nb_iterations = nb_test_batch
@@ -249,10 +279,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  if config == 'server':
-    database_path = '/work/smg/v-nicolas/level-design_raise'
-  else:
-    database_path = '/home/nicolas/Database/level-design_raise'
+  database_path = '/home/nicolas/Database/level-design_raise'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
