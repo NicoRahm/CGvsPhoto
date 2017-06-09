@@ -134,10 +134,10 @@ Warning : The database must contain images with the same image_size as specified
 
 Now, to train this model, use the *train* function specifying the number of training/validation/testing batches: 
 
-```
-  model.train(nb_train_batch = 15000,
-              nb_test_batch = 80, 
-              nb_validation_batch = 40)
+```python
+model.train(nb_train_batch = 15000,
+            nb_test_batch = 80, 
+            nb_validation_batch = 40)
 ```
 
 This will train a model and save the weights and a bunch of summaries in correspondant directories (you specify the name of the run at the begining of the procedure). You can also load a pre-trained model and continue the training (be careful though to load a model which structure corresponds to the one you are trying to train).
@@ -148,7 +148,7 @@ At the end of training, the model's accuracy is evaluated on the patches testing
 
 Now that you have trained a model, you can load it and test it on full-size images, using the *test_total_images* function :
 
-```
+```python
 test_data_path = '/Database/My_Data/test/'
 clf.test_total_images(test_data_path = test_data_path,
                       nb_images = 720, decision_rule = 'weighted_vote')
