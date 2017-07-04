@@ -6,7 +6,7 @@ database_path = '/home/nicolas/Database/level-design_raise_100/'
 image_size = 100
 
 # define a single-image classifier
-clf = Model(database_path, image_size, config = 'Personal', filters = [4,8],
+clf = Model(database_path, image_size, config = 'Personal', filters = [32,64],
             batch_size = 50, feature_extractor = 'Stats')
 
 

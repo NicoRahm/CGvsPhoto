@@ -158,8 +158,9 @@ def stat(x):
 
 def compute_stat(x, k):
   """Computes statistical features for k images"""
-  function_to_map = lambda y: tf.stack([stat(y[:,:,i]) for i in range(k)])
-  res = tf.map_fn(function_to_map, x)
+  # function_to_map = lambda y: tf.stack([stat(y[:,:,i]) for i in range(k)])
+  # res = tf.map_fn(function_to_map, x)
+  res = tf.transpose(tf.stack([tf.reduce_mean(x, axis=[1,2]), tf.reduce_min(x, axis=[1,2]), tf.reduce_max(x, axis=[1,2]), tf.reduce_mean((x - tf.reduce_mean(x, axis=[1,2], keep_dims = True))**2, axis=[1,2])]), [1,2,0])
   return(res)
 
 class Model:
@@ -605,8 +606,8 @@ class Model:
 
       if restore_weigths == 'y':
         file_to_restore = input("\nName of the file to restore (Directory : " + 
-                                self.folder_ckpt + ') : ')
-        saver.restore(sess, self.folder_ckpt + file_to_restore)
+                                self.dir_ckpt + ') : ')
+        saver.restore(sess, self.dir_ckpt + file_to_restore)
         print('\n   Model restored\n')
         
 

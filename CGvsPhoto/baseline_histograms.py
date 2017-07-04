@@ -11,7 +11,7 @@ import csv
 import time
 import random
 # import plot_history as ph
-from . import image_loader as il
+from CGvsPhoto import image_loader as il
 import tensorflow as tf
 # import matplotlib.pyplot as plt
 
@@ -279,11 +279,11 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/home/nicolas/Database/level-design_raise'
+  database_path = '/home/nicolas/Database/level-design_raise_100_color'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 2520,
-                         nb_test_batch = 720,
+                         nb_train_batch = 80000,
+                         nb_test_batch = 4000,
                          batch_size = 1)
