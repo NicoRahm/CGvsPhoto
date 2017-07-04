@@ -382,7 +382,11 @@ class Database_loader :
             if( self.nb_channels == 1 ) :
                 image = self.extract_channel(image,1)
         else: 
+
             image = np.asarray(image)
+            # extract green
+            if( self.nb_channels == 1 ) :
+                image = self.extract_channel(image,1)
         # convert to float image
         image = image.astype(np.float32) / 255.
         #image = image.reshape(1, self.size, self.size, 3)
