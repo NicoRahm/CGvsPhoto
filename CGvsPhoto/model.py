@@ -412,8 +412,8 @@ class Model:
         train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy_mean)
 
       with tf.name_scope('enforce_constraints'):
-        self.zero_op = tf.assign(self.W_convs[0][1,1,0,:], tf.zeros([nf[0]]))
-        self.norm_op = tf.assign(self.W_convs[0], self.W_convs[0]/tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True))
+        self.zero_op = tf.assign(ref = self.W_convs[0][1,1,0,:], value = tf.zeros([nf[0]]))
+        self.norm_op = tf.assign(ref = self.W_convs[0], value = self.W_convs[0]/tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True))
 
       self.train_step = train_step
       print('   test ...')
