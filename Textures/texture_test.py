@@ -155,7 +155,7 @@ if __name__ == '__main__':
 	data = il.Database_loader(directory = data_directory, 
 							  size = image_size, only_green = False)
 
-	nb_train_batch = 100
+	nb_train_batch = 200
 	batch_size = 50
 	extractor = DsiftExtractor(8,16,1)
 
@@ -251,16 +251,16 @@ if __name__ == '__main__':
 
 	# Plotting boxplot
 
-	for i in range(fisher_train.shape[1]):
-		print('Computing dataframe...')
+	# for i in range(fisher_train.shape[1]):
+	# 	print('Computing dataframe...')
 		
-		data_real = fisher_train[y_train == 0, i]
-		data_cg = fisher_train[y_train == 1, i]
+	# 	data_real = fisher_train[y_train == 0, i]
+	# 	data_cg = fisher_train[y_train == 1, i]
 
-		print('Plotting boxplot...')
-		plt.figure()
-		plt.boxplot([data_real, data_cg])
-		plt.show()
+	# 	print('Plotting boxplot...')
+	# 	plt.figure()
+	# 	plt.boxplot([data_real, data_cg])
+	# 	plt.show()
 
 	print('Fitting SVM...')
 	clf.fit(fisher_train, y_train)
