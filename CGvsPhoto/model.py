@@ -178,8 +178,8 @@ class Model:
 """
 
   def __init__(self, database_path, image_size, config = 'Personal', filters = [32, 64],
-              feature_extractor = 'Stats', nbins = 10, batch_size = 50,  
-              using_GPU = False):
+              feature_extractor = 'Stats', remove_context = False, 
+              nbins = 10, batch_size = 50, using_GPU = False):
     """Defines a model for single-image classification
 
     :param database_path: Absolute path to the default patch database (training, validation and testings are performed on this database)
@@ -233,6 +233,7 @@ class Model:
     self.batch_size = batch_size
     self.nbins = nbins
     self.using_GPU = using_GPU
+    self.remove_context = remove_context
 
     # getting the database
     self.import_database()
@@ -409,6 +410,10 @@ class Model:
 
       with tf.name_scope('train'):
         train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy_mean)
+
+      with tf.name_scope('enforce_constraints'):
+        self.zero_op = tf.assign(self.h_convs[0][1,1,1,:], np.array([0 for i in range(nf[0])]))
+        self.norm_op = tf.assign(self.h_convs[0], self.h_convs[0]/tf.reduce_sum(self.h_convs[0], axis = 3))
 
       self.train_step = train_step
       print('   test ...')
@@ -634,6 +639,12 @@ class Model:
               validation_accuracy.append(v)
               
           # regular training
+
+          # enforce constraints on first layer : 
+          if self.remove_context: 
+            sess.run(self.zero_op)
+            sess.run(self.norm_op)
+
           batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
           feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 0.65}
           summary, _ = sess.run([merged, self.train_step], feed_dict = feed_dict)
