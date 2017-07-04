@@ -155,7 +155,7 @@ if __name__ == '__main__':
 	data = il.Database_loader(directory = data_directory, 
 							  size = image_size, only_green = False)
 
-	nb_train_batch = 4
+	nb_train_batch = 100
 	batch_size = 50
 	extractor = DsiftExtractor(8,16,1)
 
