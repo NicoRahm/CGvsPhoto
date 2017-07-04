@@ -1,6 +1,6 @@
 from CGvsPhoto import Model
 # to change to your favorite database
-database_path = '/home/nicolas/Database/level-design_raise_100/'
+database_path = '/home/nicolas/Database/level-design_raise_100_color/'
 
 # to change to the format of your image
 image_size = 100
