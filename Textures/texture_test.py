@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../CGvsPhoto')
+
 from CGvsPhoto import image_loader as il 
 from dsift import DsiftExtractor
 
