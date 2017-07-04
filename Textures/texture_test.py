@@ -124,211 +124,220 @@ def compute_testing_features(i, batch_size, nb_mini_patch,
 
 
 
-data = np.array([[[2,4],[0,0],[2,1],[0,1],[0,0],[0,5]], 
-				[[3,3],[0,1],[0,1],[1,1],[0,4],[6,2]],
-				[[4,6],[1,1],[0,1],[2,1],[4,1],[3,1]]])
+# data = np.array([[[2,4],[0,0],[2,1],[0,1],[0,0],[0,5]], 
+# 				[[3,3],[0,1],[0,1],[1,1],[0,4],[6,2]],
+# 				[[4,6],[1,1],[0,1],[2,1],[4,1],[3,1]]])
 
-print('Fitting Gaussian Mixture Model...')
-K = 2
-gmm = GaussianMixture(n_components=K, covariance_type='diag')
-gmm.fit(np.reshape(data, [data.shape[0]*2, 6]))
+# print('Fitting Gaussian Mixture Model...')
+# K = 2
+# gmm = GaussianMixture(n_components=K, covariance_type='diag')
+# gmm.fit(np.reshape(data, [data.shape[0]*2, 6]))
 
-print('Computing Fisher vectors...')
+# print('Computing Fisher vectors...')
 
-fisher_vectors = compute_fisher(data, gmm)
+# fisher_vectors = compute_fisher(data, gmm)
 
-print(fisher_vectors)
+# print(fisher_vectors)
 
 
-data_directory = '/home/nicolas/Database/level-design_raise_100_color/'
-image_size = 100
 
-data = il.Database_loader(directory = data_directory, 
-						  size = image_size, only_green = False)
 
-nb_train_batch = 4
-batch_size = 50
-extractor = DsiftExtractor(8,16,1)
+if __name__ == '__main__':
 
-nb_mini_patch = 121 + 25
+	config = 'server'
 
+	if config == 'server':
+		data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
+	else:
+		data_directory = '/home/nicolas/Database/level-design_raise_100_color/'
+	image_size = 100
 
+	data = il.Database_loader(directory = data_directory, 
+							  size = image_size, only_green = False)
 
-PCAs = []
+	nb_train_batch = 4
+	batch_size = 50
+	extractor = DsiftExtractor(8,16,1)
 
-n_comp = 64
-for i in range(nb_mini_patch):
-	PCAs.append(PCA(n_components=n_comp))
+	nb_mini_patch = 121 + 25
 
-# pca = PCA(n_components=n_comp)
 
-clf = LinearSVC()
 
+	PCAs = []
 
+	n_comp = 64
+	for i in range(nb_mini_patch):
+		PCAs.append(PCA(n_components=n_comp))
 
+	# pca = PCA(n_components=n_comp)
 
-features = np.empty([nb_train_batch*batch_size, 128, nb_mini_patch])
-y_train = np.empty([nb_train_batch*batch_size, ])
-print('Training...')
+	clf = LinearSVC()
 
-# for i in range(nb_train_batch):
 
-# 	print('Compute features for training batch ' + str(i+1) + '/' + str(nb_train_batch))
-# 	images, labels = data.get_next_train_batch(batch_size = batch_size,
-# 											   crop = False)
 
-# 	for j in range(batch_size):
-# 		img = (images[j]*256).astype(np.uint8)
-# 		feaArr,positions = extractor.process_image(img, verbose = False)
-# 		features[i*batch_size + j] = feaArr.reshape([128, nb_mini_patch])
-# 		y_train[i*batch_size + j] = labels[j,0]
 
+	features = np.empty([nb_train_batch*batch_size, 128, nb_mini_patch])
+	y_train = np.empty([nb_train_batch*batch_size, ])
+	print('Training...')
 
-data_train = []
-for i in range(nb_train_batch):
-	print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-	images_batch, y_batch = data.get_next_train_batch(batch_size = batch_size,
-											   		  crop = False)
-	data_train.append([images_batch, y_batch])
+	# for i in range(nb_train_batch):
 
-pool = Pool()  
+	# 	print('Compute features for training batch ' + str(i+1) + '/' + str(nb_train_batch))
+	# 	images, labels = data.get_next_train_batch(batch_size = batch_size,
+	# 											   crop = False)
 
-to_compute = [i for i in range(nb_train_batch)]
-result = pool.starmap(partial(compute_features, 
-						  batch_size = batch_size, 
-						  nb_mini_patch = nb_mini_patch, 
-						  nb_batch = nb_train_batch),
-						  zip(data_train, to_compute)) 
+	# 	for j in range(batch_size):
+	# 		img = (images[j]*256).astype(np.uint8)
+	# 		feaArr,positions = extractor.process_image(img, verbose = False)
+	# 		features[i*batch_size + j] = feaArr.reshape([128, nb_mini_patch])
+	# 		y_train[i*batch_size + j] = labels[j,0]
 
-del(data_train)
 
-index = 0
-for i in range(len(result)):
-	features[index:index+batch_size] = result[i][0]
-	y_train[index:index+batch_size] = result[i][1]
+	data_train = []
+	for i in range(nb_train_batch):
+		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+		images_batch, y_batch = data.get_next_train_batch(batch_size = batch_size,
+												   		  crop = False)
+		data_train.append([images_batch, y_batch])
 
-	index+=batch_size
+	pool = Pool()  
 
+	to_compute = [i for i in range(nb_train_batch)]
+	result = pool.starmap(partial(compute_features, 
+							  batch_size = batch_size, 
+							  nb_mini_patch = nb_mini_patch, 
+							  nb_batch = nb_train_batch),
+							  zip(data_train, to_compute)) 
 
-del(result)
-# print(y_train)
+	del(data_train)
 
-print('Fitting PCAs...')
-# for i in range(nb_mini_patch):
-# 	# normalize(features[:,:,i])
+	index = 0
+	for i in range(len(result)):
+		features[index:index+batch_size] = result[i][0]
+		y_train[index:index+batch_size] = result[i][1]
 
-for i in range(nb_mini_patch):
-	PCAs[i].fit(features[:,:,i])
+		index+=batch_size
 
-# pca.fit(np.concatenate([features[:,:,i] for i in range(nb_mini_patch)]))
 
-print('Dimension reduction...')
-features_PCA = np.empty([nb_train_batch*batch_size, n_comp, nb_mini_patch])
-for i in range(nb_mini_patch):
-	# features_PCA[:,:,i] = pca.transform(features[:,:,i])
-	features_PCA[:,:,i] = PCAs[i].transform(features[:,:,i])
+	del(result)
+	# print(y_train)
 
-del(features)
+	print('Fitting PCAs...')
+	# for i in range(nb_mini_patch):
+	# 	# normalize(features[:,:,i])
 
-print('Fitting Gaussian Mixture Model...')
-K = 64
-gmm = GaussianMixture(n_components=K, covariance_type='diag')
-gmm.fit(np.reshape(features_PCA, [features_PCA.shape[0]*nb_mini_patch, n_comp]))
+	for i in range(nb_mini_patch):
+		PCAs[i].fit(features[:,:,i])
 
-print('Computing Fisher vectors...')
-fisher_train = compute_fisher(features_PCA, gmm)
+	# pca.fit(np.concatenate([features[:,:,i] for i in range(nb_mini_patch)]))
 
-del(features_PCA)
+	print('Dimension reduction...')
+	features_PCA = np.empty([nb_train_batch*batch_size, n_comp, nb_mini_patch])
+	for i in range(nb_mini_patch):
+		# features_PCA[:,:,i] = pca.transform(features[:,:,i])
+		features_PCA[:,:,i] = PCAs[i].transform(features[:,:,i])
 
-# Plotting boxplot
+	del(features)
 
-print('Computing dataframe...')
-df = pd.DataFrame(fisher_train[:,0:4])
+	print('Fitting Gaussian Mixture Model...')
+	K = 64
+	gmm = GaussianMixture(n_components=K, covariance_type='diag')
+	gmm.fit(np.reshape(features_PCA, [features_PCA.shape[0]*nb_mini_patch, n_comp]))
 
-df['Categories'] = pd.Series(y_train)
+	print('Computing Fisher vectors...')
+	fisher_train = compute_fisher(features_PCA, gmm)
 
-print('Plotting boxplot...')
-pd.options.display.mpl_style = 'default'
-plt.figure()
-df.boxplot(by = 'Categories')
-plt.show()
+	del(features_PCA)
 
-print('Fitting SVM...')
-clf.fit(fisher_train, y_train)
-# clf.fit(np.reshape(features_PCA, [nb_train_batch*batch_size, n_comp*nb_mini_patch]), y_train)
+	# Plotting boxplot
 
+	print('Computing dataframe...')
+	df = pd.DataFrame(fisher_train[:,0:4])
 
+	df['Categories'] = pd.Series(y_train)
 
-del(fisher_train, y_train)
+	print('Plotting boxplot...')
+	pd.options.display.mpl_style = 'default'
+	plt.figure()
+	df.boxplot(by = 'Categories')
+	plt.show()
 
+	print('Fitting SVM...')
+	clf.fit(fisher_train, y_train)
+	# clf.fit(np.reshape(features_PCA, [nb_train_batch*batch_size, n_comp*nb_mini_patch]), y_train)
 
-print('Testing...')
-nb_test_batch = 80
-features_test = np.empty([nb_test_batch*batch_size, 128, nb_mini_patch])
-y_test = np.empty([nb_test_batch*batch_size, ])
 
-# for i in range(nb_test_batch):
-# 	print('Compute features for testing batch ' + str(i+1) + '/' + str(nb_test_batch))
 
-# 	images, labels = data.get_batch_test(batch_size = batch_size,
-# 											   crop = False)
+	del(fisher_train, y_train)
 
-# 	for j in range(batch_size):
-# 		img = (images[j]*256).astype(np.uint8)
-# 		feaArr,positions = extractor.process_image(img, verbose = False)
-# 		features_test[i*batch_size + j] = feaArr.reshape([128, nb_mini_patch])
-# 		y_test[i*batch_size + j] = labels[j,0]
 
+	print('Testing...')
+	nb_test_batch = 80
+	features_test = np.empty([nb_test_batch*batch_size, 128, nb_mini_patch])
+	y_test = np.empty([nb_test_batch*batch_size, ])
 
-data_test = []
-for i in range(nb_test_batch):
-	print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
-	images_batch, y_batch = data.get_batch_test(batch_size = batch_size,
-											   	crop = False)
-	data_test.append([images_batch, y_batch])
+	# for i in range(nb_test_batch):
+	# 	print('Compute features for testing batch ' + str(i+1) + '/' + str(nb_test_batch))
 
-pool = Pool()  
+	# 	images, labels = data.get_batch_test(batch_size = batch_size,
+	# 											   crop = False)
 
-to_compute = [i for i in range(nb_test_batch)]
-result = pool.starmap(partial(compute_features, 
-						  batch_size = batch_size, 
-						  nb_mini_patch = nb_mini_patch, 
-						  nb_batch = nb_test_batch),
-						  zip(data_test, to_compute)) 
+	# 	for j in range(batch_size):
+	# 		img = (images[j]*256).astype(np.uint8)
+	# 		feaArr,positions = extractor.process_image(img, verbose = False)
+	# 		features_test[i*batch_size + j] = feaArr.reshape([128, nb_mini_patch])
+	# 		y_test[i*batch_size + j] = labels[j,0]
 
 
-del(data_test)
+	data_test = []
+	for i in range(nb_test_batch):
+		print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
+		images_batch, y_batch = data.get_batch_test(batch_size = batch_size,
+												   	crop = False)
+		data_test.append([images_batch, y_batch])
 
-index = 0
-for i in range(len(result)):
-	features_test[index:index+batch_size] = result[i][0]
-	y_test[index:index+batch_size] = result[i][1]
+	pool = Pool()  
 
-	index+=batch_size
+	to_compute = [i for i in range(nb_test_batch)]
+	result = pool.starmap(partial(compute_features, 
+							  batch_size = batch_size, 
+							  nb_mini_patch = nb_mini_patch, 
+							  nb_batch = nb_test_batch),
+							  zip(data_test, to_compute)) 
 
-del(result)
 
-print('Dimension reduction...')
-features_test_PCA = np.empty([nb_test_batch*batch_size, n_comp, nb_mini_patch])
-for i in range(nb_mini_patch):
-	# normalize(features_test[:,:,i])
-	# features_test_PCA[:,:,i] = pca.transform(features_test[:,:,i])
-	features_test_PCA[:,:,i] = PCAs[i].transform(features_test[:,:,i])
+	del(data_test)
 
-del(features_test)
+	index = 0
+	for i in range(len(result)):
+		features_test[index:index+batch_size] = result[i][0]
+		y_test[index:index+batch_size] = result[i][1]
 
-print('Computing Fisher vectors...')
-fisher_test = compute_fisher(features_test_PCA, gmm)
+		index+=batch_size
 
-del(features_test_PCA)
+	del(result)
 
+	print('Dimension reduction...')
+	features_test_PCA = np.empty([nb_test_batch*batch_size, n_comp, nb_mini_patch])
+	for i in range(nb_mini_patch):
+		# normalize(features_test[:,:,i])
+		# features_test_PCA[:,:,i] = pca.transform(features_test[:,:,i])
+		features_test_PCA[:,:,i] = PCAs[i].transform(features_test[:,:,i])
 
+	del(features_test)
 
-print('Prediction...')
-y_pred = clf.predict(fisher_test)
-# y_pred = clf.predict(np.reshape(features_test_PCA, [nb_test_batch*batch_size, n_comp*nb_mini_patch]))
+	print('Computing Fisher vectors...')
+	fisher_test = compute_fisher(features_test_PCA, gmm)
 
-print('Computing score...')
-score = accuracy_score(y_pred, y_test)
+	del(features_test_PCA)
 
-print('Accuracy : ' + str(score))
+
+
+	print('Prediction...')
+	y_pred = clf.predict(fisher_test)
+	# y_pred = clf.predict(np.reshape(features_test_PCA, [nb_test_batch*batch_size, n_comp*nb_mini_patch]))
+
+	print('Computing score...')
+	score = accuracy_score(y_pred, y_test)
+
+	print('Accuracy : ' + str(score))
