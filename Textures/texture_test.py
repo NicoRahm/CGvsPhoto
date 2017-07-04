@@ -4,7 +4,7 @@ sys.path.append('../CGvsPhoto')
 import image_loader as il 
 from dsift import DsiftExtractor
 
-import pandas as pd
+# import pandas as pd
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -251,16 +251,16 @@ if __name__ == '__main__':
 
 	# Plotting boxplot
 
-	print('Computing dataframe...')
-	df = pd.DataFrame(fisher_train[:,0:4])
+	for i in range(fisher_train.shape[1]):
+		print('Computing dataframe...')
+		
+		data_real = fisher_train[y_train == 0, i]
+		data_cg = fisher_train[y_train == 1, i]
 
-	df['Categories'] = pd.Series(y_train)
-
-	print('Plotting boxplot...')
-	pd.options.display.mpl_style = 'default'
-	plt.figure()
-	df.boxplot(by = 'Categories')
-	plt.show()
+		print('Plotting boxplot...')
+		plt.figure()
+		plt.boxplot([data_real, data_cg])
+		plt.show()
 
 	print('Fitting SVM...')
 	clf.fit(fisher_train, y_train)
