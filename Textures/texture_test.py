@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
+
+from sklearn.neural_network import MLPClassifier
 from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA
@@ -171,7 +173,9 @@ if __name__ == '__main__':
 
 	# pca = PCA(n_components=n_comp)
 
-	clf = LinearSVC()
+	clf_svm = LinearSVC()
+	clf_mlp = MLPClassifier(hidden_layer_sizes = (1024,128), activation='relu',
+							solver = 'adam')
 
 
 
@@ -263,9 +267,11 @@ if __name__ == '__main__':
 	# 	plt.show()
 
 	print('Fitting SVM...')
-	clf.fit(fisher_train, y_train)
+	clf_svm.fit(fisher_train, y_train)
 	# clf.fit(np.reshape(features_PCA, [nb_train_batch*batch_size, n_comp*nb_mini_patch]), y_train)
 
+	print('Fitting MLP...')
+	clf_mlp.fit(fisher_train, y_train)
 
 
 	del(fisher_train, y_train)
@@ -334,10 +340,13 @@ if __name__ == '__main__':
 
 
 	print('Prediction...')
-	y_pred = clf.predict(fisher_test)
+	y_pred_svm = clf_svm.predict(fisher_test)
 	# y_pred = clf.predict(np.reshape(features_test_PCA, [nb_test_batch*batch_size, n_comp*nb_mini_patch]))
+	y_pred_mlp = clf_mlp.predict(fisher_test)
 
 	print('Computing score...')
-	score = accuracy_score(y_pred, y_test)
+	score_svm = accuracy_score(y_pred_svm, y_test)
+	score_mlp = accuracy_score(y_pred_mlp, y_test)
 
-	print('Accuracy : ' + str(score))
+	print('Accuracy SVM : ' + str(score_svm))
+	print('Accuracy MLP : ' + str(score_mlp))
