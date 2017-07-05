@@ -244,7 +244,7 @@ if __name__ == '__main__':
 	del(features)
 
 	print('Fitting Gaussian Mixture Model...')
-	K = 128
+	K = 16
 	gmm = GaussianMixture(n_components=K, covariance_type='diag')
 	gmm.fit(np.reshape(features_PCA, [features_PCA.shape[0]*nb_mini_patch, n_comp]))
 
