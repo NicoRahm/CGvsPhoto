@@ -415,7 +415,7 @@ class Model:
       if self.remove_context:
         # self.zero_op = tf.assign(ref = self.W_convs[0][1,1,0,:], value = tf.zeros([nf[0]]))
         self.zero_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[1,1,0,i] for i in range(nf[0])]), updates = tf.zeros(nf[0]))
-        self.norm_op = tf.assign(ref = self.W_convs[0], value = self.W_convs[0]/tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True))
+        # self.norm_op = tf.assign(ref = self.W_convs[0], value = self.W_convs[0]/tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True))
 
       self.train_step = train_step
       print('   test ...')
