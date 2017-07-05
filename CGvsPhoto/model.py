@@ -624,6 +624,11 @@ class Model:
       start_time = time.time()
       validation_accuracy = []
       for i in range(nb_train_batch):
+
+          # enforce constraints on first layer : 
+          if self.remove_context: 
+            sess.run(self.zero_op)
+            # sess.run(self.norm_op)
         
           # evry validation_frequency batches, test the accuracy
           if i%validation_frequency == 0 :
@@ -642,10 +647,7 @@ class Model:
               
           # regular training
 
-          # enforce constraints on first layer : 
-          if self.remove_context: 
-            sess.run(self.zero_op)
-            sess.run(self.norm_op)
+
 
           batch = self.data.get_next_train_batch(self.batch_size, False, True, True)
           feed_dict = {self.x: batch[0], self.y_: batch[1], self.keep_prob: 0.65}
