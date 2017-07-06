@@ -299,8 +299,8 @@ if __name__ == '__main__':
 
 	only_green = True
 
-	nb_train_batch = 50
-	nb_test_batch = 10
+	nb_train_batch = 200
+	nb_test_batch = 80
 	batch_size = 50
 
 	model = Texture_model(data_directory, model_directory, 
