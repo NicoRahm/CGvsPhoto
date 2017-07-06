@@ -160,7 +160,7 @@ def compute_proba_train(noise_model, texture_model, data,
 
 		for i in range(nb_batch):
 			feed_dict = {noise_model.x: data_train[i][0], noise_model.keep_prob: 1.0}
-			y_pred_noise[i*batch_size, (i+1)*batch_size] = noise_model.y_conv.eval(feed_dict)
+			y_pred_noise[i*batch_size:(i+1)*batch_size] = noise_model.y_conv.eval(feed_dict)
 
 
 	del(data_train)
