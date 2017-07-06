@@ -708,14 +708,7 @@ class Model:
           file.close()
           print('   done.')
 
-      if nb_train_batch > validation_frequency:
-        plt.figure()
-        plt.plot(np.linspace(0,nb_train_batch,int(nb_train_batch/10)), validation_accuracy)
-        plt.title("Validation accuracy during training")
-        plt.xlabel("Training batch")
-        plt.ylabel("Validation accuracy")
-        plt.show()
-        plt.close()
+
     # final test
       print('   final test ...')
       test_accuracy = 0
@@ -734,6 +727,14 @@ class Model:
 
       # test_auc /= (nb_iterations - 1)
       # print("   test AUC %g"%test_auc)
+      if nb_train_batch > validation_frequency:
+        plt.figure()
+        plt.plot(np.linspace(0,nb_train_batch,int(nb_train_batch/10)), validation_accuracy)
+        plt.title("Validation accuracy during training")
+        plt.xlabel("Training batch")
+        plt.ylabel("Validation accuracy")
+        plt.show()
+        plt.close()
 
     # done
     print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))
