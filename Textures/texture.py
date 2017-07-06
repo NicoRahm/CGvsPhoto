@@ -214,7 +214,7 @@ class Texture_model:
 
 		print('Dumping model...')
 
-		dump_model(self, self.model_directory + '/' + self.run_name + '.pkl')
+		dump_model(self, self.model_directory + '/' + self.model_name + '.pkl')
 
 
 	def test(self, nb_test_batch, batch_size = 50):
