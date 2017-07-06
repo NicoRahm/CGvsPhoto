@@ -95,7 +95,7 @@ class Texture_model:
 
 
 		self.model_name = input("   Choose a name for the model : ")
-
+		self.model_directory = model_directory
 
 		# Initialize hyper-parameters
 		self.image_size = image_size
