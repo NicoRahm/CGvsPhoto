@@ -97,7 +97,7 @@ def compute_proba_train(noise_model, texture_model, data,
 	data_train = []
 	for i in range(nb_batch):
 		print('Getting batch ' + str(i+1) + '/' + str(nb_batch))
-		images_batch, y_batch = data.get_batch_test(batch_size = batch_size,
+		images_batch, y_batch = data.get_batch_train(batch_size = batch_size,
 													crop = False)
 		data_train.append([images_batch, y_batch])
 
