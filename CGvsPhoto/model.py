@@ -443,6 +443,8 @@ class Model:
         # self.zero_op = tf.assign(ref = self.W_convs[0][1,1,0,:], value = tf.zeros([nf[0]]))
         self.zero_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[1,1,0,i] for i in range(nf[0])]), updates = tf.zeros(nf[0]))
         self.norm_op = tf.assign(ref = self.W_convs[0], value = tf.divide(self.W_convs[0],tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True)))
+        self.minus_one_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[1,1,0,i] for i in range(nf[0])]), updates = tf.constant([-1.0 for i in range(nf[0])]))
+        self.norm = tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True)
 
       self.train_step = train_step
       print('   test ...')
@@ -656,6 +658,9 @@ class Model:
           if self.remove_context: 
             sess.run(self.zero_op)
             sess.run(self.norm_op)
+            sess.run(self.minus_one_op)
+
+            print(self.norm.eval())
         
           # evry validation_frequency batches, test the accuracy
           if i%validation_frequency == 0 :
