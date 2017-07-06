@@ -15,6 +15,7 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
+from svm.calibration import CalibratedClassifierCV
 
 from multiprocessing import Pool
 
@@ -121,7 +122,7 @@ class Texture_model:
 
 		self.gmm = GaussianMixture(n_components=K_gmm, 
 								   covariance_type='diag')
-		self.clf_svm = LinearSVC()
+		self.clf_svm = CalibratedClassifierCV(LinearSVC())
 
 
 
