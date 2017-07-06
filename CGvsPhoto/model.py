@@ -335,7 +335,7 @@ class Model:
 
       image_summaries(h_conv1, 'hconv1_intra')
       filter_summary(W_conv1, 'Wconv1_intra')
-      
+
       for i in range(1, nl):
         print('   Creating layer ' + str(i+1) + ' - Shape : ' + str(self.filter_size) + 'x' + 
             str(self.filter_size) + 'x' + str(nf[i-1]) + 'x' + str(nf[i]))
@@ -442,7 +442,7 @@ class Model:
       if self.remove_context:
         # self.zero_op = tf.assign(ref = self.W_convs[0][1,1,0,:], value = tf.zeros([nf[0]]))
         self.zero_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[1,1,0,i] for i in range(nf[0])]), updates = tf.zeros(nf[0]))
-        # self.norm_op = tf.assign(ref = self.W_convs[0], value = self.W_convs[0]/tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True))
+        self.norm_op = tf.assign(ref = self.W_convs[0], value = tf.divide(self.W_convs[0],tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True)))
 
       self.train_step = train_step
       print('   test ...')
