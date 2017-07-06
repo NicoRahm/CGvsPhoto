@@ -340,7 +340,7 @@ class Model:
         print('   Creating layer ' + str(i+1) + ' - Shape : ' + str(self.filter_size) + 'x' + 
             str(self.filter_size) + 'x' + str(nf[i-1]) + 'x' + str(nf[i]))
         # other conv 
-        with tf.name_scope('Conv2'):
+        with tf.name_scope('Conv' + str(i+1)):
           with tf.name_scope('Weights'):
             W_conv2 = weight_variable([self.filter_size, self.filter_size, nf[i-1], nf[i]])
             self.W_convs.append(W_conv2)
@@ -348,7 +348,7 @@ class Model:
             b_conv2 = bias_variable([nf[i]])
             self.b_convs.append(b_conv2)
 
-          h_conv2 = tf.nn.relu(conv2d(h_conv1, W_conv2) + b_conv2, 
+          h_conv2 = tf.nn.relu(conv2d(self.h_convs[i-1], W_conv2) + b_conv2, 
                                name = 'Activated_2')
 
           self.h_convs.append(h_conv2)    
