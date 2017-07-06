@@ -333,8 +333,8 @@ class Model:
       self.b_convs = [b_conv1]
       self.h_convs = [h_conv1]
 
-      image_summaries(h_conv1, 'hconv1')
-      filter_summary(W_conv1, 'Wconv1')
+      image_summaries(self.h_convs[0], 'hconv1')
+      filter_summary(self.W_convs[0], 'Wconv1')
 
       for i in range(1, nl):
         print('   Creating layer ' + str(i+1) + ' - Shape : ' + str(self.filter_size) + 'x' + 
@@ -655,7 +655,7 @@ class Model:
           # enforce constraints on first layer : 
           if self.remove_context: 
             sess.run(self.zero_op)
-            # sess.run(self.norm_op)
+            sess.run(self.norm_op)
         
           # evry validation_frequency batches, test the accuracy
           if i%validation_frequency == 0 :
