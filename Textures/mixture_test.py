@@ -7,7 +7,7 @@ from functools import partial
 
 import numpy as np
 
-from sklearn import SVC
+from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 
 import tensorflow as tf
