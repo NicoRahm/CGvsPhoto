@@ -101,6 +101,7 @@ class Texture_model:
 		self.image_size = image_size
 		self.keep_PCA = keep_PCA
 		self.K_gmm = K_gmm
+		self.only_green = only_green
 		self.nb_mini_patch = int(image_size/8 - 1)**2 + int(image_size/16 - 1)**2 
 
 
