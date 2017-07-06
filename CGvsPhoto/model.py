@@ -51,6 +51,29 @@ def variable_summaries(var):
     tf.summary.scalar('min', tf.reduce_min(var))
     tf.summary.histogram('histogram', var)
 
+
+def image_summaries(var, name):
+  tf.summary.image(name + '_1', var[:,:,:,0:1], max_outputs = 1)
+  tf.summary.image(name + '_2', var[:,:,:,1:2], max_outputs = 1)
+  tf.summary.image(name + '_3', var[:,:,:,2:3], max_outputs = 1)
+  # tf.summary.image(name + '_4', var[:,:,:,3:4], max_outputs = 1)
+  # tf.summary.image(name + '_5', var[:,:,:,4:5], max_outputs = 1)
+  # tf.summary.image(name + '_6', var[:,:,:,5:6], max_outputs = 1)
+  # tf.summary.image(name + '_7', var[:,:,:,6:7], max_outputs = 1)
+  # tf.summary.image(name + '_8', var[:,:,:,7:8], max_outputs = 1)
+
+def filter_summary(filters, name):
+  tf.summary.image(name + '_1', tf.stack([filters[:,:,0:1,0]]), max_outputs = 1)
+  tf.summary.image(name + '_2', tf.stack([filters[:,:,1:2,0]]), max_outputs = 1)
+  tf.summary.image(name + '_3', tf.stack([filters[:,:,2:3,0]]), max_outputs = 1)
+  # tf.summary.image(name + '_4', tf.stack([filters[:,:,3:4,0]]), max_outputs = 1)
+  # tf.summary.image(name + '_5', tf.stack([filters[:,:,0,4:5]]), max_outputs = 1)
+  # tf.summary.image(name + '_6', tf.stack([filters[:,:,0,5:6]]), max_outputs = 1)
+  # tf.summary.image(name + '_7', tf.stack([filters[:,:,0,6:7]]), max_outputs = 1)
+  # tf.summary.image(name + '_8', tf.stack([filters[:,:,0,7:8]]), max_outputs = 1)
+
+
+
 def weight_variable(shape, seed = None):
   """Creates and initializes (truncated normal distribution) a variable weight Tensor with a defined shape"""
   initial = tf.truncated_normal(shape, stddev=0.5, seed = random_seed)
@@ -309,6 +332,10 @@ class Model:
       self.W_convs = [W_conv1]
       self.b_convs = [b_conv1]
       self.h_convs = [h_conv1]
+
+      image_summaries(h_conv1, 'hconv1_intra')
+      filter_summary(W_conv1, 'Wconv1_intra')
+      
       for i in range(1, nl):
         print('   Creating layer ' + str(i+1) + ' - Shape : ' + str(self.filter_size) + 'x' + 
             str(self.filter_size) + 'x' + str(nf[i-1]) + 'x' + str(nf[i]))
