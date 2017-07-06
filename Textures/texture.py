@@ -64,8 +64,8 @@ def compute_fisher(X, gmm, alpha = 0.5):
 	return(G)
 
 
-def compute_features(data, i, batch_size, nb_mini_patch, 
-					 nb_batch,  only_green = False):
+def compute_dense_sift(data, i, batch_size, nb_mini_patch, 
+					   nb_batch,  only_green = False):
 
 	extractor1 = DsiftExtractor(8,16,1)
 	extractor2 = DsiftExtractor(16,32,1)
@@ -141,7 +141,7 @@ class Texture_model:
 		pool = Pool()  
 
 		to_compute = [i for i in range(nb_train_batch)]
-		result = pool.starmap(partial(compute_features, 
+		result = pool.starmap(partial(compute_dense_sift, 
 								  batch_size = batch_size, 
 								  nb_mini_patch = self.nb_mini_patch, 
 								  nb_batch = nb_train_batch,
@@ -233,7 +233,7 @@ class Texture_model:
 		pool = Pool()  
 
 		to_compute = [i for i in range(nb_test_batch)]
-		result = pool.starmap(partial(compute_features, 
+		result = pool.starmap(partial(compute_dense_sift, 
 								  batch_size = batch_size, 
 								  nb_mini_patch = self.nb_mini_patch, 
 								  nb_batch = nb_test_batch,
