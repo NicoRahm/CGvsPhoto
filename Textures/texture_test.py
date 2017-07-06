@@ -167,9 +167,9 @@ if __name__ == '__main__':
 	batch_size = 50
 	extractor = DsiftExtractor(8,16,1)
 
-	nb_mini_patch = 121 + 25
+	# nb_mini_patch = 121 + 25
 
-	nb_mini_patch = 6241 + 1444
+	nb_mini_patch = 7921
 
 	PCAs = []
 
