@@ -293,7 +293,7 @@ if __name__ == '__main__':
 	else:
 		data_directory = '/home/nicolas/Database/level-design_raise_100_color/'
 		model_directory = '/home/nicolas/Documents/models_texture/'
-	image_size = 650
+	image_size = 100
 
 	only_green = True
 
