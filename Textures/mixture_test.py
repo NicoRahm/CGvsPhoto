@@ -1,5 +1,5 @@
 from CGvsPhoto import Model
-from texture import load_model, compute_dense_sift, compute_fisher
+from texture import Texture_model, load_model, compute_dense_sift, compute_fisher
 
 from multiprocessing import Pool
 
