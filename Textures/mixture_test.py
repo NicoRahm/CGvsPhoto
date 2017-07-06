@@ -82,7 +82,7 @@ def compute_proba_test(noise_model, texture_model, data,
 
 		for i in range(nb_batch):
 			feed_dict = {noise_model.x: data_test[i][0], noise_model.keep_prob: 1.0}
-			y_pred_noise[i*batch_size, (i+1)*batch_size] = noise_model.y_conv.eval(feed_dict)
+			y_pred_noise[i*batch_size:(i+1)*batch_size] = noise_model.y_conv.eval(feed_dict)
 
 
 	del(data_test)
@@ -188,7 +188,7 @@ texture_model_name = input('Texture model to load : ')
 
 texture_model = load_model(texture_model_directory + texture_model_name + '.pkl')
 
-nb_train_batch = 100
+nb_train_batch = 200
 nb_test_batch = 80
 
 [y_pred_train, y_train] = compute_proba_train(noise_model, texture_model,
