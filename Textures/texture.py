@@ -15,7 +15,7 @@ from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA
 from sklearn.mixture import GaussianMixture
-from svm.calibration import CalibratedClassifierCV
+from sklearn.calibration import CalibratedClassifierCV
 
 from multiprocessing import Pool
 
