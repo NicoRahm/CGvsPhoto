@@ -56,7 +56,7 @@ def compute_fisher(X, gmm, alpha = 0.5):
 	return(G)
 
 def compute_training_features(i, batch_size, nb_mini_patch, 
-							  nb_train_batch):
+							  nb_train_batch, only_green = False):
 	
 	
 	extractor1 = DsiftExtractor(8,16,1)
@@ -69,7 +69,8 @@ def compute_training_features(i, batch_size, nb_mini_patch,
 	y_train = []
 	for j in range(batch_size):
 		img = (images[j]*256).astype(np.uint8)
-		img = np.dot(img, [0.299, 0.587, 0.114])
+		if not only_green: 
+			img = np.dot(img, [0.299, 0.587, 0.114])
 		feaArr1,positions = extractor1.process_image(img, verbose = False)
 		feaArr2,positions = extractor2.process_image(img, verbose = False)
 		features.append(np.concatenate([feaArr1, feaArr2]).reshape([128, nb_mini_patch]))
@@ -77,7 +78,8 @@ def compute_training_features(i, batch_size, nb_mini_patch,
 
 	return(features, y_train)
 
-def compute_features(data, i, batch_size, nb_mini_patch, nb_batch):
+def compute_features(data, i, batch_size, nb_mini_patch, 
+					 nb_batch,  only_green = False):
 
 	extractor1 = DsiftExtractor(8,16,1)
 	extractor2 = DsiftExtractor(16,32,1)
@@ -89,7 +91,8 @@ def compute_features(data, i, batch_size, nb_mini_patch, nb_batch):
 	y_train = []
 	for j in range(batch_size):
 		img = (images[j]*256).astype(np.uint8)
-		img = np.dot(img, [0.299, 0.587, 0.114])
+		if not only_green:
+			img = np.dot(img, [0.299, 0.587, 0.114])
 		feaArr1,positions = extractor1.process_image(img, verbose = False)
 		feaArr2,positions = extractor2.process_image(img, verbose = False)
 		features.append(np.concatenate([feaArr1, feaArr2]).reshape([128, nb_mini_patch]))
@@ -99,7 +102,7 @@ def compute_features(data, i, batch_size, nb_mini_patch, nb_batch):
 
 
 def compute_testing_features(i, batch_size, nb_mini_patch,
-							 nb_test_batch):
+							 nb_test_batch, only_green = False):
 	
 	extractor1 = DsiftExtractor(8,16,1)
 	extractor2 = DsiftExtractor(16,32,1)
@@ -111,7 +114,8 @@ def compute_testing_features(i, batch_size, nb_mini_patch,
 	y_train = []
 	for j in range(batch_size):
 		img = (images[j]*256).astype(np.uint8)
-		img = np.dot(img, [0.299, 0.587, 0.114])
+		if not only_green:
+			img = np.dot(img, [0.299, 0.587, 0.114])
 		feaArr1,positions = extractor1.process_image(img, verbose = False)
 		feaArr2,positions = extractor2.process_image(img, verbose = False)
 		features.append(np.concatenate([feaArr1, feaArr2]).reshape([128, nb_mini_patch]))
@@ -149,21 +153,23 @@ if __name__ == '__main__':
 	config = 'server'
 
 	if config == 'server':
-		data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
+		data_directory = '/work/smg/v-nicolas/level-design_raise_650/'
 	else:
 		data_directory = '/home/nicolas/Database/level-design_raise_100_color/'
-	image_size = 100
+	image_size = 650
+
+	only_green = True
 
 	data = il.Database_loader(directory = data_directory, 
-							  size = image_size, only_green = False)
+							  size = image_size, only_green = only_green)
 
-	nb_train_batch = 200
+	nb_train_batch = 50
 	batch_size = 50
 	extractor = DsiftExtractor(8,16,1)
 
 	nb_mini_patch = 121 + 25
 
-
+	nb_mini_patch = 6241 + 1444
 
 	PCAs = []
 
@@ -210,7 +216,8 @@ if __name__ == '__main__':
 	result = pool.starmap(partial(compute_features, 
 							  batch_size = batch_size, 
 							  nb_mini_patch = nb_mini_patch, 
-							  nb_batch = nb_train_batch),
+							  nb_batch = nb_train_batch,
+							  only_green = only_green),
 							  zip(data_train, to_compute)) 
 
 	del(data_train)
@@ -278,7 +285,7 @@ if __name__ == '__main__':
 
 
 	print('Testing...')
-	nb_test_batch = 80
+	nb_test_batch = 14
 	features_test = np.empty([nb_test_batch*batch_size, 128, nb_mini_patch])
 	y_test = np.empty([nb_test_batch*batch_size, ])
 
@@ -308,7 +315,8 @@ if __name__ == '__main__':
 	result = pool.starmap(partial(compute_features, 
 							  batch_size = batch_size, 
 							  nb_mini_patch = nb_mini_patch, 
-							  nb_batch = nb_test_batch),
+							  nb_batch = nb_test_batch,
+							  only_green = only_green),
 							  zip(data_test, to_compute)) 
 
 
