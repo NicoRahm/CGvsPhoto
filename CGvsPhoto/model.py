@@ -718,7 +718,7 @@ class Model:
       print('   final test ...')
       test_accuracy = 0
       # test_auc = 0
-      nb_iterations = 20
+      nb_iterations = nb_test_batch
       self.data.test_iterator = 0
       for _ in range( nb_iterations ) :
           batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
