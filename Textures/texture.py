@@ -72,20 +72,17 @@ def compute_dense_sift(data, i, batch_size, nb_mini_patch,
 	extractor2 = DsiftExtractor(16,32,1)
 
 	print('Compute features for batch ' + str(i+1) + '/' + str(nb_batch))
-	images, labels = data[0], data[1]
-
+	
 	features = []
-	y_train = []
-	for j in range(batch_size):
-		img = (images[j]*256).astype(np.uint8)
+	for j in range(len(data)):
+		img = (data[j]*256).astype(np.uint8)
 		if not only_green:
 			img = np.dot(img, [0.299, 0.587, 0.114])
 		feaArr1,positions = extractor1.process_image(img, verbose = False)
 		feaArr2,positions = extractor2.process_image(img, verbose = False)
 		features.append(np.concatenate([feaArr1, feaArr2]).reshape([128, nb_mini_patch]))
-		y_train.append(labels[j,0])
 
-	return(features, y_train)
+	return(features)
 
 
 
@@ -133,11 +130,13 @@ class Texture_model:
 		print('Training...')
 
 		data_train = []
+		y_train_batch = []
 		for i in range(nb_train_batch):
 			print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
 			images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
 													   		  crop = False)
-			data_train.append([images_batch, y_batch])
+			data_train.append(images_batch)
+			y_train_batch.append(y_batch)
 
 		pool = Pool()  
 
@@ -153,8 +152,8 @@ class Texture_model:
 
 		index = 0
 		for i in range(len(result)):
-			features[index:index+batch_size] = result[i][0]
-			y_train[index:index+batch_size] = result[i][1]
+			features[index:index+batch_size] = result[i]
+			y_train[index:index+batch_size] = y_train_batch[i][:,0]
 
 			index+=batch_size
 
@@ -225,31 +224,33 @@ class Texture_model:
 		y_test = np.empty([nb_test_batch*batch_size, ])
 
 		data_test = []
-		for i in range(nb_test_batch):
-			print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
-			images_batch, y_batch = self.data.get_batch_test(batch_size = batch_size,
-													   	crop = False)
-			data_test.append([images_batch, y_batch])
+		y_test_batch = []
+		for i in range(nb_train_batch):
+			print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+			images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
+													   		  crop = False)
+			data_test.append(images_batch)
+			y_test_batch.append(y_batch)
 
 		pool = Pool()  
 
-		to_compute = [i for i in range(nb_test_batch)]
+		to_compute = [i for i in range(nb_train_batch)]
 		result = pool.starmap(partial(compute_dense_sift, 
 								  batch_size = batch_size, 
 								  nb_mini_patch = self.nb_mini_patch, 
-								  nb_batch = nb_test_batch,
+								  nb_batch = nb_train_batch,
 								  only_green = self.only_green),
 								  zip(data_test, to_compute)) 
-
 
 		del(data_test)
 
 		index = 0
 		for i in range(len(result)):
-			features_test[index:index+batch_size] = result[i][0]
-			y_test[index:index+batch_size] = result[i][1]
+			features_test[index:index+batch_size] = result[i]
+			y_test[index:index+batch_size] = y_test_batch[i][:,0]
 
 			index+=batch_size
+
 
 		del(result)
 
