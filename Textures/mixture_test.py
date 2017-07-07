@@ -112,8 +112,8 @@ def compute_proba_test(noise_model, noise_model_name, texture_model,
 		tf.local_variables_initializer().run()
 
 		saver.restore(sess, noise_model.dir_ckpt + noise_model_name)
-		y_pred_noise = compute_features_noise(data_test, noise_model, noise_model_name)
-	
+		y_pred_noise = compute_features_noise(data_test, noise_model)
+
 	y_pred_texture = compute_features_texture(data_test, texture_model)
 
 	del(data_test)
@@ -150,7 +150,7 @@ def compute_proba_train(noise_model, noise_model_name, texture_model,
 
 		saver.restore(sess, noise_model.dir_ckpt + noise_model_name)
 		
-		y_pred_noise = compute_features_noise(data_train, noise_model, noise_model_name)
+		y_pred_noise = compute_features_noise(data_train, noise_model)
 	
 	y_pred_texture = compute_features_texture(data_train, texture_model)
 
@@ -204,7 +204,7 @@ def test_total_images(test_data_path, nb_images, noise_model,
 
 
 			y_pred_texture = compute_features_texture(patches, texture_model)
-			y_pred_noise = compute_features_noise(patches, noise_model, noise_model_name)
+			y_pred_noise = compute_features_noise(patches, noise_model)
 			y_pred = np.concatenate([y_pred_noise, y_pred_texture], axis = 1)
 			
 			final_pred = np.log(0.000001 + mixture_clf.predict_proba(y_pred))
