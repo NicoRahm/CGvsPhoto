@@ -9,6 +9,7 @@ from functools import partial
 import numpy as np
 
 from sklearn.svm import SVC
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.metrics import accuracy_score
 
 import tensorflow as tf
@@ -289,7 +290,7 @@ print('Training...')
 [y_pred_train, y_train] = compute_proba_train(noise_model, noise_model_name, texture_model,
 											  noise_model.data, nb_batch = nb_train_batch)
 
-clf = SVC()
+clf = CalibratedClassifierCV(SVC())
 
 print('Fitting mixture SVM...')
 clf.fit(y_pred_train, y_train)
