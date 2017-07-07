@@ -234,21 +234,21 @@ class Texture_model:
 
 		data_test = []
 		y_test_batch = []
-		for i in range(nb_train_batch):
+		for i in range(nb_test_batch):
 			if self.verbose:
-				print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-			images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
+				print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
+			images_batch, y_batch = self.data.get_batch_test(batch_size = batch_size,
 													   		  crop = False)
 			data_test.append(images_batch)
 			y_test_batch.append(y_batch)
 
 		pool = Pool()  
 
-		to_compute = [i for i in range(nb_train_batch)]
+		to_compute = [i for i in range(nb_test_batch)]
 		result = pool.starmap(partial(compute_dense_sift, 
 								  batch_size = batch_size, 
 								  nb_mini_patch = self.nb_mini_patch, 
-								  nb_batch = nb_train_batch,
+								  nb_batch = nb_test_batch,
 								  only_green = self.only_green,
 								  verbose = self.verbose),
 								  zip(data_test, to_compute)) 
