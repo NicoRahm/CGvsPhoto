@@ -185,7 +185,7 @@ class Database_loader :
             image = np.asarray(image)
             
             # extract green
-            if( self.nb_channels == 1 ) :
+            if( self.nb_channels == 1 and len(image.shape) > 2) :
                 image = self.extract_channel(image,1)
         else: 
             image = np.asarray(image)
@@ -283,7 +283,7 @@ class Database_loader :
             image = np.asarray(image)
             
             # extract green
-            if( self.nb_channels == 1 ) :
+            if( self.nb_channels == 1 and len(image.shape) > 2) :
                 image = self.extract_channel(image,1)
         else: 
             image = np.asarray(image)
@@ -379,13 +379,13 @@ class Database_loader :
             image = np.asarray(image)
 
             # extract green
-            if( self.nb_channels == 1 ) :
+            if( self.nb_channels == 1 and len(image.shape) > 2) :
                 image = self.extract_channel(image,1)
         else: 
 
             image = np.asarray(image)
             # extract green
-            if( self.nb_channels == 1 ) :
+            if( self.nb_channels == 1 and len(image.shape) > 2) :
                 image = self.extract_channel(image,1)
         # convert to float image
         image = image.astype(np.float32) / 255.
