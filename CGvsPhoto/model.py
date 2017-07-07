@@ -74,9 +74,11 @@ def filter_summary(filters, name):
 
 
 
-def weight_variable(shape, seed = None):
+def weight_variable(shape, nb_input, seed = None):
   """Creates and initializes (truncated normal distribution) a variable weight Tensor with a defined shape"""
-  initial = tf.truncated_normal(shape, stddev=0.5, seed = random_seed)
+  sigma = np.sqrt(2/nb_input)
+  # print(sigma)
+  initial = tf.truncated_normal(shape, stddev=sigma, seed = random_seed)
   return tf.Variable(initial)
 
 def bias_variable(shape):
@@ -261,6 +263,8 @@ class Model:
     # getting the database
     self.import_database()
 
+    self.nb_channels = self.data.nb_channels
+
     # create the TensorFlow graph
     if using_GPU:
       with tf.device(GPU):
@@ -318,7 +322,9 @@ class Model:
       with tf.name_scope('Conv1'):
 
         with tf.name_scope('Weights'):
-          W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], seed = random_seed)
+          W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], 
+                                    nb_input = self.filter_size*self.filter_size*self.nb_channels,
+                                    seed = random_seed)
           self.W_conv1 = W_conv1
         with tf.name_scope('Bias'):
           b_conv1 = bias_variable([nf[0]])
@@ -342,7 +348,8 @@ class Model:
         # other conv 
         with tf.name_scope('Conv' + str(i+1)):
           with tf.name_scope('Weights'):
-            W_conv2 = weight_variable([self.filter_size, self.filter_size, nf[i-1], nf[i]])
+            W_conv2 = weight_variable([self.filter_size, self.filter_size, nf[i-1], nf[i]],
+                                      self.filter_size*self.filter_size*nf[i-1])
             self.W_convs.append(W_conv2)
           with tf.name_scope('Bias'):
             b_conv2 = bias_variable([nf[i]])
@@ -392,7 +399,8 @@ class Model:
       # we add a fully-connected layer with 1024 neurons 
       with tf.variable_scope('Dense1'):
         with tf.name_scope('Weights'):
-          W_fc1 = weight_variable([size_flat, 1024])
+          W_fc1 = weight_variable([size_flat, 1024],
+                                  nb_input = size_flat)
         with tf.name_scope('Bias'):
           b_fc1 = bias_variable([1024])
         # put a relu
@@ -410,7 +418,8 @@ class Model:
       # readout layer
       with tf.variable_scope('Readout'):
         with tf.name_scope('Weights'):
-          W_fc3 = weight_variable([1024, nb_class])
+          W_fc3 = weight_variable([1024, nb_class],
+                                  nb_input = 1024)
         with tf.name_scope('Bias'):
           b_fc3 = bias_variable([nb_class])
         y_conv = tf.matmul(h_fc1_drop, W_fc3) + b_fc3
