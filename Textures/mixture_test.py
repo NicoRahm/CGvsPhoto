@@ -133,7 +133,7 @@ def compute_proba_train(noise_model, noise_model_name, texture_model,
 
 	index = 0
 	for i in range(len(data_train)):
-		y_train[index:index+batch_size] = y_train_batch[i][:,1]
+		y_train[index:index+batch_size] = y_train_batch[i][:,0]
 
 		index+=batch_size
 
@@ -308,7 +308,7 @@ print('Final accuracy : ' + str(score))
 
 
 nb_images = 720
-test_total_images(test_data_path, nb_images, noise_model, noise_model_name.accuracy_score,
+test_total_images(test_data_path, nb_images, noise_model, noise_model_name,
 				  texture_model, clf, minibatch_size = 50, show_images = False,
 				  save_images = False)
 
