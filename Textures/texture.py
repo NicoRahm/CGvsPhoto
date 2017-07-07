@@ -66,12 +66,13 @@ def compute_fisher(X, gmm, alpha = 0.5):
 
 
 def compute_dense_sift(data, i, batch_size, nb_mini_patch, 
-					   nb_batch,  only_green = False):
+					   nb_batch,  only_green = False, verbose = False):
 
 	extractor1 = DsiftExtractor(8,16,1)
 	extractor2 = DsiftExtractor(16,32,1)
 
-	print('Compute features for batch ' + str(i+1) + '/' + str(nb_batch))
+	if verbose:
+		print('Compute features for batch ' + str(i+1) + '/' + str(nb_batch))
 	
 	features = []
 	for j in range(len(data)):
@@ -89,7 +90,7 @@ def compute_dense_sift(data, i, batch_size, nb_mini_patch,
 class Texture_model: 
 
 	def __init__(self, data_directory, model_directory, image_size, 
-				 keep_PCA = 64, K_gmm = 64, only_green = False): 
+				 keep_PCA = 64, K_gmm = 64, only_green = False, verbose = True): 
 
 
 		self.model_name = input("   Choose a name for the model : ")
@@ -102,7 +103,7 @@ class Texture_model:
 		self.only_green = only_green
 		self.nb_mini_patch = int(image_size/8 - 1)**2 + int(image_size/16 - 1)**2 
 
-
+		self.verbose = verbose
 		# Initialize database
 		self.data = il.Database_loader(directory = data_directory, 
 							  		   size = image_size, 
@@ -132,7 +133,8 @@ class Texture_model:
 		data_train = []
 		y_train_batch = []
 		for i in range(nb_train_batch):
-			print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+			if self.verbose:
+				print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
 			images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
 													   		  crop = False)
 			data_train.append(images_batch)
@@ -145,7 +147,8 @@ class Texture_model:
 								  batch_size = batch_size, 
 								  nb_mini_patch = self.nb_mini_patch, 
 								  nb_batch = nb_train_batch,
-								  only_green = self.only_green),
+								  only_green = self.only_green,
+								  verbose = self.verbose),
 								  zip(data_train, to_compute)) 
 
 		del(data_train)
@@ -153,7 +156,7 @@ class Texture_model:
 		index = 0
 		for i in range(len(result)):
 			features[index:index+batch_size] = result[i]
-			y_train[index:index+batch_size] = y_train_batch[i][:,0]
+			y_train[index:index+batch_size] = y_train_batch[i][:,1]
 
 			index+=batch_size
 
@@ -166,12 +169,14 @@ class Texture_model:
 		# 	# normalize(features[:,:,i])
 
 		for i in range(self.nb_mini_patch):
-			print('Fitting PCAs ' + str(i+1) + '/' + str(self.nb_mini_patch))
+			if self.verbose:
+				print('Fitting PCAs ' + str(i+1) + '/' + str(self.nb_mini_patch))
 			self.PCAs[i].fit(features[:,:,i])
 
 		# pca.fit(np.concatenate([features[:,:,i] for i in range(nb_mini_patch)]))
 
-		print('Dimension reduction...')
+		if self.verbose:
+			print('Dimension reduction...')
 		features_PCA = np.empty([nb_train_batch*batch_size, self.keep_PCA, self.nb_mini_patch])
 		for i in range(self.nb_mini_patch):
 			# features_PCA[:,:,i] = pca.transform(features[:,:,i])
@@ -179,12 +184,14 @@ class Texture_model:
 
 		del(features)
 
-		print('Fitting Gaussian Mixture Model...')
+		if self.verbose:
+			print('Fitting Gaussian Mixture Model...')
 		self.gmm.fit(np.reshape(features_PCA, 
 								[features_PCA.shape[0]*self.nb_mini_patch, 
 								self.keep_PCA]))
 
-		print('Computing Fisher vectors...')
+		if self.verbose:
+			print('Computing Fisher vectors...')
 		fisher_train = compute_fisher(features_PCA, self.gmm)
 
 		del(features_PCA)
@@ -202,7 +209,8 @@ class Texture_model:
 		# 	plt.boxplot([data_real, data_cg])
 		# 	plt.show()
 
-		print('Fitting SVM...')
+		if self.verbose:
+			print('Fitting SVM...')
 		self.clf_svm.fit(fisher_train, y_train)
 		# clf.fit(np.reshape(features_PCA, [nb_train_batch*batch_size, n_comp*nb_mini_patch]), y_train)
 
@@ -212,7 +220,8 @@ class Texture_model:
 
 		del(fisher_train, y_train)
 
-		print('Dumping model...')
+		if self.verbose:
+			print('Dumping model...')
 
 		dump_model(self, self.model_directory + '/' + self.model_name + '.pkl')
 
@@ -226,7 +235,8 @@ class Texture_model:
 		data_test = []
 		y_test_batch = []
 		for i in range(nb_train_batch):
-			print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+			if self.verbose:
+				print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
 			images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
 													   		  crop = False)
 			data_test.append(images_batch)
@@ -239,7 +249,8 @@ class Texture_model:
 								  batch_size = batch_size, 
 								  nb_mini_patch = self.nb_mini_patch, 
 								  nb_batch = nb_train_batch,
-								  only_green = self.only_green),
+								  only_green = self.only_green,
+								  verbose = self.verbose),
 								  zip(data_test, to_compute)) 
 
 		del(data_test)
@@ -247,14 +258,15 @@ class Texture_model:
 		index = 0
 		for i in range(len(result)):
 			features_test[index:index+batch_size] = result[i]
-			y_test[index:index+batch_size] = y_test_batch[i][:,0]
+			y_test[index:index+batch_size] = y_test_batch[i][:,1]
 
 			index+=batch_size
 
 
 		del(result)
 
-		print('Dimension reduction...')
+		if self.verbose:
+			print('Dimension reduction...')
 		features_test_PCA = np.empty([nb_test_batch*batch_size, self.keep_PCA, self.nb_mini_patch])
 		for i in range(self.nb_mini_patch):
 			# normalize(features_test[:,:,i])
@@ -263,20 +275,22 @@ class Texture_model:
 
 		del(features_test)
 
-		print('Computing Fisher vectors...')
+		if self.verbose:
+			print('Computing Fisher vectors...')
 		fisher_test = compute_fisher(features_test_PCA, self.gmm)
 
 		del(features_test_PCA)
 
 
-
-		print('Prediction...')
+		if self.verbose:
+			print('Prediction...')
 		y_pred_svm = self.clf_svm.predict(fisher_test)
 		# y_pred = clf.predict(np.reshape(features_test_PCA, [nb_test_batch*batch_size, n_comp*nb_mini_patch]))
 		
 		# y_pred_mlp = clf_mlp.predict(fisher_test)
 
-		print('Computing score...')
+		if self.verbose:
+			print('Computing score...')
 		score_svm = accuracy_score(y_pred_svm, y_test)
 		# score_mlp = accuracy_score(y_pred_mlp, y_test)
 
@@ -306,7 +320,8 @@ if __name__ == '__main__':
 
 	model = Texture_model(data_directory, model_directory, 
 						  image_size = image_size, keep_PCA = 64, 
-						  K_gmm = 32, only_green = only_green)
+						  K_gmm = 32, only_green = only_green,
+						  verbose = True)
 
 	model.train(nb_train_batch, batch_size)
 

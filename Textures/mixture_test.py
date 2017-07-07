@@ -17,7 +17,7 @@ import tensorflow as tf
 import os 
 
 
-def compute_features_noise(data, noise_model, noise_model_name):
+def compute_features_noise(data, noise_model):
 	'''
 	Computes noise features from
 	data format : [] tab with size nb_batch containing numpy array containing batches
@@ -25,24 +25,18 @@ def compute_features_noise(data, noise_model, noise_model_name):
 
 	nb_batch = len(data)
 	batch_size = data[0].shape[0]
-	with tf.Session(graph=noise_model.graph) as sess:
-		saver = tf.train.Saver()
-		print('   variable initialization ...')
-		tf.global_variables_initializer().run()
-		tf.local_variables_initializer().run()
 
-		saver.restore(sess, noise_model.dir_ckpt + noise_model_name)
 
-		y_pred_noise = np.empty([nb_batch*batch_size, 2]) 
+	y_pred_noise = np.empty([nb_batch*batch_size, 2]) 
 
-		for i in range(nb_batch):
-			feed_dict = {noise_model.x: data[i], noise_model.keep_prob: 1.0}
-			y_pred_noise[i*batch_size:(i+1)*batch_size] = noise_model.y_conv.eval(feed_dict)
+	for i in range(nb_batch):
+		feed_dict = {noise_model.x: data[i], noise_model.keep_prob: 1.0}
+		y_pred_noise[i*batch_size:(i+1)*batch_size] = noise_model.y_conv.eval(feed_dict)
 
 	return(y_pred_noise)
 
 
-def compute_features_texture(data, texture_model): 
+def compute_features_texture(data, texture_model, verbose = False): 
 
 	# Texture features 
 	nb_batch = len(data)
@@ -57,7 +51,8 @@ def compute_features_texture(data, texture_model):
 								  batch_size = batch_size, 
 								  nb_mini_patch = texture_model.nb_mini_patch, 
 								  nb_batch = nb_batch,
-								  only_green = texture_model.only_green),
+								  only_green = texture_model.only_green,
+								  verbose = verbose),
 								  zip(data, to_compute)) 
 
 
@@ -69,8 +64,8 @@ def compute_features_texture(data, texture_model):
 		index+=batch_size
 
 	del(result)
-
-	print('Dimension reduction...')
+	if verbose:
+		print('Dimension reduction...')
 	features_test_PCA = np.empty([nb_batch*batch_size, texture_model.keep_PCA, texture_model.nb_mini_patch])
 	for i in range(texture_model.nb_mini_patch):
 		# normalize(features_test[:,:,i])
@@ -79,12 +74,14 @@ def compute_features_texture(data, texture_model):
 
 	del(features_test_texture)
 
-	print('Computing Fisher vectors...')
+	if verbose:
+		print('Computing Fisher vectors...')
 	fisher_test = compute_fisher(features_test_PCA, texture_model.gmm)
 
 	del(features_test_PCA)
 
-	print('Prediction for textures...')
+	if verbose:
+		print('Prediction for textures...')
 	y_pred_texture = texture_model.clf_svm.predict_proba(fisher_test)
 
 	return(y_pred_texture)
@@ -108,8 +105,15 @@ def compute_proba_test(noise_model, noise_model_name, texture_model,
 		y_test[index:index+batch_size] = y_test_batch[i][:,0]
 
 		index+=batch_size
+	with tf.Session(graph=noise_model.graph) as sess:
+		saver = tf.train.Saver()
+		print('   variable initialization ...')
+		tf.global_variables_initializer().run()
+		tf.local_variables_initializer().run()
 
-	y_pred_noise = compute_features_noise(data_test, noise_model, noise_model_name)
+		saver.restore(sess, noise_model.dir_ckpt + noise_model_name)
+		y_pred_noise = compute_features_noise(data_test, noise_model, noise_model_name)
+	
 	y_pred_texture = compute_features_texture(data_test, texture_model)
 
 	del(data_test)
@@ -138,7 +142,16 @@ def compute_proba_train(noise_model, noise_model_name, texture_model,
 
 		index+=batch_size
 
-	y_pred_noise = compute_features_noise(data_train, noise_model, noise_model_name)
+	with tf.Session(graph=noise_model.graph) as sess:
+		saver = tf.train.Saver()
+		print('   variable initialization ...')
+		tf.global_variables_initializer().run()
+		tf.local_variables_initializer().run()
+
+		saver.restore(sess, noise_model.dir_ckpt + noise_model_name)
+		
+		y_pred_noise = compute_features_noise(data_train, noise_model, noise_model_name)
+	
 	y_pred_texture = compute_features_texture(data_train, texture_model)
 
 	del(data_train)
@@ -171,73 +184,82 @@ def test_total_images(test_data_path, nb_images, noise_model,
 	fp = 0
 	nb_CGG = 0
 	accuracy = 0
-	for i in range(nb_images):
-		batch, label, width, height, original = data_test.get_next_image()
-		if not only_green: 
-			batch = np.reshape(batch, (batch.shape[0]*3, batch.shape[1], batch.shape[2],1))
 
-		patches = []
-		for p in range(int(batch.shape[0]/minibatch_size) + 1):
-			patches.append(batch[p:p+minibatch_size])
+	with tf.Session(graph=noise_model.graph) as sess:
+		saver = tf.train.Saver()
+		print('   variable initialization ...')
+		tf.global_variables_initializer().run()
+		tf.local_variables_initializer().run()
+
+		saver.restore(sess, noise_model.dir_ckpt + noise_model_name)
+
+		for i in range(nb_images):
+			batch, label, width, height, original = data_test.get_next_image()
+			if not only_green: 
+				batch = np.reshape(batch, (batch.shape[0]*3, batch.shape[1], batch.shape[2],1))
+
+			patches = []
+			for p in range(int(batch.shape[0]/minibatch_size) + 1):
+				patches.append(batch[p:p+minibatch_size])
 
 
-		y_pred_texture = compute_features_texture(patches, texture_model)
-		y_pred_noise = compute_features_noise(patches, noise_model, noise_model_name)
-		y_pred = np.concatenate([y_pred_noise, y_pred_texture], axis = 1)
-		
-		final_pred = np.log(0.000001 + mixture_clf.predict_proba(y_pred))
+			y_pred_texture = compute_features_texture(patches, texture_model)
+			y_pred_noise = compute_features_noise(patches, noise_model, noise_model_name)
+			y_pred = np.concatenate([y_pred_noise, y_pred_texture], axis = 1)
+			
+			final_pred = np.log(0.000001 + mixture_clf.predict_proba(y_pred))
 
-		prediction = 0
-		labels = []
-		diff = []
-		label_image = np.argmax(final_pred, 1)
-		d =  np.max(final_pred, 1) - np.min(final_pred, 1)
-		for k in range(d.shape[0]):
-			diff.append(np.round(d[k], 1))
+			prediction = 0
+			labels = []
+			diff = []
+			label_image = np.argmax(final_pred, 1)
+			d =  np.max(final_pred, 1) - np.min(final_pred, 1)
+			for k in range(d.shape[0]):
+				diff.append(np.round(d[k], 1))
 
-		prediction += np.sum(2*d*(label_image - 0.5))
+			prediction += np.sum(2*d*(label_image - 0.5))
 
-		for l in label_image:
-			labels.append(data_test.image_class[l])
+			for l in label_image:
+				labels.append(data_test.image_class[l])
 
-		diff = np.array(diff)
-		prediction = data_test.image_class[int(max(prediction,0)/abs(prediction))]
-		if label == 'CGG':
-			nb_CGG += 1
+			diff = np.array(diff)
+			prediction = data_test.image_class[int(max(prediction,0)/abs(prediction))]
+			if label == 'CGG':
+				nb_CGG += 1
 
-		if(label == prediction):
-			accuracy+= 1
-			if(prediction == 'CGG'):
-				tp += 1
-		else:
-			if prediction == 'CGG':
-				fp += 1
-		print(prediction, label)
+			if(label == prediction):
+				accuracy+= 1
+				if(prediction == 'CGG'):
+					tp += 1
+			else:
+				if prediction == 'CGG':
+					fp += 1
+			print(prediction, label)
 
-		if show_images and not save_images:
-			test_name = ''
+			if show_images and not save_images:
+				test_name = ''
 
-		if save_images or show_images:
-			noise_model.image_visualization(path_save = noise_model.dir_visualization + test_name, 
-                                   	file_name = str(i), 
-                                   	images = batch, labels_pred = labels, 
-                                   	true_label = label, width = width, 
-                                   	height = height, diff = diff,
-                                   	original = original,
-                                   	show_images = show_images,
-                                   	save_images = save_images,
-                                   	save_original = save_images,
-                                   	prob_map = save_images)
+			if save_images or show_images:
+				noise_model.image_visualization(path_save = noise_model.dir_visualization + test_name, 
+	                                   	file_name = str(i), 
+	                                   	images = batch, labels_pred = labels, 
+	                                   	true_label = label, width = width, 
+	                                   	height = height, diff = diff,
+	                                   	original = original,
+	                                   	show_images = show_images,
+	                                   	save_images = save_images,
+	                                   	save_original = save_images,
+	                                   	prob_map = save_images)
 
-		if ((i+1)%10 == 0):
-			print('\n_______________________________________________________')
-			print(str(i+1) + '/' + str(nb_images) + ' images treated.')
-			print('Accuracy : ' + str(round(100*accuracy/(i+1), 2)) + '%')
-			if tp + fp != 0:
-				print('Precision : ' + str(round(100*tp/(tp + fp), 2)) + '%')
-			if nb_CGG != 0:
-				print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
-			print('_______________________________________________________\n')
+			if ((i+1)%10 == 0):
+				print('\n_______________________________________________________')
+				print(str(i+1) + '/' + str(nb_images) + ' images treated.')
+				print('Accuracy : ' + str(round(100*accuracy/(i+1), 2)) + '%')
+				if tp + fp != 0:
+					print('Precision : ' + str(round(100*tp/(tp + fp), 2)) + '%')
+				if nb_CGG != 0:
+					print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
+				print('_______________________________________________________\n')
 
 
 
