@@ -251,7 +251,7 @@ config = 'server'
 if config == 'server':
 	data_directory = '/work/smg/v-nicolas/level-design_raise_100/'
 	texture_model_directory = '/work/smg/v-nicolas/models_texture/'
-	test_data_path = 'work/smg/v-nicolas/level-design_raise/test/'
+	test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
 else:
 	data_directory = '/home/nicolas/Database/level-design_raise_100_color/'
 	texture_model_directory = '/home/nicolas/Documents/models_texture/'
