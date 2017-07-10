@@ -36,7 +36,8 @@ def compute_features_noise(data, noise_model):
 	return(y_pred_noise)
 
 
-def compute_features_texture(data, texture_model, verbose = False): 
+def compute_features_texture(data, texture_model, pool = None, 
+							 verbose = False): 
 
 	# Texture features 
 	nb_batch = len(data)
@@ -44,7 +45,8 @@ def compute_features_texture(data, texture_model, verbose = False):
 
 	features_test_texture = np.empty([nb_batch*batch_size, 128, texture_model.nb_mini_patch])
 
-	pool = Pool()  
+	if pool == None:
+		pool = Pool()  
 
 	to_compute = [i for i in range(nb_batch)]
 	result = pool.starmap(partial(compute_dense_sift, 
@@ -184,6 +186,7 @@ def test_total_images(test_data_path, nb_images, noise_model,
 	fp = 0
 	nb_CGG = 0
 	accuracy = 0
+	pool = Pool()
 
 	with tf.Session(graph=noise_model.graph) as sess:
 		saver = tf.train.Saver()
@@ -203,7 +206,7 @@ def test_total_images(test_data_path, nb_images, noise_model,
 				patches.append(batch[p:p+minibatch_size])
 
 
-			y_pred_texture = compute_features_texture(patches, texture_model)
+			y_pred_texture = compute_features_texture(patches, texture_model, pool)
 			y_pred_noise = compute_features_noise(patches, noise_model)
 			y_pred = np.concatenate([y_pred_noise, y_pred_texture], axis = 1)
 			
