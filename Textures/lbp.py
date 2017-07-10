@@ -11,10 +11,12 @@ from sklearn.metrics import accuracy_score
 def compute_code(minipatch, mode = 'ltc'): 
 
 	s = np.sign(minipatch - minipatch[1,1])
-
+	print(s)
 	if mode == 'lbp':
 		s[s == -1] = 0
+		print(s)
 		binary = array_to_bin(s)
+		print(binary)
 
 		return(binary)
 	if mode == 'ltc': 
@@ -164,7 +166,7 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 10
+	nb_train_batch = 0
 	batch_size = 50
 
 	print('Training...')
@@ -210,7 +212,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 80
+	nb_test_batch = 0
 
 	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])
