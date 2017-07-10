@@ -127,7 +127,7 @@ class Projection:
 		self.nb_features = X.shape[1]
 
 		if self.init == 'random':
-			self.W = np.random([self.red_dim, self.nb_features])
+			self.W = np.random.rand(self.red_dim, self.nb_features)
 
 		cost = 0
 		for i in range(nb_iter):
