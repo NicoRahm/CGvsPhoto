@@ -7,6 +7,7 @@ from dsift import DsiftExtractor
 # import pandas as pd
 import matplotlib.pyplot as plt
 
+
 import numpy as np
 
 
@@ -22,6 +23,8 @@ from multiprocessing import Pool
 from functools import partial
 
 import pickle
+
+import random
 
 
 def dump_model(model, path): 
@@ -85,6 +88,64 @@ def compute_dense_sift(data, i, batch_size, nb_mini_patch,
 
 	return(features)
 
+def updated_W(W, phi1, phi2, y, b, lr):
+
+	diff = phi1 - phi2
+	d = np.linalg.multi_dot([np.transpose(diff), np.transpose(W), W, diff])
+
+	if y*(b-d) > 1:
+		new_W = lr*y*np.linalg.multi_dot([W, diff, np.transpose(diff)])
+	else:
+		new_W = W
+
+	cost = max(1 - y*(b-d), 0)
+	return(new_W, cost)
+
+def sample_couple(X, y):
+
+	indexes = random.sample(list(range(X.shape[0])), 2)
+
+	phi1 = X[indexes[0]]
+	phi2 = X[indexes[1]]
+	y = 4*(y[indexes[0]] - 0.5)*(y[indexes[1]] - 0.5)
+
+	return(phi1, phi2, y)
+
+class Projection:
+
+	def __init__(self, red_dim = 128, treshold = 0.5, learning_rate = 0.01, 
+				 initialization = 'random'):
+
+		self.red_dim = red_dim
+		self.b = treshold
+		self.lr = learning_rate
+
+		self.init = initialization
+
+	def train(self, X, y, nb_iter = 10000):
+
+		self.nb_features = X.shape[1]
+
+		if self.init == 'random':
+			self.W = np.random([self.red_dim, self.nb_features])
+
+		cost = 0
+		for i in range(nb_iter):
+
+			phi1, phi2, y = sample_couple(X, y)
+			new_W, current_cost = updated_W(self.W, phi1, phi2, y, self.b, self.lr)
+
+			cost += current_cost
+			self.W = new_W
+
+			if i%100 == 0: 
+				print('Cost on 100 examples for iteration ' + str(i+1) + ' : ' + str(cost/100))
+				cost = 0
+
+
+	def project(self, X): 
+		return(np.transpose(self.W.dot(np.transpose(X))))
+
 
 
 class Texture_model: 
@@ -121,6 +182,9 @@ class Texture_model:
 		self.gmm = GaussianMixture(n_components=K_gmm, 
 								   covariance_type='diag')
 		self.clf_svm = CalibratedClassifierCV(LinearSVC())
+
+		self.projector = Projection(red_dim = 128, treshold = 0.5,
+									learning_rate = 0.01, initialization = 'random')
 
 
 
@@ -208,6 +272,16 @@ class Texture_model:
 		# 	plt.figure()
 		# 	plt.boxplot([data_real, data_cg])
 		# 	plt.show()
+
+		if self.verbose:
+			print('Fitting Projection...')
+
+		self.projector.train(fisher_train, y_train, nb_iter = 10000)
+
+		if self.verbose: 
+			print('Projection...')
+
+		fisher_train = self.projector.project(fisher_train)
 
 		if self.verbose:
 			print('Fitting SVM...')
@@ -314,7 +388,7 @@ if __name__ == '__main__':
 
 	only_green = True
 
-	nb_train_batch = 200
+	nb_train_batch = 10
 	nb_test_batch = 80
 	batch_size = 50
 
