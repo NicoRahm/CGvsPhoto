@@ -107,9 +107,9 @@ def sample_couple(X, y):
 
 	phi1 = X[indexes[0]]
 	phi2 = X[indexes[1]]
-	y = 4*(y[indexes[0]] - 0.5)*(y[indexes[1]] - 0.5)
+	y_i = 4*(y[indexes[0]] - 0.5)*(y[indexes[1]] - 0.5)
 
-	return(phi1, phi2, y)
+	return(phi1, phi2, y_i)
 
 class Projection:
 
@@ -132,8 +132,8 @@ class Projection:
 		cost = 0
 		for i in range(nb_iter):
 
-			phi1, phi2, y = sample_couple(X, y)
-			new_W, current_cost = updated_W(self.W, phi1, phi2, y, self.b, self.lr)
+			phi1, phi2, y_i = sample_couple(X, y)
+			new_W, current_cost = updated_W(self.W, phi1, phi2, y_i, self.b, self.lr)
 
 			cost += current_cost
 			self.W = new_W
