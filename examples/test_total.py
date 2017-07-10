@@ -13,7 +13,7 @@ clf = Model(database_path, image_size, config = 'Server', filters = [32,32,64],
 
 # test classifier on total image
 clf.test_total_images(test_data_path = test_data_path,
-                      nb_images = 40, decision_rule = 'weighted_vote',
+                      nb_images = 216, decision_rule = 'weighted_vote',
                       show_images = False, 
                       save_images = False,
                       only_green = True,
