@@ -111,6 +111,7 @@ def sample_couple(X, y):
 	phi1 = X[indexes[0]]
 	phi2 = X[indexes[1]]
 	y_i = 4*(y[indexes[0]] - 0.5)*(y[indexes[1]] - 0.5)
+	print(y_i)
 
 	return(phi1, phi2, y_i)
 
