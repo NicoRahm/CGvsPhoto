@@ -267,7 +267,7 @@ class Texture_model:
 			if save_fisher: 
 
 				dump_name = input('Name of the dump file : ')
-				pickle.dump((fisher_train, y_train), self.dump_data_directory + '/' + dump_name)
+				pickle.dump([fisher_train, y_train], self.dump_data_directory + '/' + dump_name)
 
 		# Plotting boxplot
 
@@ -283,7 +283,9 @@ class Texture_model:
 		# 	plt.show()
 
 		else: 
-			fisher_train, y_train = pickle.load(self.dump_data_directory + '/' + fisher_data_name)
+			data = pickle.load(self.dump_data_directory + '/' + fisher_data_name)
+			fisher_train = data[0]
+			y_train = data[1]
 
 		if self.verbose:
 			print('Fitting Projection...')
