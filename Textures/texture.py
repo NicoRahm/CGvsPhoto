@@ -408,7 +408,7 @@ if __name__ == '__main__':
 
 	only_green = True
 
-	nb_train_batch = 200
+	nb_train_batch = 10
 	nb_test_batch = 80
 	batch_size = 50
 
