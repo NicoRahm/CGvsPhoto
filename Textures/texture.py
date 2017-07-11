@@ -355,6 +355,11 @@ class Texture_model:
 
 		del(features_test_PCA)
 
+		if self.verbose: 
+			print('Projection...')
+
+		fisher_test = self.projector.project(fisher_test)
+
 
 		if self.verbose:
 			print('Prediction...')
@@ -388,7 +393,7 @@ if __name__ == '__main__':
 
 	only_green = True
 
-	nb_train_batch = 10
+	nb_train_batch = 200
 	nb_test_batch = 80
 	batch_size = 50
 
