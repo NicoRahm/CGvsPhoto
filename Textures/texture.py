@@ -431,7 +431,7 @@ if __name__ == '__main__':
 			load_data = None		
 
 
-	model.train(nb_train_batch, batch_size, save_fisher = save_data, fisher_data_name = save_data)
+	model.train(nb_train_batch, batch_size, save_fisher = save_data, fisher_data_name = load_data)
 
 	model.test(nb_test_batch, batch_size)
 
