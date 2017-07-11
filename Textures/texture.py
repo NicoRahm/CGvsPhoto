@@ -150,12 +150,13 @@ class Projection:
 
 class Texture_model: 
 
-	def __init__(self, data_directory, model_directory, image_size, 
+	def __init__(self, data_directory, model_directory, dump_data_directory, image_size, 
 				 keep_PCA = 64, K_gmm = 64, only_green = False, verbose = True): 
 
 
 		self.model_name = input("   Choose a name for the model : ")
 		self.model_directory = model_directory
+		self.dump_data_directory = dump_data_directory
 
 		# Initialize hyper-parameters
 		self.image_size = image_size
@@ -188,77 +189,85 @@ class Texture_model:
 
 
 
-	def train(self, nb_train_batch, batch_size = 50): 
+	def train(self, nb_train_batch, batch_size = 50, 
+			  save_fisher = False, fisher_data_name = None): 
 
-		features = np.empty([nb_train_batch*batch_size, 128, self.nb_mini_patch])
-		y_train = np.empty([nb_train_batch*batch_size, ])
-		print('Training...')
 
-		data_train = []
-		y_train_batch = []
-		for i in range(nb_train_batch):
+		if fisher_data_name == None:
+			features = np.empty([nb_train_batch*batch_size, 128, self.nb_mini_patch])
+			y_train = np.empty([nb_train_batch*batch_size, ])
+			print('Training...')
+
+			data_train = []
+			y_train_batch = []
+			for i in range(nb_train_batch):
+				if self.verbose:
+					print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+				images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
+														   		  crop = False)
+				data_train.append(images_batch)
+				y_train_batch.append(y_batch)
+
+			pool = Pool()  
+
+			to_compute = [i for i in range(nb_train_batch)]
+			result = pool.starmap(partial(compute_dense_sift, 
+									  batch_size = batch_size, 
+									  nb_mini_patch = self.nb_mini_patch, 
+									  nb_batch = nb_train_batch,
+									  only_green = self.only_green,
+									  verbose = self.verbose),
+									  zip(data_train, to_compute)) 
+
+			del(data_train)
+
+			index = 0
+			for i in range(len(result)):
+				features[index:index+batch_size] = result[i]
+				y_train[index:index+batch_size] = y_train_batch[i][:,1]
+
+				index+=batch_size
+
+
+			del(result)
+			# print(y_train)
+
+			
+			# for i in range(nb_mini_patch):
+			# 	# normalize(features[:,:,i])
+
+			for i in range(self.nb_mini_patch):
+				if self.verbose:
+					print('Fitting PCAs ' + str(i+1) + '/' + str(self.nb_mini_patch))
+				self.PCAs[i].fit(features[:,:,i])
+
+			# pca.fit(np.concatenate([features[:,:,i] for i in range(nb_mini_patch)]))
+
 			if self.verbose:
-				print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-			images_batch, y_batch = self.data.get_next_train_batch(batch_size = batch_size,
-													   		  crop = False)
-			data_train.append(images_batch)
-			y_train_batch.append(y_batch)
+				print('Dimension reduction...')
+			features_PCA = np.empty([nb_train_batch*batch_size, self.keep_PCA, self.nb_mini_patch])
+			for i in range(self.nb_mini_patch):
+				# features_PCA[:,:,i] = pca.transform(features[:,:,i])
+				features_PCA[:,:,i] = self.PCAs[i].transform(features[:,:,i])
 
-		pool = Pool()  
+			del(features)
 
-		to_compute = [i for i in range(nb_train_batch)]
-		result = pool.starmap(partial(compute_dense_sift, 
-								  batch_size = batch_size, 
-								  nb_mini_patch = self.nb_mini_patch, 
-								  nb_batch = nb_train_batch,
-								  only_green = self.only_green,
-								  verbose = self.verbose),
-								  zip(data_train, to_compute)) 
-
-		del(data_train)
-
-		index = 0
-		for i in range(len(result)):
-			features[index:index+batch_size] = result[i]
-			y_train[index:index+batch_size] = y_train_batch[i][:,1]
-
-			index+=batch_size
-
-
-		del(result)
-		# print(y_train)
-
-		
-		# for i in range(nb_mini_patch):
-		# 	# normalize(features[:,:,i])
-
-		for i in range(self.nb_mini_patch):
 			if self.verbose:
-				print('Fitting PCAs ' + str(i+1) + '/' + str(self.nb_mini_patch))
-			self.PCAs[i].fit(features[:,:,i])
+				print('Fitting Gaussian Mixture Model...')
+			self.gmm.fit(np.reshape(features_PCA, 
+									[features_PCA.shape[0]*self.nb_mini_patch, 
+									self.keep_PCA]))
 
-		# pca.fit(np.concatenate([features[:,:,i] for i in range(nb_mini_patch)]))
+			if self.verbose:
+				print('Computing Fisher vectors...')
+			fisher_train = compute_fisher(features_PCA, self.gmm)
 
-		if self.verbose:
-			print('Dimension reduction...')
-		features_PCA = np.empty([nb_train_batch*batch_size, self.keep_PCA, self.nb_mini_patch])
-		for i in range(self.nb_mini_patch):
-			# features_PCA[:,:,i] = pca.transform(features[:,:,i])
-			features_PCA[:,:,i] = self.PCAs[i].transform(features[:,:,i])
+			del(features_PCA)
 
-		del(features)
+			if save_fisher: 
 
-		if self.verbose:
-			print('Fitting Gaussian Mixture Model...')
-		self.gmm.fit(np.reshape(features_PCA, 
-								[features_PCA.shape[0]*self.nb_mini_patch, 
-								self.keep_PCA]))
-
-		if self.verbose:
-			print('Computing Fisher vectors...')
-		fisher_train = compute_fisher(features_PCA, self.gmm)
-
-		del(features_PCA)
+				dump_name = input('Name of the dump file : ')
+				pickle.dump((fisher_train, y_train), self.dump_data_directory + '/' + dump_name)
 
 		# Plotting boxplot
 
@@ -272,6 +281,9 @@ class Texture_model:
 		# 	plt.figure()
 		# 	plt.boxplot([data_real, data_cg])
 		# 	plt.show()
+
+		else: 
+			fisher_train, y_train = pickle.load(self.dump_data_directory + '/' + fisher_data_name)
 
 		if self.verbose:
 			print('Fitting Projection...')
@@ -386,9 +398,12 @@ if __name__ == '__main__':
 	if config == 'server':
 		data_directory = '/work/smg/v-nicolas/level-design_raise_100/'
 		model_directory = '/work/smg/v-nicolas/models_texture/'
+		dump_data_directory = '/work/smg/v-nicolas/data_texture/'
 	else:
 		data_directory = '/home/nicolas/Database/level-design_raise_100_color/'
 		model_directory = '/home/nicolas/Documents/models_texture/'
+		dump_data_directory = '/home/nicolas/Documents/data_texture/'
+
 	image_size = 100
 
 	only_green = True
@@ -397,12 +412,26 @@ if __name__ == '__main__':
 	nb_test_batch = 80
 	batch_size = 50
 
-	model = Texture_model(data_directory, model_directory, 
+	model = Texture_model(data_directory, model_directory, dump_data_directory, 
 						  image_size = image_size, keep_PCA = 64, 
 						  K_gmm = 32, only_green = only_green,
 						  verbose = True)
 
-	model.train(nb_train_batch, batch_size)
+	save_data = input('Save data? (y/N) : ')
+
+	if save_data == 'y':
+		save_data = True
+		load_data = None
+	else: 
+		save_data = False
+		load_data = input('Load data? (y/N) : ')
+		if load_data == 'y':
+			load_data = input('File to load (source directory : ' + dump_data_directory + ') : ')
+		else: 
+			load_data = None		
+
+
+	model.train(nb_train_batch, batch_size, save_fisher = save_data, fisher_data_name = save_data)
 
 	model.test(nb_test_batch, batch_size)
 
