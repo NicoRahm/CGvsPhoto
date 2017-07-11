@@ -126,8 +126,13 @@ class Projection:
 
 		self.nb_features = X.shape[1]
 
+		print('Initialization...')
 		if self.init == 'random':
 			self.W = np.random.rand(self.red_dim, self.nb_features)
+		if self.init == 'PCA':
+			pca = PCA(n_components = self.red_dim, whiten = True)
+			pca.fit(X)
+			self.W = pca.components_
 
 		cost = 0
 		for i in range(nb_iter):
@@ -185,7 +190,8 @@ class Texture_model:
 		self.clf_svm = CalibratedClassifierCV(LinearSVC())
 
 		self.projector = Projection(red_dim = 128, treshold = 1,
-									learning_rate = 0.0001, initialization = 'random')
+									learning_rate = 0.0001, 
+									initialization = 'PCA')
 
 
 
@@ -437,7 +443,7 @@ if __name__ == '__main__':
 
 	if load_data != None: 
 		model_to_load = input('Model to load for test : ')
-		model2 = load_model(model_directory + '/' +  model_to_load + '.pkl')
+		model = load_model(model_directory + '/' +  model_to_load + '.pkl')
 
 	model.test(nb_test_batch, batch_size)
 
