@@ -117,7 +117,7 @@ def sample_couple(X, y):
 
 class Projection:
 
-	def __init__(self, red_dim = 128, treshold = 0.5, learning_rate = 0.01, 
+	def __init__(self, red_dim = 128, treshold = 1.2, learning_rate = 0.01, 
 				 initialization = 'random'):
 
 		self.red_dim = red_dim
@@ -197,7 +197,7 @@ class Texture_model:
 								   covariance_type='diag')
 		self.clf_svm = CalibratedClassifierCV(LinearSVC())
 
-		self.projector = Projection(red_dim = 128, treshold = 1,
+		self.projector = Projection(red_dim = 128, treshold = 1.2,
 									learning_rate = 0.001, 
 									initialization = 'PCA')
 
