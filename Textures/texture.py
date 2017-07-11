@@ -185,7 +185,7 @@ class Texture_model:
 		self.clf_svm = CalibratedClassifierCV(LinearSVC())
 
 		self.projector = Projection(red_dim = 128, treshold = 0.5,
-									learning_rate = 0.01, initialization = 'random')
+									learning_rate = 0.001, initialization = 'random')
 
 
 
