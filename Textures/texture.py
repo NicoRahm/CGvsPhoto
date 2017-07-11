@@ -91,10 +91,10 @@ def compute_dense_sift(data, i, batch_size, nb_mini_patch,
 def updated_W(W, phi1, phi2, y, b, lr):
 
 	diff = phi1 - phi2
-	d = np.linalg.multi_dot([np.transpose(diff), np.transpose(W), W, diff])
+	d = np.linalg.multi_dot([np.transpose(diff), np.transpose(W), W, np.reshape(diff, [diff.shape[0], 1])])
 
 	if y*(b-d) > 1:
-		new_W = lr*y*np.linalg.multi_dot([W, diff, np.transpose(diff)])
+		new_W = lr*y*np.linalg.multi_dot([W, np.reshape(diff, [diff.shape[0], 1]), np.transpose(diff)])
 	else:
 		new_W = W
 
