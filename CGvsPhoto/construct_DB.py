@@ -15,7 +15,7 @@ import shutil
 def load_images_from_dir(dir_name, shuffle = False) :
 
 # file extension accepted as image data
-    valid_image_extension = [".jpg",".gif",".png",".tga",".tif", ".JPG"]
+    valid_image_extension = [".jpg", ".jpeg",".gif",".png",".tga",".tif", ".JPG"]
 
     file_list = []
     nb_image = 0 
@@ -102,14 +102,14 @@ def construct_DB(source_real, source_CG, target_dir, nb_per_class = 1800,
 
 if __name__ == '__main__': 
 
-	source_real_directory = "/home/nicolas/Database/dresden/jpeg/"
-	source_CG_directory = "/home/nicolas/Database/GameCG/"
-	target_dir_test = '/home/nicolas/Database/level-design_dresden/'
+	source_real_directory = "/home/nicolas/Database/face_DB/Real/"
+	source_CG_directory = "/home/nicolas/Database/face_DB/CGG/"
+	target_dir_test = '/home/nicolas/Database/face_DB_split/'
 
 	construct_DB(source_real = source_real_directory, 
 			  source_CG = source_CG_directory,
 			  target_dir = target_dir_test, 
-			  nb_total = 1800,
+			  nb_per_class = 108,
 			  validation_proportion = 0.1, 
-			  test_proportion = 0.2)
+			  test_proportion = 0.4)
 
