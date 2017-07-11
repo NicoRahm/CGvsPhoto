@@ -184,7 +184,7 @@ class Texture_model:
 								   covariance_type='diag')
 		self.clf_svm = CalibratedClassifierCV(LinearSVC())
 
-		self.projector = Projection(red_dim = 128, treshold = 0.5,
+		self.projector = Projection(red_dim = 128, treshold = 2,
 									learning_rate = 0.0001, initialization = 'random')
 
 
