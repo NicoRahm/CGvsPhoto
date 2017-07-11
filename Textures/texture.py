@@ -267,7 +267,7 @@ class Texture_model:
 			if save_fisher: 
 
 				dump_name = input('Name of the dump file : ')
-				pickle.dump([fisher_train, y_train], self.dump_data_directory + '/' + dump_name + '.pkl')
+				pickle.dump([fisher_train, y_train], open(self.dump_data_directory + '/' + dump_name + '.pkl', 'wb'))
 
 		# Plotting boxplot
 
@@ -283,7 +283,7 @@ class Texture_model:
 		# 	plt.show()
 
 		else: 
-			data = pickle.load(self.dump_data_directory + '/' + fisher_data_name + '.pkl')
+			data = pickle.load(open(self.dump_data_directory + '/' + fisher_data_name + '.pkl', 'rb'))
 			fisher_train = data[0]
 			y_train = data[1]
 
@@ -434,6 +434,10 @@ if __name__ == '__main__':
 
 
 	model.train(nb_train_batch, batch_size, save_fisher = save_data, fisher_data_name = load_data)
+
+	if load_data != None: 
+		model_to_load = input('Model to load for test : ')
+		model2 = load_model(model_directory + '/' +  model_to_load + '.pkl')
 
 	model.test(nb_test_batch, batch_size)
 
