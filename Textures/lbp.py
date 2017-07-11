@@ -135,7 +135,7 @@ def compute_features(data, i, batch_size, nb_batch, mode = 'ltc'):
 	y_train = []
 	for i in range(batch_size): 
 		features.append(compute_hist(images[i,:,:], mode))
-		y_train.append(labels[i,0])
+		y_train.append(labels[i,1])
 
 	print(features[0])
 	return(features, y_train)
@@ -156,8 +156,8 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 
 if __name__ == '__main__': 
 
-	data_directory = '/work/smg/v-nicolas/level-design_raise/'
-	image_size = None
+	data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
+	image_size = 100
 
 	data = il.Database_loader(directory = data_directory, 
 							  size = image_size, only_green = False)
@@ -166,8 +166,8 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 100
-	batch_size = 10
+	nb_train_batch = 200
+	batch_size = 50
 
 	print('Training...')
 	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
@@ -212,7 +212,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 50
+	nb_test_batch = 80
 
 	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])

@@ -96,11 +96,13 @@ def updated_W(W, phi1, phi2, y, b, lr):
 	if y*(b-d) <= 1:
 		new_W = W - lr*y*W.dot(np.outer(diff, diff))
 		# print('Updating...')
+		updated = True
 	else:
 		new_W = W
+		updated = False
 
 	cost = max(1 - y*(b-d), 0)
-	return(new_W, cost)
+	return(new_W, cost, updated)
 
 def sample_couple(X, y):
 
@@ -136,17 +138,21 @@ class Projection:
 			self.W = pca.components_
 
 		cost = 0
+		nb_updated = 0
 		for i in range(nb_iter):
 
 			phi1, phi2, y_i = sample_couple(X, y)
-			new_W, current_cost = updated_W(self.W, phi1, phi2, y_i, self.b, self.lr)
-
+			new_W, current_cost, updated = updated_W(self.W, phi1, phi2, y_i, self.b, self.lr)
+			if updated:
+				nb_updated += 1
 			cost += current_cost
 			self.W = new_W
 
 			if (i+1)%100 == 0: 
 				print('Cost on 100 examples for iteration ' + str(i+1) + ' : ' + str(cost/100))
+				print('Number of updates on 100 examples for iteration ' + str(i+1) + ' : ' + str(nb_updated))
 				cost = 0
+				nb_updated = 0
 
 
 	def project(self, X): 
@@ -191,7 +197,7 @@ class Texture_model:
 		self.clf_svm = CalibratedClassifierCV(LinearSVC())
 
 		self.projector = Projection(red_dim = 128, treshold = 1,
-									learning_rate = 0.01, 
+									learning_rate = 0.001, 
 									initialization = 'PCA')
 
 
