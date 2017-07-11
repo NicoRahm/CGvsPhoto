@@ -95,7 +95,7 @@ def updated_W(W, phi1, phi2, y, b, lr):
 
 	if y*(b-d) <= 1:
 		new_W = W - lr*y*W.dot(np.outer(diff, diff))
-		print('Updating...')
+		# print('Updating...')
 	else:
 		new_W = W
 
@@ -144,7 +144,7 @@ class Projection:
 			cost += current_cost
 			self.W = new_W
 
-			if i%100 == 0: 
+			if (i+1)%100 == 0: 
 				print('Cost on 100 examples for iteration ' + str(i+1) + ' : ' + str(cost/100))
 				cost = 0
 

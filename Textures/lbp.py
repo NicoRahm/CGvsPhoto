@@ -156,7 +156,7 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 
 if __name__ == '__main__': 
 
-	data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
+	data_directory = '/work/smg/v-nicolas/level-design_raise/'
 	image_size = 100
 
 	data = il.Database_loader(directory = data_directory, 
