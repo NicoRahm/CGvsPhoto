@@ -94,7 +94,7 @@ def updated_W(W, phi1, phi2, y, b, lr):
 	d = np.linalg.multi_dot([np.transpose(diff), np.transpose(W), W, diff])
 
 	if y*(b-d) > 1:
-		new_W = lr*y*W.dot(np.outer(diff, diff))
+		new_W = W - lr*y*W.dot(np.outer(diff, diff))
 	else:
 		new_W = W
 
