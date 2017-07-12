@@ -108,7 +108,7 @@ def updated_W(W, phi1, phi2, y, index, b, lr, grad_mem):
 	grad, cost, updated = gradient(W, diff, y, b)
 	grad_mem[index] = grad
 
-	new_W = W - lr*sum(grad_mem.values())/len(grad_mem.values)
+	new_W = W - lr*sum(grad_mem.values())/len(grad_mem.values())
 
 	return(new_W, cost, updated)
 
