@@ -110,7 +110,7 @@ def updated_W(W, phi1, phi2, y, index, b, lr, grad_mem):
 
 	new_W = W - lr*sum(grad_mem.values())/len(grad_mem.values())
 
-	return(new_W, cost, updated)
+	return(new_W, cost, updated, grad_mem)
 
 def sample_couple(X, y):
 
