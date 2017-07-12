@@ -173,32 +173,36 @@ if __name__ == '__main__':
 	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
 	y_train = np.empty([nb_train_batch*batch_size,])
 
-	data_train = []
-	for i in range(nb_train_batch):
-		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-		images_batch, y_batch = data.get_next_train(crop = False)
-		data_train.append([images_batch, y_batch])
-
 	pool = Pool()  
+	index = 0
+	for i in range(nb_train_batch):
+		data_train = []
+		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+		for j in range(batch_size):
+			print('Getting image' + str(j+1) + '/' + str(batch_size))
+			images_batch, y_batch = data.get_next_train(crop = False)
+			data_train.append([images_batch, y_batch])
 
-	to_compute = [i for i in range(nb_train_batch)]
-	result = pool.starmap(partial(compute_features, 
-							  batch_size = batch_size, 
-							  nb_batch = nb_train_batch, 
-							  mode = mode),
-							  zip(data_train, to_compute)) 
+	
 
+		to_compute = [i for i in range(nb_train_batch)]
+		result = pool.starmap(partial(compute_features, 
+								  batch_size = batch_size, 
+								  nb_batch = nb_train_batch, 
+								  mode = mode),
+								  zip(data_train, to_compute)) 
+
+
+	
+
+		
+		for i in range(len(result)):
+			features_train[index:index+1] = result[i][0]
+			y_train[index:index+1] = result[i][1]
+
+			index+=1
 
 	del(data_train)
-
-	index = 0
-	for i in range(len(result)):
-		features_train[index:index+batch_size] = result[i][0]
-		y_train[index:index+batch_size] = result[i][1]
-
-		index+=batch_size
-
-
 	del(result)
 
 	clf = SVC()
