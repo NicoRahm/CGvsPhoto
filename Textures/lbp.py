@@ -185,10 +185,10 @@ if __name__ == '__main__':
 
 	
 
-		to_compute = [i for i in range(nb_train_batch)]
+		to_compute = [i for i in range(batch_size)]
 		result = pool.starmap(partial(compute_features, 
-								  batch_size = batch_size, 
-								  nb_batch = nb_train_batch, 
+								  batch_size = 1, 
+								  nb_batch = batch_size, 
 								  mode = mode),
 								  zip(data_train, to_compute)) 
 
