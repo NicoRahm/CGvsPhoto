@@ -1,13 +1,13 @@
 from CGvsPhoto import Database_loader
 
 # directory with the original database
-source_db = '/home/nicolas/Database/face_DB_split/'
+source_db = '/home/nicolas/Database/face_DB_split_2/'
 
 # wanted size for the patches 
 image_size = 100
 
 # directory to store the patch database
-target_patches = '/home/nicolas/Database/face_DB_100/'
+target_patches = '/home/nicolas/Database/face_DB_100_2/'
 
 
 # create a database manager 

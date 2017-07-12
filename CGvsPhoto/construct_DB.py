@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
 	source_real_directory = "/home/nicolas/Database/face_DB/Real/"
 	source_CG_directory = "/home/nicolas/Database/face_DB/CGG/"
-	target_dir_test = '/home/nicolas/Database/face_DB_split/'
+	target_dir_test = '/home/nicolas/Database/face_DB_split_2/'
 
 	construct_DB(source_real = source_real_directory, 
 			  source_CG = source_CG_directory,
