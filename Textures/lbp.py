@@ -211,7 +211,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 500
+	nb_test_batch = 5
 
 	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])

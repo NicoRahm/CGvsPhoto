@@ -102,15 +102,27 @@ def gradient(W, diff, y, b):
 	cost = max(1 - y*(b-d), 0)
 	return(grad, cost, updated)
 
-def updated_W(W, diff, y, index, b, lr, grad_mem):
+def updated_W(W, phi1, phi2, y, index, b, lr, grad_mem):
 
+	diff = phi1 - phi2
 	grad, cost, updated = gradient(W, diff, y, b)
 	grad_mem[index] = grad
 
-	new_W = W - 1000*lr*np.mean(grad_mem, axis = 0)
-	
-	return(new_W, cost, updated, grad_mem)
+	new_W = W - lr*sum(grad_mem.values())/len(grad_mem.values)
 
+	return(new_W, cost, updated)
+
+def sample_couple(X, y):
+
+	indexes = random.sample(list(range(X.shape[0])), 2)
+
+	phi1 = X[indexes[0]]
+	phi2 = X[indexes[1]]
+	y_i = 4*(y[indexes[0]] - 0.5)*(y[indexes[1]] - 0.5)
+	index = indexes[0]*X.shape[0] + indexes[1]
+	# print(y_i)
+
+	return(phi1, phi2, y_i, index)
 
 class Projection:
 
@@ -135,21 +147,13 @@ class Projection:
 			pca.fit(X)
 			self.W = pca.components_
 
-		diffs = np.empty([X.shape[0]**2, X.shape[1]])
-		grad_mem = np.empty([X.shape[0]**2, X.shape[1]])
-		y_diffs = np.empty([X.shape[0]**2,])
-
-		for i in range(X.shape[0]):
-			for j in range(X.shape[1]):
-				diffs[i*X.shape[0] + j] = X[i] - X[j]
-				y_diffs[i*X.shape[0] + j] = 4*(y[i] - 0.5)*(y[j] - 0.5)
-
+		grad_mem = dict()
 		cost = 0
 		nb_updated = 0
 		for i in range(nb_iter):
 
-			index = random.sample(list(range(X.shape[0]**2)), 1)
-			new_W, current_cost, updated, grad_mem = updated_W(self.W, diffs[index], y_diffs[index], index, self.b, self.lr, grad_mem)
+			phi1, phi2, y_i, index = sample_couple(X, y)
+			new_W, current_cost, updated, grad_mem = updated_W(self.W, phi1, phi2, y_i, index, self.b, self.lr, grad_mem)
 			if updated:
 				nb_updated += 1
 			cost += current_cost
@@ -310,7 +314,7 @@ class Texture_model:
 		if self.verbose:
 			print('Fitting Projection...')
 
-		self.projector.train(fisher_train, y_train, nb_iter = 10000)
+		self.projector.train(fisher_train[:1000], y_train[:1000], nb_iter = 10000)
 
 		if self.verbose: 
 			print('Projection...')
