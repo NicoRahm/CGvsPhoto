@@ -157,7 +157,7 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 if __name__ == '__main__': 
 
 	data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
-	image_size = 100
+	image_size = None
 
 	data = il.Database_loader(directory = data_directory, 
 							  size = image_size, only_green = False)
@@ -166,8 +166,8 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 200
-	batch_size = 50
+	nb_train_batch = 100
+	batch_size = 10
 
 	print('Training...')
 	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
@@ -212,7 +212,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 80
+	nb_test_batch = 50
 
 	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])

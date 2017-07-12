@@ -390,7 +390,10 @@ class Database_loader :
         # convert to float image
         image = image.astype(np.float32) / 255.
         #image = image.reshape(1, self.size, self.size, 3)
-        image = image.reshape(self.size, self.size, self.nb_channels)
+        if self.size == None: 
+            image = image.reshape(image.shape[0], image.shape[1], self.nb_channels)
+        else: 
+            image = image.reshape(self.size, self.size, self.nb_channels)
 
         # buils class label
         label = np.zeros(len(self.image_class))
