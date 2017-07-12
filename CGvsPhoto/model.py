@@ -204,7 +204,7 @@ class Model:
 
   def __init__(self, database_path, image_size, config = 'Personal', filters = [32, 64],
               feature_extractor = 'Stats', remove_context = False, 
-              nbins = 10, batch_size = 50, using_GPU = False):
+              nbins = 10, remove_filter_size = 3, batch_size = 50, using_GPU = False):
     """Defines a model for single-image classification
 
     :param database_path: Absolute path to the default patch database (training, validation and testings are performed on this database)
@@ -259,6 +259,7 @@ class Model:
     self.nbins = nbins
     self.using_GPU = using_GPU
     self.remove_context = remove_context
+    self.remove_filter_size = remove_filter_size
 
     # getting the database
     self.import_database()
@@ -322,9 +323,14 @@ class Model:
       with tf.name_scope('Conv1'):
 
         with tf.name_scope('Weights'):
-          W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], 
-                                    nb_input = self.filter_size*self.filter_size*self.nb_channels,
-                                    seed = random_seed)
+          if remove_context:
+            W_conv1 = weight_variable([self.remove_filter_size, self.remove_filter_size, 1, nf[0]], 
+                                      nb_input = self.filter_size*self.filter_size*self.nb_channels,
+                                      seed = random_seed)
+          else:
+            W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], 
+                                      nb_input = self.filter_size*self.filter_size*self.nb_channels,
+                                      seed = random_seed)
           self.W_conv1 = W_conv1
         with tf.name_scope('Bias'):
           b_conv1 = bias_variable([nf[0]])
