@@ -88,32 +88,29 @@ def compute_dense_sift(data, i, batch_size, nb_mini_patch,
 
 	return(features)
 
-def updated_W(W, phi1, phi2, y, b, lr):
-
-	diff = phi1 - phi2
+def gradient(W, diff, y, b):
 	d = np.linalg.multi_dot([np.transpose(diff), np.transpose(W), W, diff])
-	print(d)
+	# print(d)
 	if y*(b-d) <= 1:
-		new_W = W - lr*y*W.dot(np.outer(diff, diff))
+		grad = y*W.dot(np.outer(diff, diff))
 		# print('Updating...')
 		updated = True
 	else:
-		new_W = W
+		grad = 0
 		updated = False
 
 	cost = max(1 - y*(b-d), 0)
-	return(new_W, cost, updated)
+	return(grad, cost, updated)
 
-def sample_couple(X, y):
+def updated_W(W, diff, y, index, b, lr, grad_mem):
 
-	indexes = random.sample(list(range(X.shape[0])), 2)
+	grad, cost, updated = gradient(W, diff, y, b)
+	grad_mem[index] = grad
 
-	phi1 = X[indexes[0]]
-	phi2 = X[indexes[1]]
-	y_i = 4*(y[indexes[0]] - 0.5)*(y[indexes[1]] - 0.5)
-	# print(y_i)
+	new_W = W - 1000*lr*np.mean(grad_mem, axis = 0)
+	
+	return(new_W, cost, updated, grad_mem)
 
-	return(phi1, phi2, y_i)
 
 class Projection:
 
@@ -138,12 +135,21 @@ class Projection:
 			pca.fit(X)
 			self.W = pca.components_
 
+		diffs = np.empty([X.shape[0]**2, X.shape[1]])
+		grad_mem = np.empty([X.shape[0]**2, X.shape[1]])
+		y_diffs = np.empty([X.shape[0]**2,])
+
+		for i in range(X.shape[0]):
+			for j in range(X.shape[1]):
+				diffs[i*X.shape[0] + j] = X[i] - X[j]
+				y_diffs[i*X.shape[0] + j] = 4*(y[i] - 0.5)*(y[j] - 0.5)
+
 		cost = 0
 		nb_updated = 0
 		for i in range(nb_iter):
 
-			phi1, phi2, y_i = sample_couple(X, y)
-			new_W, current_cost, updated = updated_W(self.W, phi1, phi2, y_i, self.b, self.lr)
+			index = random.sample(list(range(X.shape[0]**2)), 1)
+			new_W, current_cost, updated, grad_mem = updated_W(self.W, diffs[index], y_diffs[index], index, self.b, self.lr, grad_mem)
 			if updated:
 				nb_updated += 1
 			cost += current_cost
