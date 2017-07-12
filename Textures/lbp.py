@@ -166,8 +166,8 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 10
-	batch_size = 1
+	nb_train_batch = 20
+	batch_size = 32
 
 	print('Training...')
 	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
@@ -215,7 +215,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 5
+	nb_test_batch = 10
 
 	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])
