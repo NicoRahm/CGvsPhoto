@@ -323,7 +323,7 @@ class Model:
       with tf.name_scope('Conv1'):
 
         with tf.name_scope('Weights'):
-          if remove_context:
+          if self.remove_context:
             W_conv1 = weight_variable([self.remove_filter_size, self.remove_filter_size, 1, nf[0]], 
                                       nb_input = self.filter_size*self.filter_size*self.nb_channels,
                                       seed = random_seed)
