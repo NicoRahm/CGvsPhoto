@@ -166,8 +166,8 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 100
-	batch_size = 10
+	nb_train_batch = 1000
+	batch_size = 1
 
 	print('Training...')
 	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
@@ -176,8 +176,7 @@ if __name__ == '__main__':
 	data_train = []
 	for i in range(nb_train_batch):
 		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-		images_batch, y_batch = data.get_next_train_batch(batch_size = batch_size,
-											   					crop = False)
+		images_batch, y_batch = data.get_next_train(crop = False)
 		data_train.append([images_batch, y_batch])
 
 	pool = Pool()  
@@ -212,7 +211,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 50
+	nb_test_batch = 500
 
 	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])
@@ -222,8 +221,7 @@ if __name__ == '__main__':
 	data_test = []
 	for i in range(nb_test_batch):
 		print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
-		images_batch, y_batch = data.get_batch_test(batch_size = batch_size,
-											   		crop = False)
+		images_batch, y_batch = data.get_next_test(crop = False)
 		data_test.append([images_batch, y_batch])
 	pool = Pool()  
 
