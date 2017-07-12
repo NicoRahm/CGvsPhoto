@@ -179,7 +179,7 @@ if __name__ == '__main__':
 		data_train = []
 		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
 		for j in range(batch_size):
-			print('Getting image' + str(j+1) + '/' + str(batch_size))
+			print('Getting image ' + str(j+1) + '/' + str(batch_size))
 			images_batch, y_batch = data.get_next_train(crop = False)
 			data_train.append([images_batch, y_batch])
 
