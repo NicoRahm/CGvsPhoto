@@ -137,7 +137,7 @@ def compute_features(data, i, batch_size, nb_batch, mode = 'ltc'):
 		features.append(compute_hist(images, mode))
 		y_train.append(labels[0])
 
-	print(features[0])
+	# print(features[0])
 	return(features, y_train)
 
 def compute_testing_features(i, batch_size, nb_test_batch, data): 
