@@ -329,7 +329,7 @@ class Model:
         with tf.name_scope('Weights'):
           if self.remove_context:
             W_conv1 = weight_variable([self.remove_filter_size, self.remove_filter_size, 1, nf[0]], 
-                                      nb_input = self.filter_size*self.filter_size*self.nb_channels,
+                                      nb_input = self.remove_filter_size*self.remove_filter_size*self.nb_channels,
                                       seed = random_seed)
           else:
             W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], 
@@ -460,9 +460,10 @@ class Model:
       # with tf.name_scope('enforce_constraints'):
       if self.remove_context:
         # self.zero_op = tf.assign(ref = self.W_convs[0][1,1,0,:], value = tf.zeros([nf[0]]))
-        self.zero_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[1,1,0,i] for i in range(nf[0])]), updates = tf.zeros(nf[0]))
+        center = int(self.remove_filter_size/2)
+        self.zero_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[center,center,0,i] for i in range(nf[0])]), updates = tf.zeros(nf[0]))
         self.norm_op = tf.assign(ref = self.W_convs[0], value = tf.divide(self.W_convs[0],tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True)))
-        self.minus_one_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[1,1,0,i] for i in range(nf[0])]), updates = tf.constant([-1.0 for i in range(nf[0])]))
+        self.minus_one_op = tf.scatter_nd_update(ref = self.W_convs[0], indices = tf.constant([[center,center,0,i] for i in range(nf[0])]), updates = tf.constant([-1.0 for i in range(nf[0])]))
         self.norm = tf.reduce_sum(self.W_convs[0], axis = 3, keep_dims = True)
 
       self.train_step = train_step
