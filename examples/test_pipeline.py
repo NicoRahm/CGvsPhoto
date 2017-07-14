@@ -12,7 +12,7 @@ clf = Model(database_path, image_size, config = 'Server', filters = [32,32,64],
 
 
 # trains the classifier and test it on the testing set
-clf.train(nb_train_batch = 9000,
+clf.train(nb_train_batch = 10000,
           nb_test_batch = 80, 
           nb_validation_batch = 40,
           show_filters = False)
