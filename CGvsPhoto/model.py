@@ -317,8 +317,12 @@ class Model:
         
 
       # first conv net layer
-      print('   Creating layer 1 - Shape : ' + str(self.filter_size) + 'x' + 
-            str(self.filter_size) + 'x1x' + str(nf[0]))
+      if self.remove_context:
+        print('   Creating layer 1 - Shape : ' + str(self.remove_filter_size) + 'x' + 
+              str(self.remove_filter_size) + 'x1x' + str(nf[0]))
+      else:
+        print('   Creating layer 1 - Shape : ' + str(self.filter_size) + 'x' + 
+              str(self.filter_size) + 'x1x' + str(nf[0]))      
 
       with tf.name_scope('Conv1'):
 
