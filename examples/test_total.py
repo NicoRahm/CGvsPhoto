@@ -2,8 +2,8 @@ from CGvsPhoto import Model
 import os 
 # to change to your favorite database
 database_path = '/work/smg/v-nicolas/level-design_raise_100_color/'
-test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
-# test_data_path = '/work/smg/v-nicolas/face_DB_split_2/test/'
+# test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
+test_data_path = '/work/smg/v-nicolas/face_DB_split/test/'
 
 # to change to the format of your image
 image_size = 100
