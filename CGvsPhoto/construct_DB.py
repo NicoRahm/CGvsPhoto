@@ -10,7 +10,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 import os, os.path
 import random
 import shutil
-import image_loader as il
+from . import image_loader as il
 
 
 def load_images_from_dir(dir_name, shuffle = False) :
