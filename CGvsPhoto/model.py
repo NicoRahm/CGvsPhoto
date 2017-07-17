@@ -680,7 +680,7 @@ class Model:
             sess.run(self.norm_op)
             sess.run(self.minus_one_op)
 
-            # print(self.norm.eval())
+            print(self.W_conv1.eval()[:,:,0,0])
         
           # evry validation_frequency batches, test the accuracy
           if i%validation_frequency == 0 :
