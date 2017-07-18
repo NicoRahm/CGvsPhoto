@@ -130,7 +130,9 @@ def construct_Kfold(source_DB, target_dir, K = 5, size_patch = 100):
 
 
 	print('Construction K-Fold...\n')
-	os.mkdir(target_dir)
+	if not os.path.exists(target_dir):
+		os.mkdir(target_dir)
+		
 	source_real = source_DB + '/Real/'
 	source_CG = source_DB + '/CGG/'
 	image_real = load_images_from_dir(source_real, shuffle = True)
