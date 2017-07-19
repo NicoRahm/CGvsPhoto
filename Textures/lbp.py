@@ -101,7 +101,7 @@ def compute_jpeg_coef(image):
 		for i in range(int(width/8)):
 			for j in range(int(height/8)): 
 				result[8*i:8*(i+1), 8*j:8*(j+1), c] = np.round(cv2.dct(np.float32((image[8*i:8*(i+1), 8*j:8*(j+1), c])-128)))
-				print(np.max(result[8*i:8*(i+1), 8*j:8*(j+1), c]))
+				# print(np.max(result[8*i:8*(i+1), 8*j:8*(j+1), c]))
 	return(result)
 
 def compute_hist(image, mode = 'ltc'): 
