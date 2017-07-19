@@ -99,7 +99,7 @@ def compute_hist(image, mode = 'ltc'):
 		# hist_error[i] = 0
 
 
-	image = cv2.dct(np.float32(image)/255)*255
+	image = cv2.dct(np.float32(image)/255.0)*255.0
 
 	# error = compute_error_image(image)
 
