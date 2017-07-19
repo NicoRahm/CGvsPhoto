@@ -97,7 +97,7 @@ def compute_jpeg_coef(image):
 	for c in range(nb_channels):
 		for i in range(int(width/8)):
 			for j in range(int(height/8)): 
-				result[8*i:8*(i+1), 8*j:8*(j+1), c] = cv2.dct(np.float32(image[8*i:8*(i+1), 8*j:8*(j+1), c])/255.0).magnitude()*255.0
+				result[8*i:8*(i+1), 8*j:8*(j+1), c] = cv2.dct(np.float32(image[8*i:8*(i+1), 8*j:8*(j+1), c])/255.0)*255.0
 
 	return(result)
 
