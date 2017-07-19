@@ -8,6 +8,8 @@ from functools import partial
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 
+import cv2
+
 def compute_code(minipatch, mode = 'ltc'): 
 
 	s = np.sign(minipatch - minipatch[1,1])
@@ -96,6 +98,8 @@ def compute_hist(image, mode = 'ltc'):
 		hist_2[i] = 0
 		# hist_error[i] = 0
 
+
+	image = cv2.dct(np.float32(image)/255)*255
 
 	# error = compute_error_image(image)
 
