@@ -88,6 +88,19 @@ def array_to_bin(A):
 
 	return(binary)
 
+def compute_jpeg_coef(image): 
+	height = image.shape[1]
+	width = image.shape[0]
+	nb_channels = image.shape[2]
+	result = np.zeros([8*int(width/8), 8*int(height/8), nb_channels], dtype = np.float32)
+
+	for c in range(nb_channels):
+		for i in range(int(width/8)):
+			for j in range(int(height/8)): 
+				result[8*i:8*(i+1), 8*j:8*(j+1), c] = cv2.dct(np.float32(image[8*i:8*(i+1), 8*j:8*(j+1), c])/255.0).magnitude()*255.0
+
+	return(result)
+
 def compute_hist(image, mode = 'ltc'): 
 
 	hist_1 = dict()
@@ -99,9 +112,7 @@ def compute_hist(image, mode = 'ltc'):
 		# hist_error[i] = 0
 
 
-	image[:,:,0] = cv2.dct(np.float32(image[:,:,0])/255.0)*255.0
-	image[:,:,1] = cv2.dct(np.float32(image[:,:,1])/255.0)*255.0
-
+	image = compute_jpeg_coef(image)
 	# error = compute_error_image(image)
 
 	for i in range(1, image.shape[0] - 2): 
