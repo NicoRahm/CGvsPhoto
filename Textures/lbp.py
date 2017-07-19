@@ -89,6 +89,9 @@ def array_to_bin(A):
 	return(binary)
 
 def compute_jpeg_coef(image): 
+
+
+	image = cv2.cvtColor(image, cv2.CV_RGB2YCrCb)
 	height = image.shape[1]
 	width = image.shape[0]
 	nb_channels = image.shape[2]
