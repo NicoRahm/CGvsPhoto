@@ -222,6 +222,10 @@ if __name__ == '__main__':
 	del(data_train)
 	del(result)
 
+	print(features_train[0], y_train[0])
+	print(features_train[1], y_train[1])
+	print(features_train[2], y_train[2])
+
 	clf = SVC()
 
 
