@@ -11,7 +11,7 @@ image_size = 100
 # define a single-image classifier
 clf = Model(database_path, image_size, config = 'Server', filters = [32,32,64],
             batch_size = 50, feature_extractor = 'Stats', remove_context = True,
-            remove_filter_size = 5)
+            remove_filter_size = 7)
 
 
 # nb_images = len([name for name in os.listdir(test_data_path + '/CGG') if os.path.isfile(name)]) + len([name for name in os.listdir(test_data_path + '/Real') if os.path.isfile(name)])
