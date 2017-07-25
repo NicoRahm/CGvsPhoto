@@ -113,7 +113,7 @@ def compute_hist(image, mode = 'ltc'):
 		# hist_error[i] = 0
 
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
-	# image = compute_jpeg_coef(image)
+	image = compute_jpeg_coef(image)
 	# error = compute_error_image(image)
 
 	for i in range(1, image.shape[0] - 2): 
@@ -173,7 +173,7 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 
 if __name__ == '__main__': 
 
-	data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
+	data_directory = '/work/smg/v-nicolas/level-design_raise/'
 	image_size = None
 
 	data = il.Database_loader(directory = data_directory, 
@@ -183,7 +183,7 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 20
+	nb_train_batch = 2
 	batch_size = 32
 
 	print('Training...')
@@ -238,50 +238,50 @@ if __name__ == '__main__':
 	score = accuracy_score(y_pred,y_train)
 
 	print("Accuracy : " + str(score))
-	
-	print('Testing...')
 
-	nb_test_batch = 10
+	# print('Testing...')
 
-	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
-	y_test = np.empty([nb_test_batch*batch_size,])
+	# nb_test_batch = 10
 
-
-
-	data_test = []
-	for i in range(nb_test_batch):
-		print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
-		images_batch, y_batch = data.get_next_test(crop = False)
-		data_test.append([images_batch, y_batch])
-	pool = Pool()  
-
-	to_compute = [i for i in range(nb_test_batch)]
-	result = pool.starmap(partial(compute_features, 
-							  batch_size = batch_size, 
-							  nb_batch = nb_test_batch,
-							  mode = mode),
-							  zip(data_test, to_compute)) 
-
-	del(data_test)
-	index = 0
-	for i in range(len(result)):
-		features_test[index:index+batch_size] = result[i][0]
-		y_test[index:index+batch_size] = result[i][1]
-
-		index+=batch_size
+	# features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
+	# y_test = np.empty([nb_test_batch*batch_size,])
 
 
-	del(result)
 
-	print(features_test[0], y_test[0])
-	print(features_test[1], y_test[1])
-	print(features_test[2], y_test[2])
+	# data_test = []
+	# for i in range(nb_test_batch):
+	# 	print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
+	# 	images_batch, y_batch = data.get_next_test(crop = False)
+	# 	data_test.append([images_batch, y_batch])
+	# pool = Pool()  
 
-	print('Prediction...')
-	y_pred = clf.predict(features_test)
+	# to_compute = [i for i in range(nb_test_batch)]
+	# result = pool.starmap(partial(compute_features, 
+	# 						  batch_size = batch_size, 
+	# 						  nb_batch = nb_test_batch,
+	# 						  mode = mode),
+	# 						  zip(data_test, to_compute)) 
 
-	score = accuracy_score(y_pred,y_test)
+	# del(data_test)
+	# index = 0
+	# for i in range(len(result)):
+	# 	features_test[index:index+batch_size] = result[i][0]
+	# 	y_test[index:index+batch_size] = result[i][1]
 
-	print("Accuracy : " + str(score))
+	# 	index+=batch_size
+
+
+	# del(result)
+
+	# print(features_test[0], y_test[0])
+	# print(features_test[1], y_test[1])
+	# print(features_test[2], y_test[2])
+
+	# print('Prediction...')
+	# y_pred = clf.predict(features_test)
+
+	# score = accuracy_score(y_pred,y_test)
+
+	# print("Accuracy : " + str(score))
 
 
