@@ -268,6 +268,9 @@ if __name__ == '__main__':
 
 	del(result)
 
+	print(features_test[0], y_test[0])
+	print(features_test[1], y_test[1])
+	print(features_test[2], y_test[2])
 
 	print('Prediction...')
 	y_pred = clf.predict(features_test)
