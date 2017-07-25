@@ -233,7 +233,12 @@ if __name__ == '__main__':
 
 	clf.fit(features_train, y_train)
 
+	y_pred = clf.predict(features_train)
 
+	score = accuracy_score(y_pred,y_train)
+
+	print("Accuracy : " + str(score))
+	
 	print('Testing...')
 
 	nb_test_batch = 10
