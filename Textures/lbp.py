@@ -183,7 +183,7 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 2
+	nb_train_batch = 20
 	batch_size = 32
 
 	print('Training...')
