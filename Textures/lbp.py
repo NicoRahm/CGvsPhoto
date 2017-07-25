@@ -121,25 +121,24 @@ def compute_hist(image, mode = 'ltc'):
 			if mode == 'lbp':
 				b = compute_code(image[i-1:i+2, j-1:j+2,0], mode)
 				hist_1[b] += 1
-				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
-				hist_2[b] += 1
+				# b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
+				# hist_2[b] += 1
 
 			if mode == 'ltc':
 				b = compute_code(image[i-1:i+2, j-1:j+2,0], mode)
 				hist_1[b[0]] += 1
 				hist_1[b[1]] += 1
-				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
-				hist_2[b[0]] += 1
-				hist_2[b[1]] += 1				
+				# b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
+				# hist_2[b[0]] += 1
+				# hist_2[b[1]] += 1				
 			# b_error = compute_code(error[i-1:i+2, j-1:j+2])
 			# hist_error[b_error] += 1
 
 	F = []
 	N = (image.shape[0] - 3)*(image.shape[1] - 3)
-	print(hist_1.keys())
 	for i in hist_1.keys():
 		F.append(hist_1[i]/N)
-		F.append(hist_2[i]/N)
+		# F.append(hist_2[i]/N)
 		# F.append(hist_error[i])
 
 	return(np.array(F))
@@ -188,7 +187,7 @@ if __name__ == '__main__':
 	batch_size = 32
 
 	print('Training...')
-	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
+	features_train = np.empty([nb_train_batch*batch_size, len(classes.keys())])
 	y_train = np.empty([nb_train_batch*batch_size,])
 
 	pool = Pool()  
@@ -244,7 +243,7 @@ if __name__ == '__main__':
 
 	nb_test_batch = 10
 
-	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
+	features_test = np.empty([nb_test_batch*batch_size, len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])
 
 
