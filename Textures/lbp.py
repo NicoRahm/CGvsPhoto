@@ -113,7 +113,7 @@ def compute_hist(image, mode = 'ltc'):
 		# hist_error[i] = 0
 
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
-	image = compute_jpeg_coef(image)
+	# image = compute_jpeg_coef(image)
 	# error = compute_error_image(image)
 
 	for i in range(1, image.shape[0] - 2): 
