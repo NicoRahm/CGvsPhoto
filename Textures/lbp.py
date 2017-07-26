@@ -7,6 +7,7 @@ from functools import partial
 
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import normalize
 
 import cv2
 
@@ -222,6 +223,7 @@ if __name__ == '__main__':
 	del(data_train)
 	del(result)
 
+	normalize(features_train)
 	print(features_train[0], y_train[0])
 	print(features_train[1], y_train[1])
 	print(features_train[2], y_train[2])
@@ -280,6 +282,7 @@ if __name__ == '__main__':
 
 	del(result)
 
+	normalize(features_test)
 	print(features_test[0], y_test[0])
 	print(features_test[1], y_test[1])
 	print(features_test[2], y_test[2])
