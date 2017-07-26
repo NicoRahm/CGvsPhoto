@@ -52,23 +52,24 @@ def get_classes(mode = 'ltc'):
 	return(classes)
 
 def compute_error_image(image): 
-	prediction = np.empty([image.shape[0] - 1, image.shape[1] - 1])
-	for i in range(image.shape[0]-1):
-		for j in range(image.shape[1]-1):
-			a = image[i, j+1] 
-			b = image[i+1, j]
-			c = image[i+1, j+1]
+	prediction = np.zeros([image.shape[0], image.shape[1], image.shape[2]])
+	for k in range(image.shape[2]):
+		for i in range(image.shape[0]-1):
+			for j in range(image.shape[1]-1):
+				a = image[i, j+1, k] 
+				b = image[i+1, j, k]
+				c = image[i+1, j+1, k]
 
-			if c <= min(a,b):
-				prediction[i,j] = max(a,b)
-			else: 
-				if c >= max(a,b):
-					prediction[i,j] = min(a,b)
+				if c <= min(a,b):
+					prediction[i,j,k] = max(a,b)
 				else: 
-					prediction[i,j] = a + b -c
+					if c >= max(a,b):
+						prediction[i,j,k] = min(a,b)
+					else: 
+						prediction[i,j,k] = a + b -c
 	# print(prediction.shape)
 	# print(image.shape)
-	error = image[:image.shape[0]-1, :image.shape[1]-1, 0] - prediction 
+	error = image - prediction 
 	# print(error.shape)
 	return(error)
 
