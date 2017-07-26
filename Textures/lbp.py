@@ -184,8 +184,8 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 400
-	batch_size = 32
+	nb_train_batch = 1250
+	batch_size = 64
 
 	print('Training...')
 	features_train = np.empty([nb_train_batch*batch_size, len(classes.keys())])
@@ -223,7 +223,7 @@ if __name__ == '__main__':
 	del(data_train)
 	del(result)
 
-	# features_train = normalize(features_train, axis = 1)
+	features_train = normalize(features_train, axis = 1)
 	print(features_train[0], y_train[0])
 	print(features_train[1], y_train[1])
 	print(features_train[2], y_train[2])
@@ -243,7 +243,7 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
-	nb_test_batch = 100
+	nb_test_batch = 63
 
 	features_test = np.empty([nb_test_batch*batch_size, len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])
@@ -282,7 +282,7 @@ if __name__ == '__main__':
 
 	del(result)
 
-	# features_test = normalize(features_test, axis = 1)
+	features_test = normalize(features_test, axis = 1)
 	print(features_test[0], y_test[0])
 	print(features_test[1], y_test[1])
 	print(features_test[2], y_test[2])
