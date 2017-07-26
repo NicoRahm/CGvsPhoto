@@ -184,7 +184,7 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 20
+	nb_train_batch = 100
 	batch_size = 32
 
 	print('Training...')
@@ -223,7 +223,7 @@ if __name__ == '__main__':
 	del(data_train)
 	del(result)
 
-	features_train = normalize(features_train, axis = 0)
+	features_train = normalize(features_train, axis = 1)
 	print(features_train[0], y_train[0])
 	print(features_train[1], y_train[1])
 	print(features_train[2], y_train[2])
@@ -282,7 +282,7 @@ if __name__ == '__main__':
 
 	del(result)
 
-	features_test = normalize(features_test, axis = 0)
+	features_test = normalize(features_test, axis = 1)
 	print(features_test[0], y_test[0])
 	print(features_test[1], y_test[1])
 	print(features_test[2], y_test[2])
