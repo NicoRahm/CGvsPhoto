@@ -107,15 +107,17 @@ def compute_hist(image, mode = 'ltc'):
 
 	hist_1 = dict()
 	hist_2 = dict()
-	# hist_error = dict()
+	hist_error_1 = dict()
+	hist_error_2 = dict()
 	for i in classes.keys():
 		hist_1[i] = 0
 		hist_2[i] = 0
-		# hist_error[i] = 0
+		hist_error_1[i] = 0
+		hist_error_2[i] = 0
 
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
 	# image = compute_jpeg_coef(image)
-	# error = compute_error_image(image)
+	error = compute_error_image(image)
 
 	for i in range(1, image.shape[0] - 2): 
 		for j in range(1, image.shape[1] - 2): 
@@ -124,14 +126,18 @@ def compute_hist(image, mode = 'ltc'):
 				hist_1[b] += 1
 				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
 				hist_2[b] += 1
+				b = compute_code(error[i-1:i+2, j-1:j+2,0], mode)
+				hist_error_1[b] += 1
+				b = compute_code(error[i-1:i+2, j-1:j+2,1], mode)
+				hist_error_2[b] += 1
 
 			if mode == 'ltc':
 				b = compute_code(image[i-1:i+2, j-1:j+2,0], mode)
 				hist_1[b[0]] += 1
 				hist_1[b[1]] += 1
-				# b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
-				# hist_2[b[0]] += 1
-				# hist_2[b[1]] += 1				
+				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
+				hist_2[b[0]] += 1
+				hist_2[b[1]] += 1				
 			# b_error = compute_code(error[i-1:i+2, j-1:j+2])
 			# hist_error[b_error] += 1
 
@@ -140,6 +146,8 @@ def compute_hist(image, mode = 'ltc'):
 	for i in hist_1.keys():
 		F.append(hist_1[i]/N)
 		F.append(hist_2[i]/N)
+		F.append(hist_error_1[i]/N)
+		F.append(hist_error_2[i]/N)
 		# F.append(hist_error[i])
 
 	return(np.array(F))
@@ -188,7 +196,7 @@ if __name__ == '__main__':
 	batch_size = 64
 
 	print('Training...')
-	features_train = np.empty([nb_train_batch*batch_size, 2*len(classes.keys())])
+	features_train = np.empty([nb_train_batch*batch_size, 4*len(classes.keys())])
 	y_train = np.empty([nb_train_batch*batch_size,])
 
 	pool = Pool()  
@@ -245,7 +253,7 @@ if __name__ == '__main__':
 
 	nb_test_batch = 63
 
-	features_test = np.empty([nb_test_batch*batch_size, 2*len(classes.keys())])
+	features_test = np.empty([nb_test_batch*batch_size, 4*len(classes.keys())])
 	y_test = np.empty([nb_test_batch*batch_size,])
 
 
