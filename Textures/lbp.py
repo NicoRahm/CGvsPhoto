@@ -37,6 +37,7 @@ def get_classes(mode = 'ltc'):
 				 [int(b[6]), int(b[5]), int(b[4])]]
 
 			b = array_to_bin(np.array(A))
+			print(b)
 			if b not in classes:
 				classes[b] = n
 				n+=1 
