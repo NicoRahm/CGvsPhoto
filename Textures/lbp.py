@@ -86,16 +86,17 @@ def array_to_bin(A):
 
 
 	nb_c = np.sum(np.abs(T[:7] - T[1:]))
-	
-	code_1_clock = time.clock()
+
+
 	T = T.astype(np.uint8)
-	code_1_dur = time.clock() - code_1_clock
-	print('Binary computation time : ' + str(code_1_dur) + 'ms')
+
+	code_1_clock = time.clock()
 	if nb_c > 2: 
 		binary = np.packbits(np.array([0,0,0,0,0,1,0,1], dtype = np.uint8))[0]
 	else: 
 		binary = np.packbits(T)[0]
-
+	code_1_dur = time.clock() - code_1_clock
+	print('Binary computation time : ' + str(code_1_dur) + 'ms')
 	return(binary)
 
 def compute_jpeg_coef(image): 
