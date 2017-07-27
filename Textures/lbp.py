@@ -75,8 +75,8 @@ def compute_error_image(image):
 
 def array_to_bin(A): 
 
-	T = np.array(A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
-	     A[2,1], A[2,0], A[1,0])
+	T = np.array([A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
+	     A[2,1], A[2,0], A[1,0]])
 
 	nb_c = 0
 	for i in range(1,8): 
