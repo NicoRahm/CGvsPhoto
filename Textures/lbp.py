@@ -294,21 +294,21 @@ if __name__ == '__main__':
 
 	# clf = SVC()
 
-	clf = LinearSVC()
+	# clf = LinearSVC()
 
-	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-	# 						n_estimators = 150, n_jobs = 32)
+	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+							n_estimators = 150, n_jobs = 32)
 
 
-	# print('Fitting Classifier...')
+	print('Fitting Classifier...')
 
-	# clf.fit(features_train, y_train)
+	clf.fit(features_train, y_train)
 
-	# y_pred = clf.predict(features_train)
+	y_pred = clf.predict(features_train)
 
-	# score = accuracy_score(y_pred,y_train)
+	score = accuracy_score(y_pred,y_train)
 
-	# print("Accuracy : " + str(score))
+	print("Accuracy : " + str(score))
 
 	print('Testing...')
 
