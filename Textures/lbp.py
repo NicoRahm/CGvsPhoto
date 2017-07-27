@@ -5,7 +5,7 @@ from multiprocessing import Pool
 
 from functools import partial
 
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import normalize
 import xgboost as xgb
@@ -294,8 +294,10 @@ if __name__ == '__main__':
 
 	# clf = SVC()
 
-	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-							n_estimators = 150)
+	clf = LinearSVC()
+
+	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+	# 						n_estimators = 150, n_jobs = 32)
 
 
 	print('Fitting Classifier...')
@@ -311,7 +313,7 @@ if __name__ == '__main__':
 	print('Testing...')
 
 
-	nb_test_batch = 10
+	nb_test_batch = 63
 
 	if load_data is None:
 
@@ -327,7 +329,7 @@ if __name__ == '__main__':
 			images_batch, y_batch = data.get_next_test(crop = False)
 			data_test.append([images_batch, y_batch])
 			for j in range(batch_size):
-				print('Getting image ' + str(j+1) + '/' + str(batch_size))
+				# print('Getting image ' + str(j+1) + '/' + str(batch_size))
 				images_batch, y_batch = data.get_next_train(crop = False)
 				data_test.append([images_batch, y_batch])
 
