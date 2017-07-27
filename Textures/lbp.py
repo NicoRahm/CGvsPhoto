@@ -93,9 +93,17 @@ def array_to_bin(A):
 
 
 	if nb_c > 2: 
-		binary = np.packbits(np.array([0,0,0,0,0,1,0,1], dtype = np.uint8))[0]
+		binary = 5
 	else: 
-		binary = np.packbits(T)[0]
+		# binary = np.packbits(T)[0]
+		binary = T[0]
+		binary += T[1]<<1
+		binary += T[2]<<2
+		binary += T[3]<<3
+		binary += T[4]<<4
+		binary += T[5]<<5
+		binary += T[6]<<6
+		binary += T[7]<<7
 
 	return(binary)
 
