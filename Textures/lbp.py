@@ -30,7 +30,7 @@ def get_classes(mode = 'ltc'):
 	classes = dict()
 	if mode == 'lbp':
 		n = 0
-		for i in range(511):
+		for i in range(256):
 			b = '{:08b}'.format(i)
 			A = [[int(b[0]), int(b[1]), int(b[2])], 
 				 [int(b[7]), 0, int(b[3])],
