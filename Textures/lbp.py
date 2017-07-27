@@ -81,7 +81,7 @@ def array_to_bin(A):
 
 	nb_c = 0
 	for i in range(1,8): 
-		nb_c += T[i-1] - T[i]
+		nb_c += np.abs(T[i-1] - T[i])
 
 	T = T.astype(np.uint8)
 	if nb_c > 2: 
