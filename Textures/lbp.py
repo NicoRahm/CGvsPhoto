@@ -211,7 +211,7 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 
 if __name__ == '__main__': 
 
-	data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
+	data_directory = '/work/smg/v-nicolas/level-design_raise/'
 	image_size = None
 
 	data = il.Database_loader(directory = data_directory, 
@@ -240,8 +240,8 @@ if __name__ == '__main__':
 
 	if load_data is None:
 
-		nb_train_batch = 1250
-		batch_size = 64
+		nb_train_batch = 157
+		batch_size = 16
 
 		nb_hist = 2
 
@@ -292,9 +292,9 @@ if __name__ == '__main__':
 	else: 
 		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
-	clf = SVC(kernel = 'poly')
+	# clf = SVC(kernel = 'poly')
 
-	# clf = LinearSVC()
+	clf = LinearSVC()
 
 	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
 	# 						n_estimators = 150)
@@ -313,7 +313,7 @@ if __name__ == '__main__':
 	print('Testing...')
 
 
-	nb_test_batch = 63
+	nb_test_batch = 45
 
 	if load_data is None:
 
