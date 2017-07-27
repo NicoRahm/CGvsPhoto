@@ -80,16 +80,16 @@ def compute_error_image(image):
 
 def array_to_bin(A): 
 
-	code_1_clock = time.clock()
+
 	T = np.array([A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
 	     A[2,1], A[2,0], A[1,0]])
-	code_1_dur = time.clock() - code_1_clock
-	print('Binary computation time : ' + str(code_1_dur) + 'ms')
 
+	code_1_clock = time.clock()
 	nb_c = 0
 	for i in range(1,8): 
 		nb_c += np.abs(T[i-1] - T[i])
-
+	code_1_dur = time.clock() - code_1_clock
+	print('Binary computation time : ' + str(code_1_dur) + 'ms')
 	T = T.astype(np.uint8)
 	if nb_c > 2: 
 		binary = np.packbits(np.array([0,0,0,0,0,1,0,1], dtype = np.uint8))[0]
