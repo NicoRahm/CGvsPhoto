@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
 	if load_data is None:
 
-		nb_train_batch = 40
+		nb_train_batch = 1250
 		batch_size = 64
 
 		nb_hist = 2
@@ -300,15 +300,15 @@ if __name__ == '__main__':
 	# 						n_estimators = 150, n_jobs = 32)
 
 
-	print('Fitting Classifier...')
+	# print('Fitting Classifier...')
 
-	clf.fit(features_train, y_train)
+	# clf.fit(features_train, y_train)
 
-	y_pred = clf.predict(features_train)
+	# y_pred = clf.predict(features_train)
 
-	score = accuracy_score(y_pred,y_train)
+	# score = accuracy_score(y_pred,y_train)
 
-	print("Accuracy : " + str(score))
+	# print("Accuracy : " + str(score))
 
 	print('Testing...')
 
