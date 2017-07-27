@@ -341,8 +341,11 @@ class Model:
 
 
         # relu on the conv layer
-        h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, 
-                             name = 'Activated_1')
+        if self.remove_context: 
+          h_conv1 = conv2d(x_image, W_conv1)
+        else:         
+          h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1, 
+                               name = 'Activated_1')
         self.h_conv1 = h_conv1
 
       self.W_convs = [W_conv1]
