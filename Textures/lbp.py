@@ -20,10 +20,9 @@ def compute_code(minipatch, mode = 'ltc'):
 	if mode == 'lbp':
 		s[s == -1] = 0
 		# print(s)
-		code_1_clock = time.clock()
+
 		binary = array_to_bin(s)
-		code_1_dur = time.clock() - code_1_clock
-		print('Binary computation time : ' + str(code_1_dur) + 'ms')
+
 		# print(binary)
 
 		return(binary)
@@ -81,8 +80,11 @@ def compute_error_image(image):
 
 def array_to_bin(A): 
 
+	code_1_clock = time.clock()
 	T = np.array([A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
 	     A[2,1], A[2,0], A[1,0]])
+	code_1_dur = time.clock() - code_1_clock
+	print('Binary computation time : ' + str(code_1_dur) + 'ms')
 
 	nb_c = 0
 	for i in range(1,8): 
