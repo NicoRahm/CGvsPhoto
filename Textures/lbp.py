@@ -292,9 +292,9 @@ if __name__ == '__main__':
 	else: 
 		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
-	clf = SVC()
+	# clf = SVC()
 
-	# clf = LinearSVC()
+	clf = LinearSVC()
 
 	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
 	# 						n_estimators = 150, n_jobs = 32)
