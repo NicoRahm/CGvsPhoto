@@ -11,6 +11,8 @@ from sklearn.preprocessing import normalize
 
 import cv2
 
+import time
+
 def compute_code(minipatch, mode = 'ltc'): 
 
 	s = np.sign(minipatch - minipatch[1,1])
@@ -37,7 +39,7 @@ def get_classes(mode = 'ltc'):
 				 [int(b[6]), int(b[5]), int(b[4])]]
 
 			b = array_to_bin(np.array(A))
-			print(b)
+			# print(b)
 			if b not in classes:
 				classes[b] = n
 				n+=1 
@@ -119,13 +121,19 @@ def compute_hist(image, mode = 'ltc'):
 
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
 	# image = compute_jpeg_coef(image)
+	error_clock = time.clock()
 	error = compute_error_image(image)
+	error_dur = time.clock() - error_clock
 
+	print('Error image computation time : ' + error_dur + 'ms')
+	code_1_dur = 0
 	for i in range(1, image.shape[0] - 2): 
 		for j in range(1, image.shape[1] - 2): 
 			if mode == 'lbp':
+				code_1_clock = time.clock()
 				b = compute_code(image[i-1:i+2, j-1:j+2,0], mode)
 				hist_1[b] += 1
+				code_1_dur += time.clock() - code_1_clock
 				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
 				hist_2[b] += 1
 				b = compute_code(error[i-1:i+2, j-1:j+2,0], mode)
@@ -142,6 +150,8 @@ def compute_hist(image, mode = 'ltc'):
 				hist_2[b[1]] += 1				
 			# b_error = compute_code(error[i-1:i+2, j-1:j+2])
 			# hist_error[b_error] += 1
+
+	print('Code 1 computation time : ' + code_1_dur/((image.shape[0] - 3)*(image.shape[1] - 3)) + 'ms')
 
 	F = []
 	N = (image.shape[0] - 3)*(image.shape[1] - 3)
