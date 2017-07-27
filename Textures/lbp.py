@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
 	if load_data is None:
 
-		nb_train_batch = 1250
+		nb_train_batch = 20
 		batch_size = 64
 
 		nb_hist = 2
@@ -311,7 +311,7 @@ if __name__ == '__main__':
 	print('Testing...')
 
 
-	nb_test_batch = 63
+	nb_test_batch = 10
 
 	if load_data is None:
 
