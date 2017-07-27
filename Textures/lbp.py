@@ -84,11 +84,13 @@ def array_to_bin(A):
 	T = np.array([A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
 	     A[2,1], A[2,0], A[1,0]])
 
-	code_1_clock = time.clock()
+
 	nb_c = np.sum(np.abs(T[:7] - T[1:]))
+	
+	code_1_clock = time.clock()
+	T = T.astype(np.uint8)
 	code_1_dur = time.clock() - code_1_clock
 	print('Binary computation time : ' + str(code_1_dur) + 'ms')
-	T = T.astype(np.uint8)
 	if nb_c > 2: 
 		binary = np.packbits(np.array([0,0,0,0,0,1,0,1], dtype = np.uint8))[0]
 	else: 
