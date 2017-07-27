@@ -8,10 +8,13 @@ from functools import partial
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import normalize
+import xgboost as xgb
 
 import cv2
 
 import time
+
+import pickle
 
 def compute_code(minipatch, mode = 'ltc'): 
 
@@ -218,56 +221,84 @@ if __name__ == '__main__':
 
 	classes = get_classes(mode)
 
-	nb_train_batch = 1250
-	batch_size = 64
 
-	nb_hist = 2
+	dump_data_directory = "/work/smg/v-nicolas/data_lbp/"
+	save_data = input('Save training data? (y/N) : ')
 
-	print('Training...')
-	features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
-	y_train = np.empty([nb_train_batch*batch_size,])
-
-	pool = Pool()  
-	index = 0
-	for i in range(nb_train_batch):
-		data_train = []
-		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-		for j in range(batch_size):
-			# print('Getting image ' + str(j+1) + '/' + str(batch_size))
-			images_batch, y_batch = data.get_next_train(crop = False)
-			data_train.append([images_batch, y_batch])
-
-	
-
-		to_compute = [i for i in range(batch_size)]
-		result = pool.starmap(partial(compute_features, 
-								  batch_size = 1, 
-								  nb_batch = batch_size, 
-								  mode = mode),
-								  zip(data_train, to_compute)) 
+	if save_data == 'y':
+		save_data = True
+		load_data = None
+		dump_name = input('Name of the dump file : ')
+	else: 
+		save_data = False
+		load_data = input('Load data? (y/N) : ')
+		if load_data == 'y':
+			load_data = input('File to load (source directory : ' + dump_data_directory + ') : ')
+		else: 
+			load_data = None		
 
 
-	
+	if load_data is None:
+
+		nb_train_batch = 1250
+		batch_size = 64
+
+		nb_hist = 2
+
+		print('Training...')
+		features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
+		y_train = np.empty([nb_train_batch*batch_size,])
+
+		pool = Pool()  
+		index = 0
+		for i in range(nb_train_batch):
+			data_train = []
+			print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+			for j in range(batch_size):
+				# print('Getting image ' + str(j+1) + '/' + str(batch_size))
+				images_batch, y_batch = data.get_next_train(crop = False)
+				data_train.append([images_batch, y_batch])
 
 		
-		for i in range(len(result)):
-			features_train[index:index+1] = result[i][0]
-			y_train[index:index+1] = result[i][1]
 
-			index+=1
-
-	del(data_train)
-	del(result)
-
-	features_train = normalize(features_train, axis = 1)
-	print(features_train[0], y_train[0])
-	print(features_train[1], y_train[1])
-	print(features_train[2], y_train[2])
-
-	clf = SVC()
+			to_compute = [i for i in range(batch_size)]
+			result = pool.starmap(partial(compute_features, 
+									  batch_size = 1, 
+									  nb_batch = batch_size, 
+									  mode = mode),
+									  zip(data_train, to_compute)) 
 
 
-	print('Fitting SVM...')
+		
+
+			
+			for i in range(len(result)):
+				features_train[index:index+1] = result[i][0]
+				y_train[index:index+1] = result[i][1]
+
+				index+=1
+
+		del(data_train)
+		del(result)
+
+		features_train = normalize(features_train, axis = 1)
+		print(features_train[0], y_train[0])
+		print(features_train[1], y_train[1])
+		print(features_train[2], y_train[2])
+
+		if save_data: 
+			pickle.dump((features_train, y_train), open(dump_data_directory + dump_name + 'train.pkl', 'wb'))
+
+	else: 
+		features_train, y_train = pickle.load(open(dump_data_directory + load_data, 'rb'))
+
+	# clf = SVC()
+
+	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+							n_estimators = 150)
+
+
+	print('Fitting Classifier...')
 
 	clf.fit(features_train, y_train)
 
@@ -279,49 +310,75 @@ if __name__ == '__main__':
 
 	print('Testing...')
 
+
+	save_data = input('Save testing data? (y/N) : ')
+
+	if save_data == 'y':
+		save_data = True
+		load_data = None
+		dump_name = input('Name of the dump file : ')
+	else: 
+		save_data = False
+		load_data = input('Load data? (y/N) : ')
+		if load_data == 'y':
+			load_data = input('File to load (source directory : ' + dump_data_directory + ') : ')
+		else: 
+			load_data = None	
+
+
+
 	nb_test_batch = 63
 
-	features_test = np.empty([nb_test_batch*batch_size, nb_hist*len(classes.keys())])
-	y_test = np.empty([nb_test_batch*batch_size,])
+	if load_data is None:
+
+		features_test = np.empty([nb_test_batch*batch_size, nb_hist*len(classes.keys())])
+		y_test = np.empty([nb_test_batch*batch_size,])
 
 
 
-	data_test = []
-	index = 0
-	for i in range(nb_test_batch):
-		print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
-		images_batch, y_batch = data.get_next_test(crop = False)
-		data_test.append([images_batch, y_batch])
-		for j in range(batch_size):
-			print('Getting image ' + str(j+1) + '/' + str(batch_size))
-			images_batch, y_batch = data.get_next_train(crop = False)
+		data_test = []
+		index = 0
+		for i in range(nb_test_batch):
+			print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
+			images_batch, y_batch = data.get_next_test(crop = False)
 			data_test.append([images_batch, y_batch])
+			for j in range(batch_size):
+				print('Getting image ' + str(j+1) + '/' + str(batch_size))
+				images_batch, y_batch = data.get_next_train(crop = False)
+				data_test.append([images_batch, y_batch])
 
-	
+		
 
-		to_compute = [i for i in range(batch_size)]
-		result = pool.starmap(partial(compute_features, 
-								  batch_size = 1, 
-								  nb_batch = batch_size, 
-								  mode = mode),
-								  zip(data_test, to_compute)) 
-		for i in range(len(result)):
-			features_test[index:index+1] = result[i][0]
-			y_test[index:index+1] = result[i][1]
+			to_compute = [i for i in range(batch_size)]
+			result = pool.starmap(partial(compute_features, 
+									  batch_size = 1, 
+									  nb_batch = batch_size, 
+									  mode = mode),
+									  zip(data_test, to_compute)) 
+			for i in range(len(result)):
+				features_test[index:index+1] = result[i][0]
+				y_test[index:index+1] = result[i][1]
 
-			index+=1
-
-
-	del(data_test)
+				index+=1
 
 
+		del(data_test)
 
-	del(result)
 
-	features_test = normalize(features_test, axis = 1)
-	print(features_test[0], y_test[0])
-	print(features_test[1], y_test[1])
-	print(features_test[2], y_test[2])
+
+		del(result)
+
+		features_test = normalize(features_test, axis = 1)
+		print(features_test[0], y_test[0])
+		print(features_test[1], y_test[1])
+		print(features_test[2], y_test[2])
+
+		if save_data: 
+			pickle.dump((features_test, y_test), open(dump_data_directory + dump_name + 'test.pkl', 'wb'))
+
+	else: 
+		features_test, y_test = pickle.load(open(dump_data_directory + load_data, 'rb'))
+
 
 	print('Prediction...')
 	y_pred = clf.predict(features_test)
