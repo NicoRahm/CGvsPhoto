@@ -20,9 +20,10 @@ def compute_code(minipatch, mode = 'ltc'):
 	if mode == 'lbp':
 		s[s == -1] = 0
 		# print(s)
-
+		code_1_clock = time.clock()
 		binary = array_to_bin(s)
-
+		code_1_dur = time.clock() - code_1_clock
+		print('Binary computation time : ' + str(code_1_dur) + 'ms')
 		# print(binary)
 
 		return(binary)
@@ -90,13 +91,12 @@ def array_to_bin(A):
 
 	T = T.astype(np.uint8)
 
-	code_1_clock = time.clock()
+
 	if nb_c > 2: 
 		binary = np.packbits(np.array([0,0,0,0,0,1,0,1], dtype = np.uint8))[0]
 	else: 
 		binary = np.packbits(T)[0]
-	code_1_dur = time.clock() - code_1_clock
-	print('Binary computation time : ' + str(code_1_dur) + 'ms')
+
 	return(binary)
 
 def compute_jpeg_coef(image): 
