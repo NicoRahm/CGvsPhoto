@@ -125,7 +125,7 @@ def compute_hist(image, mode = 'ltc'):
 	error = compute_error_image(image)
 	error_dur = time.clock() - error_clock
 
-	print('Error image computation time : ' + error_dur + 'ms')
+	print('Error image computation time : ' + str(error_dur) + 'ms')
 	code_1_dur = 0
 	for i in range(1, image.shape[0] - 2): 
 		for j in range(1, image.shape[1] - 2): 
@@ -151,7 +151,7 @@ def compute_hist(image, mode = 'ltc'):
 			# b_error = compute_code(error[i-1:i+2, j-1:j+2])
 			# hist_error[b_error] += 1
 
-	print('Code 1 computation time : ' + code_1_dur/((image.shape[0] - 3)*(image.shape[1] - 3)) + 'ms')
+	print('Code 1 computation time : ' + str(code_1_dur/((image.shape[0] - 3)*(image.shape[1] - 3))) + 'ms')
 
 	F = []
 	N = (image.shape[0] - 3)*(image.shape[1] - 3)
