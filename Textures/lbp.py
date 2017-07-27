@@ -240,7 +240,7 @@ if __name__ == '__main__':
 
 	if load_data is None:
 
-		nb_train_batch = 20
+		nb_train_batch = 40
 		batch_size = 64
 
 		nb_hist = 2
