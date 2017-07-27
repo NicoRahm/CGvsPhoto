@@ -20,10 +20,10 @@ def compute_code(minipatch, mode = 'ltc'):
 	if mode == 'lbp':
 		s[s == -1] = 0
 		# print(s)
-		code_1_clock = time.clock()
+		# code_1_clock = time.clock()
 		binary = array_to_bin(s)
-		code_1_dur = time.clock() - code_1_clock
-		print('Binary computation time : ' + str(code_1_dur) + 'ms')
+		# code_1_dur = time.clock() - code_1_clock
+		# print('Binary computation time : ' + str(code_1_dur) + 'ms')
 		# print(binary)
 
 		return(binary)
