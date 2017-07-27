@@ -290,7 +290,7 @@ if __name__ == '__main__':
 			pickle.dump((features_train, y_train), open(dump_data_directory + dump_name + 'train.pkl', 'wb'))
 
 	else: 
-		features_train, y_train = pickle.load(open(dump_data_directory + load_data, 'rb'))
+		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
 	# clf = SVC()
 
@@ -309,22 +309,6 @@ if __name__ == '__main__':
 	print("Accuracy : " + str(score))
 
 	print('Testing...')
-
-
-	save_data = input('Save testing data? (y/N) : ')
-
-	if save_data == 'y':
-		save_data = True
-		load_data = None
-		dump_name = input('Name of the dump file : ')
-	else: 
-		save_data = False
-		load_data = input('Load data? (y/N) : ')
-		if load_data == 'y':
-			load_data = input('File to load (source directory : ' + dump_data_directory + ') : ')
-		else: 
-			load_data = None	
-
 
 
 	nb_test_batch = 63
@@ -377,7 +361,7 @@ if __name__ == '__main__':
 			pickle.dump((features_test, y_test), open(dump_data_directory + dump_name + 'test.pkl', 'wb'))
 
 	else: 
-		features_test, y_test = pickle.load(open(dump_data_directory + load_data, 'rb'))
+		features_test, y_test = pickle.load(open(dump_data_directory + load_data + 'test.pkl', 'rb'))
 
 
 	print('Prediction...')
