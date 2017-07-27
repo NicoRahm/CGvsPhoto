@@ -75,18 +75,18 @@ def compute_error_image(image):
 
 def array_to_bin(A): 
 
-	T = [int(A[0,0]), int(A[0,1]), int(A[0,2]), int(A[1,2]), int(A[2,2]),
-	     int(A[2,1]), int(A[2,0]), int(A[1,0])]
+	T = np.array(A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
+	     A[2,1], A[2,0], A[1,0])
 
 	nb_c = 0
 	for i in range(1,8): 
-		if T[i-1] != T[i]: 
-			nb_c += 1
+		nb_c += T[i-1] - T[i]
 
+	T = T.astype(np.uint8)
 	if nb_c > 2: 
-		binary = '0b100000000'
+		binary = np.packbits(np.array([0,0,0,0,0,1,0,1], dtype = np.uint8))[0]
 	else: 
-		binary = '0b' + str(T[0]) + str(T[1]) + str(T[2]) + str(T[3]) + str(T[4]) + str(T[5]) + str(T[6]) + str(T[7])
+		binary = np.packbits(T)[0]
 
 	return(binary)
 
