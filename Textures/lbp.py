@@ -85,9 +85,7 @@ def array_to_bin(A):
 	     A[2,1], A[2,0], A[1,0]])
 
 	code_1_clock = time.clock()
-	nb_c = 0
-	for i in range(1,8): 
-		nb_c += np.abs(T[i-1] - T[i])
+	nb_c = np.sum(np.abs(T[:7] - T[1:]))
 	code_1_dur = time.clock() - code_1_clock
 	print('Binary computation time : ' + str(code_1_dur) + 'ms')
 	T = T.astype(np.uint8)
