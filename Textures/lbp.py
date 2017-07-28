@@ -294,15 +294,15 @@ if __name__ == '__main__':
 
 	# clf = SVC(kernel = 'poly')
 
-	clf = LinearSVC()
+	# clf = LinearSVC()
 
-	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-	# 						n_estimators = 150)
+	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+							n_estimators = 150)
 
 
 	print('Fitting Classifier...')
 
-	clf.fit(features_train, y_train)
+	clf.fit(features_train[:10000], y_train)
 
 	y_pred = clf.predict(features_train)
 
