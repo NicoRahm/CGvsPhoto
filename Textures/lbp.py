@@ -192,9 +192,8 @@ def compute_features(data, i, batch_size, nb_batch, mode = 'ltc'):
 	images, labels = data[0], data[1]
 	features = []
 	y_train = []
-	for i in range(batch_size): 
-		features.append(compute_hist(images, mode))
-		y_train.append(labels[0])
+	features.append(compute_hist(images, mode))
+	y_train.append(labels[0])
 
 	# print(features[0])
 	return(features, y_train)
@@ -259,7 +258,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 			for i in range(len(result)):
 				res.append(result[i][0][0])
 			pred = np.log(classifier.predict_proba(np.array(res)) + 0.00000001)
-			print(pred)
+			print(classifier.predict(np.array(res)))
 					
 			nb_im += pred.shape[0]
 			label_image = np.argmax(pred, 1)
