@@ -264,7 +264,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 		while j < batch_size:
 
 			d = []
-			for k in range(j, j+minibatch_size): 
+			for k in range(j, min(j+minibatch_size, batch_size)): 
 				d.append([batch[k], label[k]])
 
 			to_compute = [i for i in range(minibatch_size)]
