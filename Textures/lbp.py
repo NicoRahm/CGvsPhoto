@@ -479,4 +479,4 @@ if __name__ == '__main__':
 
 	test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
 
-	test_total_images(test_data_total, 720, clf)
+	test_total_images(test_data_total, 720, clf, decision_rule = 'weighted_vote')
