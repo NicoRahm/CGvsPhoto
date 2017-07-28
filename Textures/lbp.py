@@ -8,11 +8,15 @@ from functools import partial
 from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import normalize
+from sklearn.calibration import CalibratedClassifierCV
+
 import xgboost as xgb
 
 import cv2
 
 import time
+
+import os
 
 import pickle
 
@@ -86,7 +90,7 @@ def array_to_bin(A):
 
 
 	T = np.array([A[0,0], A[0,1], A[0,2], A[1,2], A[2,2],
-	     A[2,1], A[2,0], A[1,0]])
+			 A[2,1], A[2,0], A[1,0]])
 
 
 	nb_c = np.sum(np.abs(T[:7] - T[1:]))
@@ -139,7 +143,7 @@ def compute_hist(image, mode = 'ltc'):
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
 	# image = compute_jpeg_coef(image)
 	# error_clock = time.clock()
-	error = compute_error_image(image)
+	# error = compute_error_image(image)
 	# error_dur = time.clock() - error_clock
 
 	# print('Error image computation time : ' + str(error_dur) + 'ms')
@@ -199,7 +203,7 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 
 	print('Compute features for testing batch ' + str(i+1) + '/' + str(nb_test_batch))
 	images, labels = data.get_batch_test(batch_size = batch_size,
-											   crop = False)
+												 crop = False)
 
 	features = []
 	y_test = []
@@ -209,13 +213,124 @@ def compute_testing_features(i, batch_size, nb_test_batch, data):
 
 	return(features, y_test)
 
+
+def test_total_images(test_data_path, nb_images, classifier,
+					  minibatch_size = 25, decision_rule = 'majority_vote',
+					  only_green = False): 
+	"""Performs boosting for classifying full-size images.
+	Decomposes each image into patches (with size = self.image_size), computes the posterior probability of each class
+	and uses a decision rule to classify the full-size image.
+	Optionnaly plots or save the probability map and the original image in the visualization directory.
+	:param test_data_path: The absolute path to the test dataset. Must contain two directories : CGG/ and Real/
+	:param nb_images: The number of images to test
+	:param minibatch_size: The size of the batch to process the patches
+	:param decision_rule: The decision rule to use to aggregate patches prediction
+	:param show_images: Whether to show images or not 
+	:param save_images: Whether to save images or not
+	:param only_green: Whether to take only the green channel of the image
+	:param other_clf: Whether to use aother classifier (LDA or SVM). If True, takes the lastly trained
+
+	:type test_data_path: str
+	:type nb_images: int
+	:type minibatch_size: int
+	:type decision_rule: str
+	:type show_images: bool
+	:type save_images: bool
+	:type only_green: bool
+	:type other_clf:bool
+	"""
+	valid_decision_rule = ['majority_vote', 'weighted_vote']
+	if decision_rule not in valid_decision_rule:
+		raise NameError(decision_rule + ' is not a valid decision rule.')
+
+	print('	 Testing for the database : ' + test_data_path)
+
+	data_test = il.Test_loader(test_data_path, subimage_size = 100, only_green = only_green)
+
+
+	pool = Pool()
+	tp = 0
+	fp = 0
+	nb_CGG = 0
+	accuracy = 0
+	for i in range(nb_images):
+		batch, label, width, height, original = data_test.get_next_image()
+		batch_size = batch.shape[0]
+		j = 0
+		prediction = 0
+		labels = []
+		diff = []
+		nb_im = 0
+		while j < batch_size:
+
+			result = pool.starmap(partial(compute_features, 
+										batch_size = 1, 
+										nb_batch = batch_size, 
+										mode = 'lbp'),
+										zip(batch, label)) 
+
+			pred = classifier.predict_proba(result[:,0])
+					
+			nb_im += pred.shape[0]
+			label_image = np.argmax(pred, 1)
+			d =	np.max(pred, 1) - np.min(pred, 1)
+			for k in range(d.shape[0]):
+				diff.append(np.round(d[k], 1))
+
+			if decision_rule == 'majority_vote':
+				prediction += np.sum(label_image)
+			if decision_rule == 'weighted_vote':
+				prediction += np.sum(2*d*(label_image - 0.5))
+
+			for l in label_image:
+				labels.append(data_test.image_class[l])
+			j+=minibatch_size
+
+				 
+		diff = np.array(diff)
+		if decision_rule == 'majority_vote':
+			prediction = data_test.image_class[int(np.round(prediction/batch_size))]
+		if decision_rule == 'weighted_vote':
+			prediction = data_test.image_class[int(max(prediction,0)/abs(prediction))]
+				
+
+		if label == 'CGG':
+			nb_CGG += 1
+		if(label == prediction):
+			accuracy+= 1
+			if(prediction == 'CGG'):
+				tp += 1
+		else:
+			if prediction == 'CGG':
+				fp += 1
+		print(prediction, label)
+
+		if ((i+1)%10 == 0):
+			print('\n_______________________________________________________')
+			print(str(i+1) + '/' + str(nb_images) + ' images treated.')
+			print('Accuracy : ' + str(round(100*accuracy/(i+1), 2)) + '%')
+			if tp + fp != 0:
+				print('Precision : ' + str(round(100*tp/(tp + fp), 2)) + '%')
+			if nb_CGG != 0:
+					print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
+			print('_______________________________________________________\n')
+
+
+	print('\n_______________________________________________________')
+	print('Final Accuracy : ' + str(round(100*accuracy/(nb_images), 3)) + '%')
+	print('Final Precision : ' + str(round(100*tp/(tp + fp), 3)) + '%')
+	print('Final Recall : ' + str(round(100*tp/nb_CGG, 3)) + '%')
+	print('_______________________________________________________\n')
+
+
+
 if __name__ == '__main__': 
 
 	data_directory = '/work/smg/v-nicolas/level-design_raise/'
 	image_size = None
 
 	data = il.Database_loader(directory = data_directory, 
-							  size = image_size, only_green = False)
+								size = image_size, only_green = False)
 
 	mode = 'lbp'
 
@@ -249,7 +364,7 @@ if __name__ == '__main__':
 		features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
 		y_train = np.empty([nb_train_batch*batch_size,])
 
-		pool = Pool()  
+		pool = Pool()	
 		index = 0
 		for i in range(nb_train_batch):
 			data_train = []
@@ -263,10 +378,10 @@ if __name__ == '__main__':
 
 			to_compute = [i for i in range(batch_size)]
 			result = pool.starmap(partial(compute_features, 
-									  batch_size = 1, 
-									  nb_batch = batch_size, 
-									  mode = mode),
-									  zip(data_train, to_compute)) 
+										batch_size = 1, 
+										nb_batch = batch_size, 
+										mode = mode),
+										zip(data_train, to_compute)) 
 
 
 		
@@ -292,12 +407,12 @@ if __name__ == '__main__':
 	else: 
 		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
-	clf = SVC(kernel = 'poly')
+	# clf = SVC(kernel = 'poly')
 
-	# clf = LinearSVC()
+	# clf = CalibratedClassifierCV(LinearSVC())
 
-	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-	# 						n_estimators = 150)
+	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+							n_estimators = 150)
 
 
 	print('Fitting Classifier...')
@@ -337,10 +452,10 @@ if __name__ == '__main__':
 
 			to_compute = [i for i in range(batch_size)]
 			result = pool.starmap(partial(compute_features, 
-									  batch_size = 1, 
-									  nb_batch = batch_size, 
-									  mode = mode),
-									  zip(data_test, to_compute)) 
+										batch_size = 1, 
+										nb_batch = batch_size, 
+										mode = mode),
+										zip(data_test, to_compute)) 
 			for i in range(len(result)):
 				features_test[index:index+1] = result[i][0]
 				y_test[index:index+1] = result[i][1]
@@ -373,4 +488,6 @@ if __name__ == '__main__':
 
 	print("Accuracy : " + str(score))
 
+	test_data_total = "/work/smg/v-nicolas/level-design_raise/"
 
+	test_total_images(test_data_total, 720, clf)
