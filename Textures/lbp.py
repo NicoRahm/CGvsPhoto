@@ -274,7 +274,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 										mode = 'lbp'),
 										zip(dat, to_compute)) 
 
-			pred = classifier.predict_proba(result[:,0])
+			pred = classifier.predict_proba(result[:][0])
 					
 			nb_im += pred.shape[0]
 			label_image = np.argmax(pred, 1)
