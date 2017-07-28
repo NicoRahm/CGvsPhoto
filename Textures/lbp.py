@@ -259,6 +259,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 			for i in range(len(result)):
 				res.append(result[i][0][0])
 			pred = classifier.predict_proba(np.array(res))
+			print(pred)
 					
 			nb_im += pred.shape[0]
 			label_image = np.argmax(pred, 1)
