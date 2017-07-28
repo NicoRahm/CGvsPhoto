@@ -143,7 +143,7 @@ def compute_hist(image, mode = 'ltc'):
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
 	# image = compute_jpeg_coef(image)
 	# error_clock = time.clock()
-	# error = compute_error_image(image)
+	error = compute_error_image(image)
 	# error_dur = time.clock() - error_clock
 
 	# print('Error image computation time : ' + str(error_dur) + 'ms')
@@ -157,10 +157,10 @@ def compute_hist(image, mode = 'ltc'):
 				# code_1_dur += time.clock() - code_1_clock
 				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
 				hist_2[b] += 1
-				# b = compute_code(error[i-1:i+2, j-1:j+2,0], mode)
-				# hist_error_1[b] += 1
-				# b = compute_code(error[i-1:i+2, j-1:j+2,1], mode)
-				# hist_error_2[b] += 1
+				b = compute_code(error[i-1:i+2, j-1:j+2,0], mode)
+				hist_error_1[b] += 1
+				b = compute_code(error[i-1:i+2, j-1:j+2,1], mode)
+				hist_error_2[b] += 1
 
 			if mode == 'ltc':
 				b = compute_code(image[i-1:i+2, j-1:j+2,0], mode)
@@ -179,9 +179,8 @@ def compute_hist(image, mode = 'ltc'):
 	for i in hist_1.keys():
 		F.append(hist_1[i]/N)
 		F.append(hist_2[i]/N)
-		# F.append(hist_error_1[i]/N)
-		# F.append(hist_error_2[i]/N)
-		# F.append(hist_error[i])
+		F.append(hist_error_1[i]/N)
+		F.append(hist_error_2[i]/N)
 
 	return(np.array(F))
 
@@ -348,7 +347,7 @@ if __name__ == '__main__':
 		nb_train_batch = 157
 		batch_size = 16
 
-		nb_hist = 2
+		nb_hist = 4
 
 		print('Training...')
 		features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
