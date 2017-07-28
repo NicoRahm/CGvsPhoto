@@ -220,24 +220,6 @@ def test_total_images(test_data_path, nb_images, classifier,
 	"""Performs boosting for classifying full-size images.
 	Decomposes each image into patches (with size = self.image_size), computes the posterior probability of each class
 	and uses a decision rule to classify the full-size image.
-	Optionnaly plots or save the probability map and the original image in the visualization directory.
-	:param test_data_path: The absolute path to the test dataset. Must contain two directories : CGG/ and Real/
-	:param nb_images: The number of images to test
-	:param minibatch_size: The size of the batch to process the patches
-	:param decision_rule: The decision rule to use to aggregate patches prediction
-	:param show_images: Whether to show images or not 
-	:param save_images: Whether to save images or not
-	:param only_green: Whether to take only the green channel of the image
-	:param other_clf: Whether to use aother classifier (LDA or SVM). If True, takes the lastly trained
-
-	:type test_data_path: str
-	:type nb_images: int
-	:type minibatch_size: int
-	:type decision_rule: str
-	:type show_images: bool
-	:type save_images: bool
-	:type only_green: bool
-	:type other_clf:bool
 	"""
 	valid_decision_rule = ['majority_vote', 'weighted_vote']
 	if decision_rule not in valid_decision_rule:
@@ -273,6 +255,8 @@ def test_total_images(test_data_path, nb_images, classifier,
 										nb_batch = minibatch_size, 
 										mode = 'lbp'),
 										zip(dat, to_compute)) 
+
+			print(result[:][0].shape())
 
 			pred = classifier.predict_proba(result[:][0])
 					
@@ -414,10 +398,10 @@ if __name__ == '__main__':
 
 	# clf = SVC(kernel = 'poly')
 
-	# clf = CalibratedClassifierCV(LinearSVC())
+	clf = CalibratedClassifierCV(LinearSVC())
 
-	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-							n_estimators = 150)
+	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+	# 						n_estimators = 150)
 
 
 	print('Fitting Classifier...')
