@@ -488,6 +488,6 @@ if __name__ == '__main__':
 
 	print("Accuracy : " + str(score))
 
-	test_data_total = "/work/smg/v-nicolas/level-design_raise/"
+	test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
 
 	test_total_images(test_data_total, 720, clf)
