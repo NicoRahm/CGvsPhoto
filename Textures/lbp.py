@@ -258,7 +258,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 			res = []
 			for i in range(len(result)):
 				res.append(result[i][0][0])
-			pred = np.log(classifier.predict_proba(np.array(res)) + 0,00000001)
+			pred = np.log(classifier.predict_proba(np.array(res)) + 0.00000001)
 			print(pred)
 					
 			nb_im += pred.shape[0]
