@@ -347,7 +347,7 @@ if __name__ == '__main__':
 		nb_train_batch = 1250
 		batch_size = 64
 
-		nb_hist = 4
+		nb_hist = 2
 
 		print('Training...')
 		features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
