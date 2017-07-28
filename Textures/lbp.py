@@ -263,16 +263,16 @@ def test_total_images(test_data_path, nb_images, classifier,
 		nb_im = 0
 		while j < batch_size:
 
-			d = []
+			dat = []
 			for k in range(j, min(j+minibatch_size, batch_size)): 
-				d.append([batch[k], label[k]])
+				dat.append([batch[k], label[k]])
 
 			to_compute = [i for i in range(minibatch_size)]
 			result = pool.starmap(partial(compute_features, 
 										batch_size = 1, 
 										nb_batch = minibatch_size, 
 										mode = 'lbp'),
-										zip(d, to_compute)) 
+										zip(dat, to_compute)) 
 
 			pred = classifier.predict_proba(result[:,0])
 					
