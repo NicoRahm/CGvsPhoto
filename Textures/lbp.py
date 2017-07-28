@@ -302,7 +302,7 @@ if __name__ == '__main__':
 
 	print('Fitting Classifier...')
 
-	clf.fit(features_train[:20000], y_train[:20000])
+	clf.fit(features_train[:40000], y_train[:40000])
 
 	y_pred = clf.predict(features_train)
 
