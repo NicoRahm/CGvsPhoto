@@ -404,17 +404,17 @@ if __name__ == '__main__':
 	# 						n_estimators = 150)
 
 
-	# print('Fitting Classifier...')
+	print('Fitting Classifier...')
 
-	# clf.fit(features_train, y_train)
+	clf.fit(features_train, y_train)
 
-	# y_pred = clf.predict(features_train)
+	y_pred = clf.predict(features_train)
 
-	# score = accuracy_score(y_pred,y_train)
+	score = accuracy_score(y_pred,y_train)
 
-	# print("Accuracy : " + str(score))
+	print("Accuracy : " + str(score))
 
-	# print('Testing...')
+	print('Testing...')
 
 
 	nb_test_batch = 63
@@ -470,13 +470,13 @@ if __name__ == '__main__':
 		features_test, y_test = pickle.load(open(dump_data_directory + load_data + 'test.pkl', 'rb'))
 
 
-	# print('Prediction...')
-	# y_pred = clf.predict(features_test)
+	print('Prediction...')
+	y_pred = clf.predict(features_test)
 
-	# score = accuracy_score(y_pred,y_test)
+	score = accuracy_score(y_pred,y_test)
 
-	# print("Accuracy : " + str(score))
+	print("Accuracy : " + str(score))
 
-	# test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
+	test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
 
-	# test_total_images(test_data_total, 720, clf, decision_rule = 'weighted_vote')
+	test_total_images(test_data_total, 720, clf, decision_rule = 'weighted_vote')
