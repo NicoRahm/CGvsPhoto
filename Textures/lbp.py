@@ -265,7 +265,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 
 			dat = []
 			for k in range(j, min(j+minibatch_size, batch_size)): 
-				dat.append([batch[k], label[k]])
+				dat.append([batch[k], label])
 
 			to_compute = [i for i in range(minibatch_size)]
 			result = pool.starmap(partial(compute_features, 
