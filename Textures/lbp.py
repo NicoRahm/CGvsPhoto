@@ -255,8 +255,8 @@ def test_total_images(test_data_path, nb_images, classifier,
 										mode = 'lbp'),
 										zip(dat, to_compute)) 
 			res = []
-			for i in range(len(result)):
-				res.append(result[i][0][0])
+			for k in range(len(result)):
+				res.append(result[k][0][0])
 			res = normalize(np.array(res), axis = 1)
 			pred = np.log(classifier.predict_proba(res) + 0.00000001)
 			# print(classifier.predict(np.array(res)))
