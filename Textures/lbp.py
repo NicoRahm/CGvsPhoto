@@ -315,7 +315,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 
 if __name__ == '__main__': 
 
-	data_directory = '/work/smg/v-nicolas/level-design_raise/'
+	data_directory = '/work/smg/v-nicolas/level-design_raise_100_color/'
 	image_size = None
 
 	data = il.Database_loader(directory = data_directory, 
@@ -344,8 +344,8 @@ if __name__ == '__main__':
 
 	if load_data is None:
 
-		nb_train_batch = 157
-		batch_size = 16
+		nb_train_batch = 1250
+		batch_size = 64
 
 		nb_hist = 4
 
@@ -417,7 +417,7 @@ if __name__ == '__main__':
 	# print('Testing...')
 
 
-	nb_test_batch = 45
+	nb_test_batch = 63
 
 	if load_data is None:
 
