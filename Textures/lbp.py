@@ -255,7 +255,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 										nb_batch = minibatch_size, 
 										mode = 'lbp'),
 										zip(dat, to_compute)) 
-
+			print(result)
 			pred = classifier.predict_proba(np.array(result[:][0]))
 					
 			nb_im += pred.shape[0]
