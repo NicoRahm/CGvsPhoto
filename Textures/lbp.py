@@ -255,8 +255,10 @@ def test_total_images(test_data_path, nb_images, classifier,
 										nb_batch = minibatch_size, 
 										mode = 'lbp'),
 										zip(dat, to_compute)) 
-			print(result)
-			pred = classifier.predict_proba(np.array(result[:][0]))
+			res = []
+			for i in range(len(result)):
+				res.append(result[i][0])
+			pred = classifier.predict_proba(np.array(res))
 					
 			nb_im += pred.shape[0]
 			label_image = np.argmax(pred, 1)
