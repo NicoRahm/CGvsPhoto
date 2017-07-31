@@ -157,10 +157,10 @@ def compute_hist(image, mode = 'ltc'):
 				# code_1_dur += time.clock() - code_1_clock
 				b = compute_code(image[i-1:i+2, j-1:j+2,1], mode)
 				hist_2[b] += 1
-				# b = compute_code(error[i-1:i+2, j-1:j+2,0], mode)
-				# hist_error_1[b] += 1
-				# b = compute_code(error[i-1:i+2, j-1:j+2,1], mode)
-				# hist_error_2[b] += 1
+				b = compute_code(error[i-1:i+2, j-1:j+2,0], mode)
+				hist_error_1[b] += 1
+				b = compute_code(error[i-1:i+2, j-1:j+2,1], mode)
+				hist_error_2[b] += 1
 
 			if mode == 'ltc':
 				b = compute_code(image[i-1:i+2, j-1:j+2,0], mode)
@@ -179,8 +179,8 @@ def compute_hist(image, mode = 'ltc'):
 	for i in hist_1.keys():
 		F.append(hist_1[i]/N)
 		F.append(hist_2[i]/N)
-		# F.append(hist_error_1[i]/N)
-		# F.append(hist_error_2[i]/N)
+		F.append(hist_error_1[i]/N)
+		F.append(hist_error_2[i]/N)
 
 	return(np.array(F))
 
