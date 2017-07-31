@@ -143,7 +143,7 @@ def compute_hist(image, mode = 'ltc'):
 	image = cv2.cvtColor(image*255, cv2.COLOR_RGB2YCR_CB)
 	# image = compute_jpeg_coef(image)
 	# error_clock = time.clock()
-	# error = compute_error_image(image)
+	error = compute_error_image(image)
 	# error_dur = time.clock() - error_clock
 
 	# print('Error image computation time : ' + str(error_dur) + 'ms')
