@@ -269,7 +269,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 			if decision_rule == 'majority_vote':
 				prediction += np.sum(label_image)
 			if decision_rule == 'weighted_vote':
-				prediction += np.sum(2*d*(label_image - 0.5))
+				prediction += np.sum(-2*d*(label_image - 0.5))
 
 			for l in label_image:
 				labels.append(data_test.image_class[l])
@@ -398,10 +398,10 @@ if __name__ == '__main__':
 
 	# clf = SVC(kernel = 'poly')
 
-	clf = CalibratedClassifierCV(LinearSVC())
+	# clf = CalibratedClassifierCV(LinearSVC())
 
-	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-	# 						n_estimators = 150)
+	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+							n_estimators = 150)
 
 
 	print('Fitting Classifier...')
