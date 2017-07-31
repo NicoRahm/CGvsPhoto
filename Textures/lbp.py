@@ -398,10 +398,10 @@ if __name__ == '__main__':
 
 	# clf = SVC(kernel = 'poly')
 
-	# clf = CalibratedClassifierCV(LinearSVC())
+	clf = CalibratedClassifierCV(LinearSVC())
 
-	clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-							n_estimators = 150)
+	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+	# 						n_estimators = 150)
 
 
 	print('Fitting Classifier...')
