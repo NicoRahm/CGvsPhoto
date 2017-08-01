@@ -199,7 +199,7 @@ def compute_features(data, i, batch_size, nb_batch, mode = 'ltc'):
 
 def compute_features_par(image, pool, mini_size = 100, mode = 'lbp'): 
 
-	print(image.shape)
+	# print(image.shape)
 	width = image.shape[1]
 	height = image.shape[0]
 	images = []
@@ -388,7 +388,7 @@ if __name__ == '__main__':
 				images_batch, y_batch = data.get_next_train(crop = False)
 				data_train.append([images_batch, y_batch])
 				print(images_batch.shape)
-				features_train[i] = compute_features_par(images_batch[0], pool, mode = mode)
+				features_train[i] = compute_features_par(images_batch, pool, mode = mode)
 
 		
 
