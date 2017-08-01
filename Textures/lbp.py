@@ -388,7 +388,7 @@ if __name__ == '__main__':
 				data_train.append([images_batch, y_batch])
 				print(images_batch.shape)
 				features_train[i] = compute_features_par(images_batch, pool, mode = mode)
-				y_train[i] = y_batch
+				y_train[i] = y_batch[0]
 		
 
 			# to_compute = [i for i in range(batch_size)]
@@ -464,7 +464,7 @@ if __name__ == '__main__':
 				images_batch, y_batch = data.get_next_train(crop = False)
 				data_test.append([images_batch, y_batch])
 				features_test[i] = compute_features_par(images_batch, pool, mode = mode)
-				y_test[i] = y_batch
+				y_test[i] = y_batch[0]
 		
 
 			# to_compute = [i for i in range(batch_size)]
