@@ -197,6 +197,26 @@ def compute_features(data, i, batch_size, nb_batch, mode = 'ltc'):
 	# print(features[0])
 	return(features, y_train)
 
+def compute_features_par(image, pool, mini_size = 100, mode = 'lbp'): 
+
+	width = image.shape[1]
+	height = image.shape[0]
+	images = [image[i:i+mini_size, j:j+mini_size]  for (i,j) in zip(range(int(height/mini_size)), range(int(width/mini_size)))]
+
+	result = pool.map(partial(compute_hist,
+							  mode = mode),
+							  images) 
+
+	features = result[0]
+
+	for i in range(1, len(result)): 
+		features += result[i]
+
+	features /= len(result)
+
+	return(features)
+
+
 def compute_testing_features(i, batch_size, nb_test_batch, data): 
 
 	print('Compute features for testing batch ' + str(i+1) + '/' + str(nb_test_batch))
@@ -363,24 +383,27 @@ if __name__ == '__main__':
 				images_batch, y_batch = data.get_next_train(crop = False)
 				data_train.append([images_batch, y_batch])
 
+				features_train.append(compute_features_par(images_batch[0], pool, mode = mode))
+
 		
 
-			to_compute = [i for i in range(batch_size)]
-			result = pool.starmap(partial(compute_features, 
-										batch_size = 1, 
-										nb_batch = batch_size, 
-										mode = mode),
-										zip(data_train, to_compute)) 
+			# to_compute = [i for i in range(batch_size)]
+			# result = pool.starmap(partial(compute_features, 
+			# 							batch_size = 1, 
+			# 							nb_batch = batch_size, 
+			# 							mode = mode),
+			# 							zip(data_train, to_compute)) 
+
 
 
 		
 
 			
-			for i in range(len(result)):
-				features_train[index:index+1] = result[i][0]
-				y_train[index:index+1] = result[i][1]
+			# for i in range(len(result)):
+			# 	features_train[index:index+1] = result[i][0]
+			# 	y_train[index:index+1] = result[i][1]
 
-				index+=1
+			# 	index+=1
 
 		del(data_train)
 		del(result)
