@@ -202,7 +202,7 @@ def compute_features_par(image, pool, mini_size = 100, mode = 'lbp'):
 	width = image.shape[1]
 	height = image.shape[0]
 	images = [image[i:i+mini_size, j:j+mini_size]  for i in range(int(height/mini_size)) for j in range(int(width/mini_size))]
-
+	print(images[0])
 	result = pool.map(partial(compute_hist,
 							  mode = mode),
 							  images) 
