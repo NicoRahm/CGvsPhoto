@@ -383,7 +383,7 @@ if __name__ == '__main__':
 				images_batch, y_batch = data.get_next_train(crop = False)
 				data_train.append([images_batch, y_batch])
 
-				features_train.append(compute_features_par(images_batch[0], pool, mode = mode))
+				features_train[i] = compute_features_par(images_batch[0], pool, mode = mode)
 
 		
 
