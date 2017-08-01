@@ -199,13 +199,14 @@ def compute_features(data, i, batch_size, nb_batch, mode = 'ltc'):
 
 def compute_features_par(image, pool, mini_size = 100, mode = 'lbp'): 
 
+	print(image.shape)
 	width = image.shape[1]
 	height = image.shape[0]
 	images = []
 	for i in range(int(height/mini_size)): 
 		for j in range(int(width/mini_size)):
 			images.append(image[i:i+mini_size, j:j+mini_size])
-			
+
 	print(images[0])
 	result = pool.map(partial(compute_hist,
 							  mode = mode),
@@ -386,7 +387,7 @@ if __name__ == '__main__':
 				# print('Getting image ' + str(j+1) + '/' + str(batch_size))
 				images_batch, y_batch = data.get_next_train(crop = False)
 				data_train.append([images_batch, y_batch])
-
+				print(images_batch.shape)
 				features_train[i] = compute_features_par(images_batch[0], pool, mode = mode)
 
 		
