@@ -684,7 +684,7 @@ class Test_loader:
 
         subimages, width, height = self.extract_subimages(image_file, self.subimage_size)
         original = Image.open(self.dir + image_file)
-        return((subimages, labeled_image[1], width, height, original))
+        return((subimages, labeled_image[1], width, height, original, image_file))
           
 def get_image_filename_from_dir(directory_path) :
     # file extension accepted as image data

@@ -258,7 +258,7 @@ def test_total_images(test_data_path, nb_images, classifier,
 	nb_CGG = 0
 	accuracy = 0
 	for i in range(nb_images):
-		batch, label, width, height, original = data_test.get_next_image()
+		batch, label, width, height, original, image_file = data_test.get_next_image()
 		batch_size = batch.shape[0]
 		j = 0
 		prediction = 0

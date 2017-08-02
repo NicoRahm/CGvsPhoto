@@ -328,11 +328,11 @@ class Model:
 
         with tf.name_scope('Weights'):
           if self.remove_context:
-            W_conv1 = weight_variable([self.remove_filter_size, self.remove_filter_size, 1, nf[0]], 
+            W_conv1 = weight_variable([self.remove_filter_size, self.remove_filter_size, self.nb_channels, nf[0]], 
                                       nb_input = self.remove_filter_size*self.remove_filter_size*self.nb_channels,
                                       seed = random_seed)
           else:
-            W_conv1 = weight_variable([self.filter_size, self.filter_size, 1, nf[0]], 
+            W_conv1 = weight_variable([self.filter_size, self.filter_size, self.nb_channels, nf[0]], 
                                       nb_input = self.filter_size*self.filter_size*self.nb_channels,
                                       seed = random_seed)
           self.W_conv1 = W_conv1
@@ -1035,7 +1035,7 @@ class Model:
       nb_CGG = 0
       accuracy = 0
       for i in range(nb_images):
-        batch, label, width, height, original = data_test.get_next_image()
+        batch, label, width, height, original, image_file = data_test.get_next_image()
         if not only_green: 
           batch = np.reshape(batch, (batch.shape[0]*3, batch.shape[1], batch.shape[2],1))
         batch_size = batch.shape[0]
@@ -1431,7 +1431,7 @@ if __name__ == '__main__':
   clf.train(nb_train_batch = nb_train_batch,
             nb_test_batch = nb_test_batch, 
             nb_validation_batch = nb_validation_batch,
-            save_filters = False)
+            show_filters = False)
 
   # clf.svm_training(nb_train_batch = 800, nb_test_batch = 80)
 
