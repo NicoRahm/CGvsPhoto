@@ -1038,8 +1038,6 @@ class Model:
       accuracy = 0
       for i in range(nb_images):
         batch, label, width, height, original, image_file = data_test.get_next_image()
-        if not only_green: 
-          batch = np.reshape(batch, (batch.shape[0]*3, batch.shape[1], batch.shape[2],1))
         batch_size = batch.shape[0]
         j = 0
         prediction = 0
