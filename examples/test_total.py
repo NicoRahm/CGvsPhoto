@@ -21,5 +21,5 @@ clf.test_total_images(test_data_path = test_data_path,
                       decision_rule = 'weighted_vote',
                       show_images = False, 
                       save_images = False,
-                      only_green = True,
+                      only_green = False,
                       other_clf = False)
