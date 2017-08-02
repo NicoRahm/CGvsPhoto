@@ -310,10 +310,10 @@ class Model:
     with graph.as_default():
 
       with tf.name_scope('Input_Data'):
-        x = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 1])
+        x = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, self.nb_channels])
         self.x = x
         # reshape the input data:
-        x_image = tf.reshape(x, [-1,self.image_size, self.image_size, 1])
+        x_image = tf.reshape(x, [-1,self.image_size, self.image_size, self.nb_channels])
         with tf.name_scope('Image_Visualization'):
           tf.summary.image('Input_Data', x_image)
         
