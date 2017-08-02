@@ -204,7 +204,8 @@ class Model:
 
   def __init__(self, database_path, image_size, config = 'Personal', filters = [32, 64],
               feature_extractor = 'Stats', remove_context = False, 
-              nbins = 10, remove_filter_size = 3, batch_size = 50, using_GPU = False):
+              nbins = 10, remove_filter_size = 3, batch_size = 50, 
+              using_GPU = False, only_green = True):
     """Defines a model for single-image classification
 
     :param database_path: Absolute path to the default patch database (training, validation and testings are performed on this database)
@@ -260,6 +261,7 @@ class Model:
     self.using_GPU = using_GPU
     self.remove_context = remove_context
     self.remove_filter_size = remove_filter_size
+    self.only_green = only_green
 
     # getting the database
     self.import_database()
@@ -286,7 +288,7 @@ class Model:
     print('   import data : image_size = ' + 
         str(self.image_size) + 'x' + str(self.image_size) + '...')
     self.data = il.Database_loader(self.database_path, self.image_size, 
-                                   proportion = 1, only_green=True)
+                                   proportion = 1, only_green=self.only_green)
     self.nb_class = self.data.nb_class
 
   def create_graph(self, nb_class, nl = 2, nf = [32, 64], filter_size = 3,
@@ -319,10 +321,10 @@ class Model:
       # first conv net layer
       if self.remove_context:
         print('   Creating layer 1 - Shape : ' + str(self.remove_filter_size) + 'x' + 
-              str(self.remove_filter_size) + 'x1x' + str(nf[0]))
+              str(self.remove_filter_size) + 'x' + str(self.nb_channels) + 'x' + str(nf[0]))
       else:
         print('   Creating layer 1 - Shape : ' + str(self.filter_size) + 'x' + 
-              str(self.filter_size) + 'x1x' + str(nf[0]))      
+              str(self.filter_size) + 'x' + str(self.nb_channels) + 'x' + str(nf[0]))      
 
       with tf.name_scope('Conv1'):
 
