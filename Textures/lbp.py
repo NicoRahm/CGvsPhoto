@@ -410,7 +410,7 @@ if __name__ == '__main__':
 			# 	index+=1
 
 		del(data_train)
-		del(result)
+		# del(result)
 
 		features_train = normalize(features_train, axis = 1)
 		print(features_train[0], y_train[0])
@@ -484,7 +484,7 @@ if __name__ == '__main__':
 
 
 
-		del(result)
+		# del(result)
 
 		features_test = normalize(features_test, axis = 1)
 		print(features_test[0], y_test[0])
