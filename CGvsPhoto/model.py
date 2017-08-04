@@ -1306,6 +1306,7 @@ class Model:
                       pad_inches=0.0)
 
         plt.close()
+        del(img)
 
   def show_filtered(self, image_file):
     print('   Loading image from file : ' + image_file)
@@ -1372,10 +1373,10 @@ class Model:
       saver.restore(sess, self.dir_ckpt + file_to_restore)
 
       data_test = il.Test_loader(data_path, 
-                                 subimage_size = self.image_size)
+                                 subimage_size = self.image_size, only_green = self.only_green)
 
       for i in range(nb_images):
-        batch, label, width, height, original = data_test.get_next_image()
+        batch, label, width, height, original, file_name = data_test.get_next_image()
         batch_size = batch.shape[0]
         j = 0
         labels = []
