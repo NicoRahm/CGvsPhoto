@@ -364,20 +364,23 @@ if __name__ == '__main__':
 			load_data = input('File to load (source directory : ' + dump_data_directory + ') : ')
 		else: 
 			load_data = None		
-
-
+	
+	batch_size = 1
+	nb_hist = 2
+	pool = Pool()
+	
 	# if load_data is None:
 
 	# 	nb_train_batch = 2520
-	# 	batch_size = 1
+	# 	
 
-	# 	nb_hist = 2
+	# 	
 
 	# 	print('Training...')
 	# 	features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
 	# 	y_train = np.empty([nb_train_batch*batch_size,])
 
-	# 	pool = Pool()	
+	# 		
 	# 	index = 0
 	# 	for i in range(nb_train_batch):
 	# 		data_train = []
@@ -447,7 +450,6 @@ if __name__ == '__main__':
 	nb_test_batch = 720
 
 	if load_data is None:
-
 		features_test = np.empty([nb_test_batch*batch_size, nb_hist*len(classes.keys())])
 		y_test = np.empty([nb_test_batch*batch_size,])
 
