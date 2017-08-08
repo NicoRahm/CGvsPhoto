@@ -459,12 +459,11 @@ if __name__ == '__main__':
 		index = 0
 		for i in range(nb_test_batch):
 			print('Getting batch ' + str(i+1) + '/' + str(nb_test_batch))
-			images_batch, y_batch = data.get_next_test(crop = False)
-			data_test.append([images_batch, y_batch])
 			for j in range(batch_size):
 				# print('Getting image ' + str(j+1) + '/' + str(batch_size))
-				images_batch, y_batch = data.get_next_train(crop = False)
+				images_batch, y_batch = data.get_next_test(crop = False)
 				data_test.append([images_batch, y_batch])
+				print(images_batch.shape)
 				features_test[i] = compute_features_par(images_batch, pool, mode = mode)
 				y_test[i] = y_batch[0]
 		

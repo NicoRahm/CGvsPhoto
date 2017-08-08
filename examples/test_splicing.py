@@ -1,6 +1,6 @@
 from CGvsPhoto import Model
 # to change to your splicing database
-splicing_data_path = '/home/nicolas/Database/splicing2/'
+splicing_data_path = '/home/nicolas/Database/splicing3/'
 
 # to change to your training database
 database_path = '/home/nicolas/Database/level-design_raise/'
@@ -17,7 +17,7 @@ clf = Model(database_path, image_size, config = 'Personal', filters = [32,32,64]
 # tests classifier on splicing images
 # you have to load pre-trained weights 
 clf.test_splicing(data_path = splicing_data_path, 
-                  nb_images = 50,
+                  nb_images = 8,
                   minibatch_size = 25,
                   show_images = False,
                   save_images = True)
