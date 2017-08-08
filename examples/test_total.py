@@ -9,7 +9,7 @@ test_data_path = '/work/smg/v-nicolas/level-design_raise/test/'
 image_size = 100
 
 # define a single-image classifier
-clf = Model(database_path, image_size, config = 'Server', filters = [32, 32, 64],
+clf = Model(database_path, image_size, config = 'Server', filters = [32, 32, 64, 64],
             batch_size = 50, feature_extractor = 'Stats', remove_context = False,
             remove_filter_size = 5, only_green = False)
 
