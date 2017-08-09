@@ -279,11 +279,11 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/work/smg/v-nicolas/face_DB_split'
+  database_path = '/work/smg/v-nicolas/level-design_raise'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 108,
-                         nb_test_batch = 86,
+                         nb_train_batch = 2520,
+                         nb_test_batch = 720,
                          batch_size = 1)
