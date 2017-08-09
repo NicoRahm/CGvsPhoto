@@ -369,80 +369,80 @@ if __name__ == '__main__':
 	nb_hist = 2
 	pool = Pool()
 	
-	# if load_data is None:
+	if load_data is None:
 
-	# 	nb_train_batch = 2520
+		nb_train_batch = 2520
 		
 
 		
 
-	# 	print('Training...')
-	# 	features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
-	# 	y_train = np.empty([nb_train_batch*batch_size,])
+		print('Training...')
+		features_train = np.empty([nb_train_batch*batch_size, nb_hist*len(classes.keys())])
+		y_train = np.empty([nb_train_batch*batch_size,])
 
 			
-	# 	index = 0
-	# 	for i in range(nb_train_batch):
-	# 		data_train = []
-	# 		print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
-	# 		for j in range(batch_size):
-	# 			# print('Getting image ' + str(j+1) + '/' + str(batch_size))
-	# 			images_batch, y_batch = data.get_next_train(crop = False)
-	# 			data_train.append([images_batch, y_batch])
-	# 			print(images_batch.shape)
-	# 			features_train[i] = compute_features_par(images_batch, pool, mode = mode)
-	# 			y_train[i] = y_batch[0]
+		index = 0
+		for i in range(nb_train_batch):
+			data_train = []
+			print('Getting batch ' + str(i+1) + '/' + str(nb_train_batch))
+			for j in range(batch_size):
+				# print('Getting image ' + str(j+1) + '/' + str(batch_size))
+				images_batch, y_batch = data.get_next_train(crop = False)
+				data_train.append([images_batch, y_batch])
+				print(images_batch.shape)
+				features_train[i] = compute_features_par(images_batch, pool, mode = mode)
+				y_train[i] = y_batch[0]
 		
 
-	# 		# to_compute = [i for i in range(batch_size)]
-	# 		# result = pool.starmap(partial(compute_features, 
-	# 		# 							batch_size = 1, 
-	# 		# 							nb_batch = batch_size, 
-	# 		# 							mode = mode),
-	# 		# 							zip(data_train, to_compute)) 
+			# to_compute = [i for i in range(batch_size)]
+			# result = pool.starmap(partial(compute_features, 
+			# 							batch_size = 1, 
+			# 							nb_batch = batch_size, 
+			# 							mode = mode),
+			# 							zip(data_train, to_compute)) 
 
 
 
 		
 
 			
-	# 		# for i in range(len(result)):
-	# 		# 	features_train[index:index+1] = result[i][0]
-	# 		# 	y_train[index:index+1] = result[i][1]
+			# for i in range(len(result)):
+			# 	features_train[index:index+1] = result[i][0]
+			# 	y_train[index:index+1] = result[i][1]
 
-	# 		# 	index+=1
+			# 	index+=1
 
-	# 	del(data_train)
-	# 	# del(result)
+		del(data_train)
+		# del(result)
 
-	# 	features_train = normalize(features_train, axis = 1)
-	# 	print(features_train[0], y_train[0])
-	# 	print(features_train[1], y_train[1])
-	# 	print(features_train[2], y_train[2])
+		features_train = normalize(features_train, axis = 1)
+		print(features_train[0], y_train[0])
+		print(features_train[1], y_train[1])
+		print(features_train[2], y_train[2])
 
-	# 	if save_data: 
-	# 		pickle.dump((features_train, y_train), open(dump_data_directory + dump_name + 'train.pkl', 'wb'))
+		if save_data: 
+			pickle.dump((features_train, y_train), open(dump_data_directory + dump_name + 'train.pkl', 'wb'))
 
-	# else: 
-	# 	features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
+	else: 
+		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
-	# # clf = SVC(kernel = 'poly')
+	# clf = SVC(kernel = 'poly')
 
-	# clf = CalibratedClassifierCV(LinearSVC())
+	clf = CalibratedClassifierCV(LinearSVC())
 
-	# # clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
-	# # 						n_estimators = 150)
+	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
+	# 						n_estimators = 150)
 
 
-	# print('Fitting Classifier...')
+	print('Fitting Classifier...')
 
-	# clf.fit(features_train, y_train)
+	clf.fit(features_train, y_train)
 
-	# y_pred = clf.predict(features_train)
+	y_pred = clf.predict(features_train)
 
-	# score = accuracy_score(y_pred,y_train)
+	score = accuracy_score(y_pred,y_train)
 
-	# print("Accuracy : " + str(score))
+	print("Accuracy : " + str(score))
 
 	print('Testing...')
 
