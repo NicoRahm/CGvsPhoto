@@ -1137,7 +1137,7 @@ class Model:
             print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
           print('_______________________________________________________\n')
 
-    fpr, tpr, thresholds = roc_curve(np.array(y), 0.5 + np.array(scores)/10)
+    fpr, tpr, thresholds = roc_curve((1 + np.array(y))/2, 0.5 + np.array(scores)/10)
 
     print(0.5 + np.array(scores)/np.max(np.array(scores)))
     print(thresholds)
