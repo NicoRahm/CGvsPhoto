@@ -24,6 +24,8 @@ from sklearn.metrics import auc
 
 import matplotlib.pyplot as plt
 
+import pickle
+
 # tool functions
 def conv2d(x, W):
   """Returns the 2D convolution between input x and the kernel W"""  
@@ -240,33 +242,26 @@ def train_classifier(database_path, image_size, nb_train_batch,
   scores = np.reshape(np.array(scores), (nb_test_batch*batch_size,))
 
   fpr, tpr, _ = roc_curve(y_test, scores)
-  roc_auc = auc(fpr, tpr)
+  # roc_auc = auc(fpr, tpr)
 
-  plt.figure()
-  lw = 2
-  plt.plot(fpr, tpr, color='darkorange',
-           lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
-  plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-  plt.xlim([0.0, 1.0])
-  plt.ylim([0.0, 1.05])
-  plt.xlabel('False Positive Rate')
-  plt.ylabel('True Positive Rate')
-  plt.title('Receiver operating characteristic')
-  plt.legend(loc="lower right")
-  plt.show()
-  plt.close()
+  # plt.figure()
+  # lw = 2
+  # plt.plot(fpr, tpr, color='darkorange',
+  #          lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
+  # plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+  # plt.xlim([0.0, 1.0])
+  # plt.ylim([0.0, 1.05])
+  # plt.xlabel('False Positive Rate')
+  # plt.ylabel('True Positive Rate')
+  # plt.title('Receiver operating characteristic')
+  # plt.legend(loc="lower right")
+  # plt.show()
+  # plt.close()
 
-  filename = '/home/nicolas/Documents/ROC/' + test_name + '.csv'
+  filename = '/home/smg/v-nicolas/ROC/' + test_name + '.pkl'
   print('Saving tpr and fpr in file : ' + filename)
-  with open(filename, 'w') as file:
-    try:
-      writer = csv.writer(file)
-       
-      for i in range(fpr.shape[0]):
-        writer.writerow([str(fpr[i]), str(tpr[i])])
-      print('   done.')
-    finally:
-      file.close()
+
+  pickle.dump((fpr, tpr), filename)
 
   # done
   print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))

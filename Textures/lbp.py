@@ -9,6 +9,8 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import normalize
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.metrics import roc_curve
+
 
 import xgboost as xgb
 
@@ -502,10 +504,20 @@ if __name__ == '__main__':
 	print('Prediction...')
 	y_pred = clf.predict(features_test)
 
+	scores = clf.predict_proba(features_test)[:,1]
+
 	score = accuracy_score(y_pred,y_test)
 
 	print("Accuracy : " + str(score))
 
-	test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
+	fpr, tpr, _ = roc_curve(y_test, scores)
 
-	test_total_images(test_data_total, 720, clf, decision_rule = 'weighted_vote')
+	test_name = input('Test name : ')
+
+	filename = '/home/smg/v-nicolas/ROC/' + test_name + '.pkl'
+	print('Saving tpr and fpr in file : ' + filename)
+	pickle.dump((fpr, tpr), filename)
+
+	# test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
+
+	# test_total_images(test_data_total, 720, clf, decision_rule = 'weighted_vote')

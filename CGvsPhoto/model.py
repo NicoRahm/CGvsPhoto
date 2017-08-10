@@ -31,6 +31,8 @@ from sklearn.metrics import accuracy_score as acc
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import SVC
 
+import pickle
+
 # seed initialisation
 print("\n   random initialisation ...")
 random_seed = int(time.time() % 10000 ) 
@@ -745,15 +747,25 @@ class Model:
       # test_auc = 0
       nb_iterations = nb_test_batch
       self.data.test_iterator = 0
+      scores = np.array([nb_test_batch*self.batch_size,])
+      y_test = np.array([nb_test_batch*self.batch_size,])
       for _ in range( nb_iterations ) :
           batch_test = self.data.get_batch_test(self.batch_size, False, True, True)
           feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
           test_accuracy += self.accuracy.eval(feed_dict)
+          scores[_*self.batch_size:(_ + 1 )*self.batch_size] = self.y_conv.eval(feed_dict)[:,1]
+          y_test[_*self.batch_size:(_ + 1 )*self.batch_size] = batch_test[1][:,1]
           # test_auc += sess.run(auc, feed_dict)[0]
 
                 
       test_accuracy /= nb_iterations
       print("   test accuracy %g"%test_accuracy)
+
+      fpr, tpr, _ = roc_curve(y_test, scores)
+
+      filename = '/home/smg/v-nicolas/ROC/' + run_name + '.pkl'
+      print('Saving tpr and fpr in file : ' + filename)
+      pickle.dump((fpr, tpr), filename)
 
       # test_auc /= (nb_iterations - 1)
       # print("   test AUC %g"%test_auc)
