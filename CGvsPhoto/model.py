@@ -1085,13 +1085,12 @@ class Model:
           j+=minibatch_size
 
          
-        if config != 'server':
-          if(label == 'Real'):
-            y.append(0)
-          else:
-            y.append(1)
-          print(prediction/nb_im)
-          scores.append(prediction/nb_im)
+        if(label == 'Real'):
+          y.append(0)
+        else:
+          y.append(1)
+        print(prediction/nb_im)
+        scores.append(prediction/nb_im)
 
         diff = np.array(diff)
         if decision_rule == 'majority_vote':
