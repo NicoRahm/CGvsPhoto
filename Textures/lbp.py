@@ -428,9 +428,9 @@ if __name__ == '__main__':
 	else: 
 		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
-	# clf = SVC()
+	clf = SVC()
 
-	clf = CalibratedClassifierCV(LinearSVC())
+	# clf = CalibratedClassifierCV(LinearSVC())
 
 	# clf = xgb.XGBClassifier(max_depth = 3, learning_rate = 0.1, 
 	# 						n_estimators = 150)
