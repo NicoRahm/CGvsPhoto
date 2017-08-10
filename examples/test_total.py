@@ -10,7 +10,7 @@ image_size = 100
 
 # define a single-image classifier
 clf = Model(database_path, image_size, config = 'Server', filters = [32, 32, 64],
-            batch_size = 50, feature_extractor = 'Hist', remove_context = False,
+            batch_size = 50, feature_extractor = 'Stats', remove_context = True,
             remove_filter_size = 5, only_green = False)
 
 
