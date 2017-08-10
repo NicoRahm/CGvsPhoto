@@ -516,7 +516,7 @@ if __name__ == '__main__':
 
 	filename = '/home/smg/v-nicolas/ROC/' + test_name + '.pkl'
 	print('Saving tpr and fpr in file : ' + filename)
-	pickle.dump((fpr, tpr), filename)
+	pickle.dump((fpr, tpr), open(filename, 'w'))
 
 	# test_data_total = "/work/smg/v-nicolas/level-design_raise/test/"
 
