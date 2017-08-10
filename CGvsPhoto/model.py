@@ -1137,34 +1137,14 @@ class Model:
             print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
           print('_______________________________________________________\n')
 
-    if config != 'server':
-      fpr, tpr, thresholds = roc_curve(np.array(y), 0.5 + np.array(scores)/10)
+    fpr, tpr, thresholds = roc_curve(np.array(y), 0.5 + np.array(scores)/10)
 
-      print(0.5 + np.array(scores)/np.max(np.array(scores)))
-      print(thresholds)
+    print(0.5 + np.array(scores)/np.max(np.array(scores)))
+    print(thresholds)
 
-      filename = '/home/nicolas/Documents/ROC/' + test_name + '.csv'
-      print('Saving tpr and fpr in file : ' + filename)
-      with open(filename, 'w') as file:
-        try:
-          writer = csv.writer(file)
-       
-          for i in range(fpr.shape[0]):
-            writer.writerow([str(fpr[i]), str(tpr[i])])
-          print('   done.')
-        finally:
-          file.close()
-
-      plt.figure()
-      lw = 2
-      plt.plot(fpr, tpr, color='darkorange')
-      plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
-      plt.xlim([0.0, 1.0])
-      plt.ylim([0.0, 1.05])
-      plt.xlabel('False Positive Rate')
-      plt.ylabel('True Positive Rate')
-      plt.title('Receiver operating characteristic curve')
-      plt.show()
+    filename = '/home/nicolas/Documents/ROC/' + test_name + '.csv'
+    print('Saving tpr and fpr in file : ' + filename)
+    pickle.dump((fpr,tpr), open(filename, 'wb'))
 
     print('\n_______________________________________________________')
     print('Final Accuracy : ' + str(round(100*accuracy/(nb_images), 3)) + '%')
