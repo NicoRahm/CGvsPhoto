@@ -1089,7 +1089,7 @@ class Model:
           y.append(0)
         else:
           y.append(1)
-        print(prediction/nb_im)
+        # print(prediction/nb_im)
         scores.append(prediction/nb_im)
 
         diff = np.array(diff)
