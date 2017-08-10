@@ -506,6 +506,8 @@ if __name__ == '__main__':
 
 	scores = clf.predict_proba(features_test)[:,1]
 
+	print(scores.shape)
+
 	score = accuracy_score(y_pred,y_test)
 
 	print("Accuracy : " + str(score))

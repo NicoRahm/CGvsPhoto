@@ -30,6 +30,7 @@ from sklearn.metrics import auc
 from sklearn.metrics import accuracy_score as acc
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.svm import SVC
+from sklearn.preprocessing import normalize
 
 import pickle
 
@@ -754,7 +755,7 @@ class Model:
           feed_dict = {self.x:batch_test[0], self.y_: batch_test[1], self.keep_prob: 1.0}
           test_accuracy += self.accuracy.eval(feed_dict)
           # print(scores[k*self.batch_size:(k+1)*self.batch_size].shape)
-          scores[k*self.batch_size:(k+1)*self.batch_size] = self.y_conv.eval(feed_dict)[:,1]
+          scores[k*self.batch_size:(k+1)*self.batch_size] = normalize(self.y_conv.eval(feed_dict))[:,1]
           y_test[k*self.batch_size:(k+1)*self.batch_size] = batch_test[1][:,1]
           # test_auc += sess.run(auc, feed_dict)[0]
 
