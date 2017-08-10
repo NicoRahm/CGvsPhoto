@@ -428,7 +428,9 @@ if __name__ == '__main__':
 	else: 
 		features_train, y_train = pickle.load(open(dump_data_directory + load_data + 'train.pkl', 'rb'))
 
-	clf = SVC()
+	# clf = SVC()
+
+	clf = SVC(kernel = 'linear', probability = True)
 
 	# clf = CalibratedClassifierCV(LinearSVC())
 
