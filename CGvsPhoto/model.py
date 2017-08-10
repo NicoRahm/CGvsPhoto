@@ -765,7 +765,7 @@ class Model:
 
       filename = '/home/smg/v-nicolas/ROC/' + run_name + '.pkl'
       print('Saving tpr and fpr in file : ' + filename)
-      pickle.dump((fpr, tpr), open(filename, 'w'))
+      pickle.dump((fpr, tpr), open(filename, 'wb'))
 
       # test_auc /= (nb_iterations - 1)
       # print("   test AUC %g"%test_auc)

@@ -261,7 +261,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
   filename = '/home/smg/v-nicolas/ROC/' + test_name + '.pkl'
   print('Saving tpr and fpr in file : ' + filename)
 
-  pickle.dump((fpr, tpr), open(filename, 'w'))
+  pickle.dump((fpr, tpr), open(filename, 'wb'))
 
   # done
   print("   computation time (cpu) :",time.strftime("%H:%M:%S", time.gmtime(time.clock()-start_clock)))
