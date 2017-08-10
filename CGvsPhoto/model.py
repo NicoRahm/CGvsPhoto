@@ -1142,7 +1142,7 @@ class Model:
     print(0.5 + np.array(scores)/np.max(np.array(scores)))
     print(thresholds)
 
-    filename = '/home/nicolas/Documents/ROC/' + test_name + '.csv'
+    filename = '/home/smg/v-nicolas/ROC/' + test_name + '.pkl'
     print('Saving tpr and fpr in file : ' + filename)
     pickle.dump((fpr,tpr), open(filename, 'wb'))
 
