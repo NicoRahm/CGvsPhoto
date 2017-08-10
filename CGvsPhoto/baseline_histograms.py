@@ -274,11 +274,11 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/work/smg/v-nicolas/level-design_raise_100_color'
+  database_path = '/work/smg/v-nicolas/level-design_raise'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
                          image_size = image_size,
-                         nb_train_batch = 80000,
-                         nb_test_batch = 4000,
+                         nb_train_batch = 2520,
+                         nb_test_batch = 720,
                          batch_size = 1)
