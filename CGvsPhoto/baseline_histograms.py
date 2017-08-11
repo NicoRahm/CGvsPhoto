@@ -274,7 +274,7 @@ def train_classifier(database_path, image_size, nb_train_batch,
 
 if __name__ == '__main__': 
 
-  database_path = '/work/smg/v-nicolas/level-design_raise'
+  database_path = '/work/smg/v-nicolas/level-design_raise_Q70'
   image_size = None
 
   clf = train_classifier(database_path = database_path, 
