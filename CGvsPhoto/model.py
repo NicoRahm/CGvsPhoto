@@ -518,16 +518,19 @@ class Model:
     if show_filters: 
       
       nb_height = 4
-      nb_width = int(self.nb_conv1/nb_height)
+      nb_width = int(self.nf[0]/nb_height)
 
       img, axes = plt.subplots(nrows = nb_width, ncols = nb_height)
       gs1 = gridspec.GridSpec(nb_height, nb_width)
-      for i in range(self.nb_conv1):
+      for i in range(self.nf[0]):
         ax1 = plt.subplot(gs1[i])
         ax1.axis('off')
-        im = plt.imshow(self.W_conv1[:,:,0,i].eval(), cmap = 'jet')
+        im = plt.imshow(self.W_conv1[:,:,0,i].eval(), cmap = 'jet', vmin = -5, vmax = 5)
+
         ax1.set_xticklabels([])
         ax1.set_yticklabels([]) 
+        ax1.autoscale(False)
+        ax1.set_adjustable('box-forced')
         # axes.get_yaxis().set_ticks([])
         # plt.ylabel('Kernel ' + str(i), fontsize = 5.0)
         # ax1.set_ylabel('Kernel ' + str(i), fontsize = 5.0)
@@ -535,8 +538,8 @@ class Model:
 
       img.subplots_adjust(wspace = 0.1, hspace = 0.6, right = 0.7)
       cbar_ax = img.add_axes([0.75, 0.15, 0.03, 0.7])
-      cbar = img.colorbar(im, ticks=[-0.5, 0, 0.5], cax=cbar_ax)
-      cbar.ax.set_yticklabels(['< -0.5', '0', '> 0.5'])
+      cbar = img.colorbar(im, ticks=[-5, 0, 5], cax=cbar_ax)
+      cbar.ax.set_yticklabels(['< -5', '0', '> 5'])
       plt.show(img)
       plt.close()     
 
@@ -687,6 +690,8 @@ class Model:
             sess.run(self.zero_op)
             sess.run(self.norm_op)
             sess.run(self.minus_one_op)
+
+            print(self.W_conv1.eval()[:,:,0,0])
 
             # print(self.W_conv1.eval()[:,:,0,0])
         
