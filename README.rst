@@ -9,7 +9,7 @@ Convolutional Neural Networks with TensorFlow back-end. The package
 contains methods for extracting patches from computer graphics and real
 images, training a CNN with a custom statistical layer, testing this
 model, comparing with a `state of the art method`_, visualizing
-probability maps, etc.
+probability maps, etc. See the paper corresponding to this model `here`_.
 
 .. figure:: https://user-images.githubusercontent.com/17125992/26917538-9d918318-4c69-11e7-8c6f-f865b3c5f063.png
    :alt: splicing
@@ -243,3 +243,4 @@ Authors
 .. _create\_patches\_splicing.py: examples/create_patches_splicing.py
 .. _test\_pipeline.py: examples/test_pipeline.py
 .. _test\_splicing.py: examples/test_splicing.py
+.. _here: http://www-igm.univ-mlv.fr/~vnozick/publications/Rahmouni_WIFS_2017/Rahmouni_WIFS_2017.pdf
