@@ -14,6 +14,10 @@ probability maps, etc. See the paper corresponding to this model `here`_.
 .. figure:: https://user-images.githubusercontent.com/17125992/26917538-9d918318-4c69-11e7-8c6f-f865b3c5f063.png
    :alt: splicing
 
+Dataset
+---------------
+
+The dataset used for testing our method is composed of 1800 real photographs and 1800 Video-game images. The photographs are taken from the `Raise Database`_ and converted to JPEG format. The Video-game images were downloaded from the `Level-design reference Database`_ and cropped to remove in-game informations. The correspond to 5 of the most photorealistic video-games:  The Witcher 3, Battlefield 4, Battlefield Bad Company  2, Grand Theft Auto 5 and Uncharted 4. To download the preprocessed images, follow this `link`_. 
 
 Getting Started
 ---------------
@@ -244,3 +248,6 @@ Authors
 .. _test\_pipeline.py: examples/test_pipeline.py
 .. _test\_splicing.py: examples/test_splicing.py
 .. _here: http://www-igm.univ-mlv.fr/~vnozick/publications/Rahmouni_WIFS_2017/Rahmouni_WIFS_2017.pdf
+.. _Raise Database: http://mmlab.science.unitn.it/RAISE/
+.. _Level-design reference Database: http://level-design.org/referencedb/ 
+.. _link: http://www-igm.univ-mlv.fr/~vnozick/publications/Rahmouni_WIFS_2017/GameCG.zip
