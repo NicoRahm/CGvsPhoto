@@ -17,7 +17,7 @@ probability maps, etc. See the paper corresponding to this model `here`_.
 Dataset
 ---------------
 
-The dataset used for testing our method is composed of 1800 real photographs and 1800 Video-game images. The photographs are taken from the `Raise Database`_ and converted to JPEG format. The Video-game images were downloaded from the `Level-design reference Database`_ and cropped to remove in-game informations. The correspond to 5 of the most photorealistic video-games:  The Witcher 3, Battlefield 4, Battlefield Bad Company  2, Grand Theft Auto 5 and Uncharted 4. To download the preprocessed images, follow this `link`_. 
+The dataset used for testing our method is composed of 1800 real photographs and 1800 Video-game images. The photographs are taken from the `Raise Database`_ and converted to JPEG format. The Video-game images were downloaded from the `Level-design reference Database`_ and cropped to remove in-game informations. They were extracted from 5 of the most photorealistic video-games:  The Witcher 3, Battlefield 4, Battlefield Bad Company  2, Grand Theft Auto 5 and Uncharted 4. To download the preprocessed images, follow this `link`_. 
 
 Getting Started
 ---------------
