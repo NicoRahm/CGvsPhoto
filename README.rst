@@ -238,12 +238,12 @@ efficient).
 Authors
 -------
 
-**Nicolas Rahmouni** - `NicoRahm`_
+**Nicolas Rahmouni** - `GitHub`_
 
-**Vincent Nozick**
+**Vincent Nozick** - `Website`_
 
 
-.. _NicoRahm: https://github.com/NicoRahm
+.. _GitHub: https://github.com/NicoRahm
 .. _state of the art method: http://ieeexplore.ieee.org/abstract/document/6115849/
 .. _create\_DB.py: examples/create_DB.py
 .. _create\_patches\_splicing.py: examples/create_patches_splicing.py
@@ -254,3 +254,4 @@ Authors
 .. _Level-design reference Database: http://level-design.org/referencedb/ 
 .. _data directory: https://github.com/NicoRahm/CGvsPhoto/tree/master/data
 .. _link: http://www-igm.univ-mlv.fr/~vnozick/publications/Rahmouni_WIFS_2017/GameCG.zip
+.. _Website: http://www-igm.univ-mlv.fr/~vnozick/?lang=fr
