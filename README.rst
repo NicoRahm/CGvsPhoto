@@ -235,6 +235,13 @@ to process and the aggregation scheme between ‘weighted\_vote’ and
 ‘majority\_vote’ (even if ‘weighted\_vote’ is in general more
 efficient).
 
+
+Reproducing the results
+~~~~~~~
+
+The architecture used in our article [Distinguishing Computer Graphics from Natural Images Using Convolution Neural Networks, WIFS, 2017] can be reproduced by using the default parameters of the Model class. The weights used for this model are available as TensorFlow checkpoints in the folder /weights: use "Stats_15000_run_14800.ckpt" 
+
+
 Authors
 -------
 
@@ -242,6 +249,10 @@ Authors
 
 **Vincent Nozick** - `Website`_
 
+References
+-------
+
+Rahmouni, N., Nozick, V., Yamagishi, J., & Echizen, I. (2017, December). Distinguishing Computer Graphics from Natural Images Using Convolution Neural Networks. In IEEE Workshop on Information Forensics and Security, WIFS 2017.
 
 .. _GitHub: https://github.com/NicoRahm
 .. _state of the art method: http://ieeexplore.ieee.org/abstract/document/6115849/
