@@ -254,6 +254,8 @@ References
 
 Rahmouni, N., Nozick, V., Yamagishi, J., & Echizen, I. (2017, December). Distinguishing Computer Graphics from Natural Images Using Convolution Neural Networks. In IEEE Workshop on Information Forensics and Security, WIFS 2017.
 
+This research was carried out while the authors stayed at the National Institute of Informatics, Japan
+
 .. _GitHub: https://github.com/NicoRahm
 .. _state of the art method: http://ieeexplore.ieee.org/abstract/document/6115849/
 .. _create\_DB.py: examples/create_DB.py
