@@ -1,6 +1,8 @@
 MIT License
 
-Copyright (c) 2017 Nicolas Rahmouni
+Copyright (c) 2018, Nicolas Rahmouni 
+Copyright (c) 2018, Vincent Nozick, JFLI (Japan) and UPEM (France) 
+Copyright (c) 2018, National Institute of Informatics
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
