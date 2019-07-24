@@ -1,9 +1,9 @@
 from CGvsPhoto import Model
 # to change to your splicing database
-splicing_data_path = '/home/nicolas/Database/splicing3/'
+splicing_data_path = '/Users/augus/Database/splicing3/'
 
 # to change to your training database
-database_path = '/home/nicolas/Database/level-design_raise/'
+database_path = '/Users/augus/Database/level-design_raise/'
 
 # to change to the format of your patches
 image_size = 100
