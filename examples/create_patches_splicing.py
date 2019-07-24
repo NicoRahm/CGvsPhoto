@@ -1,13 +1,13 @@
 from CGvsPhoto import Database_loader
 
 # directory with the original database
-source_db = '/home/nicolas/Database/face_DB_split_2/'
+source_db = '/Users/augus/Database/face_DB_split_2/'
 
 # wanted size for the patches 
 image_size = 100
 
 # directory to store the patch database
-target_patches = '/home/nicolas/Database/face_DB_100_2/'
+target_patches = '/Users/augus/Database/face_DB_100_2/'
 
 
 # create a database manager 
@@ -21,7 +21,7 @@ DB.export_database(target_patches,
                    nb_validation = 1000)
 
 # directory to store splicing images 
-# target_splicing = '/home/nicolas/Database/splicing2/'
+# target_splicing = '/Users/augus/Database/splicing2/'
 
 
 # DB.export_splicing(target_splicing, 50)
