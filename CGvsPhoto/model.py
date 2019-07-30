@@ -235,7 +235,7 @@ class Model:
     
     # read the configuration file
     conf = configparser.ConfigParser()
-    conf.read('config.ini')
+    conf.read('/Textures/config.ini')
 
     if config not in conf:
       raise ValueError(config + ' is not in the config.ini file... Please create the corresponding section')
