@@ -237,7 +237,7 @@ class Model:
     conf = configparser.ConfigParser()
     conf.read('/Textures/config.ini')
 
-    if config not in conf:
+    if config in conf:
       raise ValueError(config + ' is not in the config.ini file... Please create the corresponding section')
     
     self.dir_ckpt = conf[config]['dir_ckpt']
