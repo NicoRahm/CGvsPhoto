@@ -229,13 +229,11 @@ class Model:
     :type batch_size: int
     :type using_GPU: bool
   """ 
-    clear = lambda: os.system('cls')
-    clear()
     print('   tensorFlow version: ', tf.__version__)
     
     # read the configuration file
     conf = configparser.ConfigParser()
-    conf.read('config.ini')
+    conf.read('/Users/augus/CGvsPhoto/Textures/config.ini')
 
     if config not in conf:
       raise ValueError(config + ' is not in the config.ini file... Please create the corresponding section')
