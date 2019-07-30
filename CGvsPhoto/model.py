@@ -229,7 +229,7 @@ class Model:
     :type batch_size: int
     :type using_GPU: bool
   """ 
-    clear = lambda: os.system('clear')
+    clear = lambda: os.system('cls')
     clear()
     print('   tensorFlow version: ', tf.__version__)
     
