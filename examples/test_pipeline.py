@@ -2,7 +2,7 @@ from CGvsPhoto import Model
 # to change to your favorite database
 database_path = '/work/smg/v-augus/level-design_raise_100_color/'
 # database_path = '/work/smg/v-augus/face_DB_100_2/'
-database_path = '/Users/augus/Database/level-design_raise_100_color/'
+database_path = '/home/secure/CGvsPhoto/Database/level-design_raise_100_color/'
 
 
 # to change to the format of your image
