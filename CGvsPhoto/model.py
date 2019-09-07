@@ -233,7 +233,7 @@ class Model:
     
     # read the configuration file
     conf = configparser.ConfigParser()
-    conf.read('/Users/augus/CGvsPhoto/Textures/config.ini')
+    conf.read('/home/secure/CGvsPhoto/Textures/config.ini')
 
     if config not in conf:
       raise ValueError(config + ' is not in the config.ini file... Please create the corresponding section')
@@ -768,7 +768,7 @@ class Model:
 
       fpr, tpr, _ = roc_curve(y_test, scores)
 
-      filename = '/Users/augus/Documents/ROC/' + run_name + '.pkl'
+      filename = '/home/secure/CGvsPhoto/Documents/ROC/' + run_name + '.pkl'
       print('Saving tpr and fpr in file : ' + filename)
       pickle.dump((fpr, tpr), open(filename, 'wb'))
 
@@ -1145,7 +1145,7 @@ class Model:
     print(0.5 + np.array(scores)/np.max(np.array(scores)))
     print(thresholds)
 
-    filename = '/Users/augus/Documents/ROC/' + test_name + '.pkl'
+    filename = '/home/secure/CGvsPhoto/Documents/ROC/' + test_name + '.pkl'
     print('Saving tpr and fpr in file : ' + filename)
     pickle.dump((fpr,tpr), open(filename, 'wb'))
 
