@@ -1,13 +1,13 @@
 from CGvsPhoto import Database_loader
 
 # directory with the original database
-source_db = '/Users/augus/Database/face_DB_split_2/'
+source_db = '/home/secure/CGvsPhoto/Database/face_DB_split_2/'
 
 # wanted size for the patches 
 image_size = 100
 
 # directory to store the patch database
-target_patches = '/Users/augus/Database/face_DB_100_2/'
+target_patches = '/home/secure/CGvsPhoto/Database/face_DB_100_2/'
 
 
 # create a database manager 
