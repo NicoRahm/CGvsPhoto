@@ -1,11 +1,11 @@
 from CGvsPhoto import construct_DB
 
 # Change to the source of real images
-source_real = "/Users/augus/Database/dresden/jpeg/"
+source_real = "/home/secure/CGvsPhoto/Database/PG/"
 # Change to the source of CG images
-source_CG = "/Users/augus/Database/GameCG/"
+source_CG = "/home/secure/CGvsPhoto/Database/CG/"
 # The directory where the database will be saved
-target_dir = '/Users/augus/Database/test_DB/'
+target_dir = '/home/secure/CGvsPhoto/Database/test/'
 
 # Construct a database with an equilibrated CG/Real ratio
 # Formatted to be used with the image_loader
