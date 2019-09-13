@@ -487,7 +487,7 @@ class Model:
     self.graph = graph
     print('   model created.')
 
-  def validation_testing(self, it, nb_iterations = 20, batch_size = 50,
+  def validation_testing(self, it, nb_iterations = 20, batch_size = 1,
                          plot_histograms = False, range_hist = [0.,1.], 
                          selected_hist_nb = 8, run_name = '',
                          show_filters = True):
