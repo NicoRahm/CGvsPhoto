@@ -478,7 +478,7 @@ class Database_loader :
             print(str(i) + " images exported")
 
 
-    def export_database(self, export_path, nb_train, nb_test, nb_validation, batch_size, proportion = 0.5):
+    def export_database(self, export_path, nb_train, nb_test, nb_validation, proportion = 0.5):
 
         train_dir = export_path + 'train/'
         test_dir = export_path + 'test/'
@@ -500,6 +500,7 @@ class Database_loader :
 
         t1 = time.time() 
         print("Exporting training set : " + str(nb_train) + " images to process...")
+        batch_size = 100
         i = 0
         n_class0 = 0
         n_class1 = 0
@@ -532,6 +533,7 @@ class Database_loader :
             print(str(i) + " images exported")
 
         print("Exporting testing set : " + str(nb_test) + " images to process...")
+        batch_size = 100
         i = 0
         n_class0 = 0
         n_class1 = 0
@@ -560,6 +562,7 @@ class Database_loader :
             print(str(i) + " images exported")
 
         print("Exporting validation set : " + str(nb_validation) + " images to process...")
+        batch_size = 100
         i = 0
         n_class0 = 0
         n_class1 = 0
