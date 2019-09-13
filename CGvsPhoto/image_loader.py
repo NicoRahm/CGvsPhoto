@@ -478,7 +478,7 @@ class Database_loader :
             print(str(i) + " images exported")
 
 
-    def export_database(self, export_path, nb_train, nb_test, nb_validation, proportion = 0.5):
+    def export_database(self, export_path, nb_train, nb_test, nb_validation, batch_size, proportion = 0.5):
 
         train_dir = export_path + 'train/'
         test_dir = export_path + 'test/'
@@ -498,8 +498,8 @@ class Database_loader :
             os.mkdir(validation_dir + 'CGG/')
             os.mkdir(validation_dir + 'Real/')
 
+        t1 = time.time() 
         print("Exporting training set : " + str(nb_train) + " images to process...")
-        batch_size = 100
         i = 0
         n_class0 = 0
         n_class1 = 0
@@ -532,7 +532,6 @@ class Database_loader :
             print(str(i) + " images exported")
 
         print("Exporting testing set : " + str(nb_test) + " images to process...")
-        batch_size = 100
         i = 0
         n_class0 = 0
         n_class1 = 0
@@ -561,7 +560,6 @@ class Database_loader :
             print(str(i) + " images exported")
 
         print("Exporting validation set : " + str(nb_validation) + " images to process...")
-        batch_size = 100
         i = 0
         n_class0 = 0
         n_class1 = 0
@@ -589,6 +587,9 @@ class Database_loader :
                     exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i) + '.jpg')
                     i+=1
             print(str(i) + " images exported")
+            t2 = time.time()
+            elapsed_time = t2-t1
+            print(f"経過時間：{elapsed_time}")
 
 
 class Test_loader: 
