@@ -731,6 +731,10 @@ class Model:
               print('   Remaining time : ', time.strftime("%H:%M:%S",time.gmtime(remaining_time)))
             batch_clock = time.time()
       
+      path_save_batch = path_save + str(nb_train_batch) + ".ckpt"
+      print('   saving weights in file : ' + path_save_batch)
+      saver.save(sess, path_save_batch)
+      print('   OK')
       print('   saving validation accuracy...')
       file = open(acc_name, 'w', newline='')
 
