@@ -587,9 +587,9 @@ class Database_loader :
                     exp.save(export_path + '/validation/' + name_class + '/' + 'validation' + str(i) + '.jpg')
                     i+=1
             print(str(i) + " images exported")
-            t2 = time.time()
-            elapsed_time = t2-t1
-            print(f"経過時間：{elapsed_time}")
+        t2 = time.time()
+        elapsed_time = t2-t1
+        print(f"経過時間：{elapsed_time}")
 
 
 class Test_loader: 
