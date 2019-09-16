@@ -1057,6 +1057,7 @@ class Model:
       fp = 0
       nb_CGG = 0
       accuracy = 0
+      t1 = time.time()
       for i in range(nb_images):
         batch, label, width, height, original, image_file = data_test.get_next_image()
         batch_size = batch.shape[0]
@@ -1142,7 +1143,10 @@ class Model:
           if nb_CGG != 0:
             print('Recall : ' + str(round(100*tp/nb_CGG,2)) + '%')
           print('_______________________________________________________\n')
-
+        
+    t2 = time.time()
+    elapsed_time = t2-t1
+    print(f"経過時間：{elapsed_time}")
     print(np.array(y))
     fpr, tpr, thresholds = roc_curve(np.array(y), 0.5 + np.array(scores)/10)
 
