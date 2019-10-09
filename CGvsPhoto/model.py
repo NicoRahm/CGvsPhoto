@@ -1199,7 +1199,7 @@ class Model:
     """
     nb_width = int(width/self.image_size)
     nb_height = int(height/self.image_size)
-    m = 10
+    m = 2
     img = plt.figure(figsize = (nb_width, nb_height))
     
     gs1 = gridspec.GridSpec(nb_height, nb_width)
@@ -1208,18 +1208,18 @@ class Model:
     for i in range(len(images)):
 
       cdict_green = {'red': ((0.0,0.0,0.0),
-                             (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
+                             (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m)),
                      'blue': ((0.0,0.0,0.0),
-                              (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
+                              (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m)),
                      'green': ((0.0,0.0,0.0),
-                               (1.0,1.0,1.0))}
+                               (5.0,5.0,5.0))}
 
       cdict_red = {'red': ((0.0,0.0,0.0),
-                               (1.0,1.0,1.0)),
+                               (5.0,5.0,5.0)),
                     'blue': ((0.0,0.0,0.0),
-                                (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
+                                (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m)),
                     'green': ((0.0,0.0,0.0),
-                                 (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m))}
+                                 (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m))}
       
 
       ax1 = plt.subplot(gs1[i])
@@ -1270,18 +1270,18 @@ class Model:
           map_im = np.ones((self.image_size, self.image_size))
           map_im[0,0] = 0
           cdict_green = {'red': ((0.0,0.0,0.0),
-                             (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
+                             (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m)),
                      'blue': ((0.0,0.0,0.0),
-                              (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
+                              (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m)),
                      'green': ((0.0,0.0,0.0),
-                               (1.0,1.0,1.0))}
+                               (5.0,5.0,5.0))}
 
           cdict_red = {'red': ((0.0,0.0,0.0),
-                                   (1.0,1.0,1.0)),
+                                   (5.0,5.0,5.0)),
                         'blue': ((0.0,0.0,0.0),
-                                    (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m)),
+                                    (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m)),
                         'green': ((0.0,0.0,0.0),
-                                     (1.0,1.0 - diff[i]/m,1.0 - diff[i]/m))}
+                                     (5.0,5.0 - diff[i]/m,5.0 - diff[i]/m))}
           
           ax1 = plt.subplot(gs1[i])
           ax1.axis('off')
